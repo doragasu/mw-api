@@ -30,8 +30,9 @@
 #define MW_CMD_PING			 16
 #define MW_CMD_SNTP_CFG		 17
 #define MW_CMD_DATETIME		 18
-#define MW_CMD_FLASH_WRITE	 19
-#define MW_CMD_FLASH_READ	 20
+#define MW_CMD_DT_SET        19
+#define MW_CMD_FLASH_WRITE	 20
+#define MW_CMD_FLASH_READ	 21
 #define MW_CMD_ERROR		255
 
 /** \} */
