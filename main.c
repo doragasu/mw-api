@@ -32,7 +32,7 @@ static unsigned char line;
 // Command to send
 static MwCmd cmd;
 // Command reply
-static MwRep rep;
+static MwCmd rep;
 
 static inline void ByteToHexStr(uint8_t byte, char hexStr[]){
 	hexStr[0] = hexTable[byte>>4];
@@ -149,7 +149,6 @@ void MwModuleRun() {
 	// Hold reset some time and then release it.
 	dtext("Resetting WiFi...", 1);
 	DelayFrames(30);
-	dtext("Connecting to router...", 1);
 	MwModuleStart();
 }
 
@@ -231,7 +230,7 @@ void MwTcpHelloTest(void) {
 }
 
 #define AUTH_MAX 5
-void MwApScanPrint(MwRep *rep) {
+void MwApScanPrint(MwCmd *rep) {
 	// Character strings related to supported authentication modes
 	const char *authStr[AUTH_MAX + 1] = {
 		"OPEN", "WEP", "WPA_PSK", "WPA2_PSK", "WPA_WPA2_PSK", "???"
@@ -287,11 +286,52 @@ void MwScanTest(void) {
 	cmd.cmd = MW_CMD_AP_SCAN;
 	cmd.datalen = 0;
 	MwCmdSend(&cmd);
-	if ((MwCmdReplyGet(&rep) < 0) || (MW_CMD_OK != rep.rep)) {
+	if ((MwCmdReplyGet(&rep) < 0) || (MW_CMD_OK != rep.cmd)) {
 		dtext("AP Scan failed!", 1);
 		return;
 	}
 	MwApScanPrint(&rep);
+}
+
+// Get date and time
+void MwDatetimeGet(void) {
+	char datetime[80];
+
+	cmd.cmd = MW_CMD_DATETIME;
+	cmd.datalen = 0;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("Date and time query failed!", 1);
+		return;
+	}
+	memcpy(datetime, rep.datetime.dtStr, rep.datalen - 2*sizeof(uint32_t));
+	datetime[rep.datalen - 2*sizeof(uint32_t)] = '\0';
+	dtext(datetime, 1);
+}
+
+// Query and print MegaWiFi version
+void MwVersionGet(void) {
+	char hex[3];
+	char variant[80];
+
+	cmd.cmd = MW_CMD_VERSION;
+	cmd.datalen = 0;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("Version query failed!", 1);
+		return;
+	}
+	VDP_drawText("MegaWiFi cart version ", 1, line);
+	ByteToHexStr(rep.data[0], hex);
+	VDP_drawText(hex, 23, line);
+	VDP_drawText(".", 25, line);
+	ByteToHexStr(rep.data[1], hex);
+	VDP_drawText(hex, 26, line);
+	VDP_drawText("-", 28, line);
+	memcpy(variant, rep.data + 2, rep.datalen - 2);
+	variant[rep.datalen - 2] = '\0';
+	VDP_drawText(variant, 29, line);
+	VDP_drawText(" detected!", 29 + rep.datalen - 2, line++);
 }
 
 int main(void) {
@@ -307,11 +347,16 @@ int main(void) {
 	//UartLoopbackLoop();
 
 	MwModuleRun();
-	// Wait 9 additional seconds for the module to get ready
-	DelayFrames(9 * 60);
+	// Wait 3 seconds for the module to start
+	DelayFrames(3 * 60);
+	MwVersionGet();
+	// Wait 6 additional seconds for the module to get ready
+	dtext("Connecting to router...", 1);
+	DelayFrames(6 * 60);
 //	MwEchoTest();
-	MwTcpHelloTest();
-	MwScanTest();
+//	MwTcpHelloTest();
+	MwDatetimeGet();
+//	MwScanTest();
 
 	while(1);
 

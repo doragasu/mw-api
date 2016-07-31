@@ -6,8 +6,12 @@
 /// Maximum buffer length (bytes)
 #define MW_MSG_MAX_BUFLEN	512
 
-/// Maximum data payload size of a command
-#define MW_MAX_CMD_DATALEN 	512
+#define MW_CMD_MAX_BUFLEN	(MW_MSG_MAX_BUFLEN - 4)
+
+/// Maximum SSID length (including '\0').
+#define MW_SSID_MAXLEN		32
+/// Maximum password length (including '\0').
+#define MW_PASS_MAXLEN		64
 
 /** \addtogroup MwMsg Cmds Supported commands.
  *  \{ */
@@ -39,37 +43,60 @@
 
 /** \} */
 
-/** \addtogroup MwMsg MwCmd Command sent to system FSM
+/// TCP/UDP address message
+typedef struct {
+	char dst_port[6];
+	char src_port[6];
+	uint8_t channel;
+	char data[MW_CMD_MAX_BUFLEN - 6 - 6 - 1];
+} MwMsgInAddr;
+
+/// AP configuration message
+typedef struct {
+	uint8_t cfgNum;
+	char ssid[MW_SSID_MAXLEN];
+	char pass[MW_PASS_MAXLEN];
+} MwMsgApCfg;
+
+/// IP configuration message
+typedef struct {
+	uint8_t cfgNum;
+	uint8_t reserved[3];
+	uint8_t ip_addr[4];
+	uint8_t mask[4];
+	uint8_t gateway[4];
+	uint8_t dns1[4];
+	uint8_t dns2[4];
+} MwMsgIpCfg;
+
+/// Date and time message
+typedef struct {
+	uint32_t dtBin[2];
+	char dtStr[MW_CMD_MAX_BUFLEN - sizeof(uint64_t)];
+} MwMsgDateTime;
+
+/** \addtogroup MwApi MwCmd Command sent to system FSM
  *  \{ */
 typedef struct {
 	uint16_t cmd;		///< Command code
 	uint16_t datalen;	///< Data length
-	/// If datalen is nonzero, additional command data goes here until
-	/// filling datalen bytes.
-	uint8_t data[MW_MAX_CMD_DATALEN];
+	// If datalen is nonzero, additional command data goes here until
+	// filling datalen bytes.
+	union {
+		uint8_t ch;		// Channel number for channel related requests
+		uint8_t data[MW_CMD_MAX_BUFLEN];// Might need adjusting data length!
+		MwMsgInAddr inAddr;
+		MwMsgApCfg apCfg;
+		MwMsgIpCfg ipCfg;
+		MwMsgDateTime datetime;
+	};
 } MwCmd;
 /** \} */
-
-/// Reply to a command
-typedef struct {
-	uint16_t rep;
-	uint16_t datalen;
-	/// If datalen is nonzero, additional reply data goes here until
-	/// filling datalen bytes.
-	uint8_t data[MW_MAX_CMD_DATALEN];
-} MwRep;
 
 typedef struct {
 	uint8_t data[MW_MSG_MAX_BUFLEN];	///< Buffer data
 	uint16_t len;						///< Length of buffer contents
 	uint8_t ch;							///< Channel associated with buffer
 } MwMsgBuf;
-
-typedef struct {
-	char dst_port[6];
-	char src_port[6];
-	uint8_t channel;
-	char data[MW_MSG_MAX_BUFLEN];
-} MwMsgInAddr;
 
 #endif //_MW_MSG_H_

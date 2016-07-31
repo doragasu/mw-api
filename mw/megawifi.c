@@ -38,7 +38,7 @@ int MwCmdSend(MwCmd* cmd) {
  *         the control channel). Lower than 0 if there was a reception
  *         error.
  ****************************************************************************/
-int MwCmdReplyGet(MwRep* rep) {
+int MwCmdReplyGet(MwCmd *rep) {
 	uint16_t maxLen = sizeof(MwRep);
 
 	return LsdRecv((uint8_t*)rep, &maxLen, UINT32_MAX);

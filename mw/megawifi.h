@@ -61,7 +61,7 @@ int MwCmdSend(MwCmd* cmd);
  *         the control channel). Lower than 0 if there was a reception
  *         error.
  ****************************************************************************/
-int MwCmdReplyGet(MwRep* rep);
+int MwCmdReplyGet(MwCmd *rep);
 
 /****************************************************************************
  * \brief Puts the WiFi module in reset state.
