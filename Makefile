@@ -3,7 +3,7 @@ GCC_VER?=4.8.2
 
 MAKE?=make
 LIB?=lib
-MDMA?=$(HOME)/src/github/mdmap/mdmap
+MDMA?=$(HOME)/src/github/mw-mdma-cli/mdma
 GENGCC_BIN=$(GENDEV)/m68k-elf/bin
 GENBIN=$(GENDEV)/bin
 

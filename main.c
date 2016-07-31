@@ -236,6 +236,9 @@ void MwApScanPrint(MwRep *rep) {
 	const char *authStr[AUTH_MAX + 1] = {
 		"OPEN", "WEP", "WPA_PSK", "WPA2_PSK", "WPA_WPA2_PSK", "???"
 	};
+	const uint8_t authStrLen[] = {
+		4, 3, 7, 8, 12, 3
+	};
 	uint16_t i,  x;
 	char hex[3];
 	char ssid[33];
@@ -245,7 +248,8 @@ void MwApScanPrint(MwRep *rep) {
 		x = 1;
 		// Print auth mode
 		VDP_drawText(authStr[MIN(rep->data[i], AUTH_MAX)], x, line);
-		x += strlen(authStr[MIN(rep->data[i++], AUTH_MAX)]);
+		x += authStrLen[MIN(rep->data[i], AUTH_MAX)];
+		i++;
 		VDP_drawText(", ", x, line);
 		x += 2;
 		// Print channel
@@ -262,8 +266,9 @@ void MwApScanPrint(MwRep *rep) {
 		x += 2;
 		// Print SSID
 		memcpy(ssid, rep->data + i + 1, rep->data[i]);
-		i += rep->data[i] + 1;
+		ssid[rep->data[i]] = '\0';
 		VDP_drawText(ssid, x, line++);
+		i += rep->data[i] + 1;
 	}
 }
 
@@ -302,8 +307,8 @@ int main(void) {
 	//UartLoopbackLoop();
 
 	MwModuleRun();
-	// Wait 8 additional seconds for the module to get ready
-	DelayFrames(8 * 60);
+	// Wait 9 additional seconds for the module to get ready
+	DelayFrames(9 * 60);
 //	MwEchoTest();
 	MwTcpHelloTest();
 	MwScanTest();
