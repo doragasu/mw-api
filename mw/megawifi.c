@@ -39,7 +39,7 @@ int MwCmdSend(MwCmd* cmd) {
  *         error.
  ****************************************************************************/
 int MwCmdReplyGet(MwCmd *rep) {
-	uint16_t maxLen = sizeof(MwRep);
+	uint16_t maxLen = sizeof(MwCmd);
 
 	return LsdRecv((uint8_t*)rep, &maxLen, UINT32_MAX);
 }

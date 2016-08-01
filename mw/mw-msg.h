@@ -13,34 +13,35 @@
 /// Maximum password length (including '\0').
 #define MW_PASS_MAXLEN		64
 
-/** \addtogroup MwMsg Cmds Supported commands.
+/** \addtogroup MwApi Cmds Supported commands.
  *  \{ */
-#define MW_CMD_OK			  0
-#define MW_CMD_VERSION        1
-#define MW_CMD_ECHO			  2
-#define MW_CMD_AP_SCAN		  3
-#define MW_CMD_AP_CFG		  4
-#define MW_CMD_AP_CFG_GET	  5
-#define MW_CMD_IP_CFG		  6
-#define MW_CMD_IP_CFG_GET	  7
-#define MW_CMD_AP_JOIN		  8
-#define MW_CMD_AP_LEAVE		  9
-#define MW_CMD_TCP_CON		 10
-#define MW_CMD_TCP_BIND		 11
-#define MW_CMD_TCP_ACCEPT	 12
-#define MW_CMD_TCP_STAT		 13
-#define MW_CMD_TCP_DISC		 14
-#define MW_CMD_UDP_SET		 15
-#define MW_CMD_UDP_STAT		 16
-#define MW_CMD_UDP_CLR		 17
-#define MW_CMD_PING			 18
-#define MW_CMD_SNTP_CFG		 19
-#define MW_CMD_DATETIME		 20
-#define MW_CMD_DT_SET        21
-#define MW_CMD_FLASH_WRITE	 22
-#define MW_CMD_FLASH_READ	 23
-#define MW_CMD_ERROR		255
-
+#define MW_CMD_OK			  0		///< OK command reply
+#define MW_CMD_VERSION        1		///< Get firmware version
+#define MW_CMD_ECHO			  2		///< Echo data
+#define MW_CMD_AP_SCAN		  3		///< Scan for access points
+#define MW_CMD_AP_CFG		  4		///< Configure access point
+#define MW_CMD_AP_CFG_GET     5		///< Get access point configuration
+#define MW_CMD_IP_CFG		  6		///< Configure IPv4
+#define MW_CMD_IP_CFG_GET	  7		///< Get IPv4 configuration
+#define MW_CMD_AP_JOIN		  8		///< Join access point
+#define MW_CMD_AP_LEAVE		  9		///< Leave previously joined access point
+#define MW_CMD_TCP_CON		 10		///< Connect TCP socket
+#define MW_CMD_TCP_BIND		 11		///< Bind TCP socket to port
+#define MW_CMD_TCP_ACCEPT	 12		///< Accept incomint TCP connection
+#define MW_CMD_TCP_STAT		 13		///< Get TCP status
+#define MW_CMD_TCP_DISC		 14		///< Disconnect and free TCP socket
+#define MW_CMD_UDP_SET		 15		///< Configure UDP socket
+#define MW_CMD_UDP_STAT		 16		///< Get UDP status
+#define MW_CMD_UDP_CLR		 17		///< Clear and free UDP socket
+#define MW_CMD_PING			 18		///< Ping host
+#define MW_CMD_SNTP_CFG		 19		///< Configure SNTP service
+#define MW_CMD_DATETIME		 20		///< Get date and time
+#define MW_CMD_DT_SET        21		///< Set date and time
+#define MW_CMD_FLASH_WRITE	 22		///< Write to WiFi module flash
+#define MW_CMD_FLASH_READ	 23		///< Read from WiFi module flash
+#define MW_CMD_FLASH_ERASE	 24		///< Erase sector from WiFi flash
+#define MW_CMD_FLASH_ID 	 25		///< Get WiFi flash chip identifiers
+#define MW_CMD_ERROR		255		///< Error command reply
 /** \} */
 
 /// TCP/UDP address message
@@ -75,6 +76,16 @@ typedef struct {
 	char dtStr[MW_CMD_MAX_BUFLEN - sizeof(uint64_t)];
 } MwMsgDateTime;
 
+typedef struct {
+	uint32_t addr;
+	uint8_t data[MW_CMD_MAX_BUFLEN - sizeof(uint32_t)];
+} MwMsgFlashData;
+
+typedef struct {
+	uint32_t addr;
+	uint16_t len;
+} MwMsgFlashRange;
+
 /** \addtogroup MwApi MwCmd Command sent to system FSM
  *  \{ */
 typedef struct {
@@ -89,6 +100,10 @@ typedef struct {
 		MwMsgApCfg apCfg;
 		MwMsgIpCfg ipCfg;
 		MwMsgDateTime datetime;
+		MwMsgFlashData flData;
+		MwMsgFlashRange flRange;
+		uint16_t flSect;	// Flash sector
+		uint32_t flId;		// Flash IDs
 	};
 } MwCmd;
 /** \} */

@@ -334,6 +334,63 @@ void MwVersionGet(void) {
 	VDP_drawText(" detected!", 29 + rep.datalen - 2, line++);
 }
 
+void MwFlashTest(void) {
+	char hex[3];
+	const char str[] = "MegaWiFi flash API test string!";
+
+	// Obtain and print Flash manufacturer and device IDs
+	cmd.cmd = MW_CMD_FLASH_ID;
+	cmd.datalen = 0;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("FlashID query failed!", 1);
+		return;
+	}
+	VDP_drawText("FlashIDs: ", 1, line);
+	ByteToHexStr(rep.data[0], hex);
+	VDP_drawText(hex, 11, line);
+	ByteToHexStr(rep.data[1], hex);
+	VDP_drawText(hex, 14, line);
+	ByteToHexStr(rep.data[2], hex);
+	VDP_drawText(hex, 17, line++);
+
+	// Try reading some data
+	cmd.cmd = MW_CMD_FLASH_READ;
+	cmd.flRange.addr = 0;	// Corresponds to 0x80000
+	cmd.flRange.len = 80;
+	cmd.datalen = sizeof(MwMsgFlashRange);
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("Flash read failed!\n", 1);
+		return;
+	}
+	dtext("Flash read OK:", 1);
+	dtext((const char*)rep.data, 1);
+
+	// Erase sector
+	cmd.cmd = MW_CMD_FLASH_ERASE;
+	cmd.datalen = sizeof(uint16_t);
+	cmd.flSect = 0;	// Corresponds to sector 0x80
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("Sector erase failed!", 1);
+		return;
+	}
+	dtext("Sector erase OK!", 1);
+
+	// Write some data
+	cmd.cmd = MW_CMD_FLASH_WRITE;
+	cmd.datalen = sizeof(str) + sizeof(uint32_t);
+	cmd.flData.addr = 0;
+	strcpy((char*)cmd.flData.data, str);
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("Flash write failed!", 1);
+		return;
+	}
+	dtext("Flash write OK!", 1);
+}
+
 int main(void) {
 	line = 0;
 	dtext("MeGaWiFi TEST PROGRAM", 1);
@@ -357,6 +414,7 @@ int main(void) {
 //	MwTcpHelloTest();
 	MwDatetimeGet();
 //	MwScanTest();
+//	MwFlashTest();
 
 	while(1);
 
