@@ -11,6 +11,7 @@
 #include "mw/16c550.h"
 #include "mw/lsd.h"
 #include "mw/util.h"
+#include "ssid_config.h"
 // SGDK includes must be after mw ones, or they will conflict with stdint.h
 #include <genesis.h>
 
@@ -271,6 +272,20 @@ void MwApScanPrint(MwCmd *rep) {
 	}
 }
 
+void MwApConfig(void) {
+	cmd.cmd = MW_CMD_AP_CFG;
+	cmd.datalen = sizeof(MwMsgApCfg);
+	cmd.apCfg.cfgNum = 0;
+	strcpy(cmd.apCfg.ssid, WIFI_SSID);
+	strcpy(cmd.apCfg.pass, WIFI_PASS);
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("AP configuration failed!", 1);
+		return;
+	}
+	dtext("AP configuration OK!", 1);
+}
+
 void MwScanTest(void) {
 	// Leave current AP
 	dtext("Leaving AP...", 1);
@@ -406,14 +421,15 @@ int main(void) {
 	MwModuleRun();
 	// Wait 3 seconds for the module to start
 	DelayFrames(3 * 60);
-	MwVersionGet();
+//	MwVersionGet();
 	// Wait 6 additional seconds for the module to get ready
 	dtext("Connecting to router...", 1);
 	DelayFrames(6 * 60);
 //	MwEchoTest();
 //	MwTcpHelloTest();
 	MwDatetimeGet();
-//	MwScanTest();
+	MwScanTest();
+//	MwApConfig();
 //	MwFlashTest();
 
 	while(1);
