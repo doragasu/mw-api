@@ -406,6 +406,18 @@ void MwFlashTest(void) {
 	dtext("Flash write OK!", 1);
 }
 
+void MwApJoin(uint8_t num) {
+	cmd.cmd = MW_CMD_AP_JOIN;
+	cmd.datalen = 1;
+	cmd.data[0] = num;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("AP join failed!", 1);
+		return;
+	}
+	dtext("Joining AP...", 1);
+}
+
 int main(void) {
 	line = 0;
 	dtext("MeGaWiFi TEST PROGRAM", 1);
@@ -429,6 +441,7 @@ int main(void) {
 //	MwTcpHelloTest();
 	MwDatetimeGet();
 	MwScanTest();
+	MwApJoin(1);
 //	MwApConfig();
 //	MwFlashTest();
 
