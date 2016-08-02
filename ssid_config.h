@@ -1,7 +1,7 @@
 // Add your AP credentials used for tests to this file. Then to avoid them
 // being uploaded to GitHub, thell git to ignore changes to this file:
 //
-// git update-index --assume-unchanged include/ssid_config.h 
+// git update-index --assume-unchanged ssid_config.h 
 //
 // This way they will never be commited.
 //
