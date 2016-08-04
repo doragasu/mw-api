@@ -41,6 +41,9 @@
 #define MW_CMD_FLASH_READ	 23		///< Read from WiFi module flash
 #define MW_CMD_FLASH_ERASE	 24		///< Erase sector from WiFi flash
 #define MW_CMD_FLASH_ID 	 25		///< Get WiFi flash chip identifiers
+#define MW_CMD_SYS_STAT		 26		///< Get system status
+#define MW_CMD_DEF_CFG_SET	 27		///< Set default configuration
+#define MW_HRNG_GET			 28		///< Gets random numbers
 #define MW_CMD_ERROR		255		///< Error command reply
 /** \} */
 
