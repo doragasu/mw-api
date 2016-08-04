@@ -63,11 +63,11 @@ typedef struct {
 typedef struct {
 	uint8_t cfgNum;
 	uint8_t reserved[3];
-	uint8_t ip_addr[4];
-	uint8_t mask[4];
-	uint8_t gateway[4];
-	uint8_t dns1[4];
-	uint8_t dns2[4];
+	uint32_t ip_addr;
+	uint32_t mask;
+	uint32_t gateway;
+	uint32_t dns1;
+	uint32_t dns2;
 } MwMsgIpCfg;
 
 /// Date and time message

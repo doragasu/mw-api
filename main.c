@@ -20,6 +20,8 @@
 #define dtext(str, col)	do{VDP_drawText(str, col, line++);\
                            if ((line) > 28)line = 0;}while(0)
 
+#define IPV4_BUILD(a, b, c, d)	(((a)<<24) | ((b)<<16) | ((c)<<8) | (d))
+
 static inline void DelayFrames(unsigned int fr) {
 	while (fr--) VDP_waitVSync();
 }
@@ -286,6 +288,26 @@ void MwApConfig(void) {
 	dtext("AP configuration OK!", 1);
 }
 
+void MwIpConfig(void) {
+	cmd.cmd = MW_CMD_IP_CFG;
+	cmd.datalen = sizeof(MwMsgIpCfg);
+	cmd.ipCfg.cfgNum = 0;
+	cmd.ipCfg.reserved[0] = 0;
+	cmd.ipCfg.reserved[1] = 0;
+	cmd.ipCfg.reserved[2] = 0;
+	cmd.ipCfg.ip_addr = IPV4_BUILD(192, 168, 1, 60);
+	cmd.ipCfg.mask    = IPV4_BUILD(255, 255, 255, 0);
+	cmd.ipCfg.gateway = IPV4_BUILD(192, 168, 1, 5);
+	cmd.ipCfg.dns1 = IPV4_BUILD(87, 216, 1, 65);
+	cmd.ipCfg.dns2 = IPV4_BUILD(87, 216, 1, 66);
+	MwCmdSend(&cmd);
+	if ((MwCmdReplyGet(&rep) < 0) || (MW_CMD_OK != rep.cmd)) {
+		dtext("IP configuration failed!", 1);
+		return;
+	}
+	dtext("Configured static IP", 1);
+}
+
 void MwScanTest(void) {
 	// Leave current AP
 	dtext("Leaving AP...", 1);
@@ -440,9 +462,10 @@ int main(void) {
 //	MwEchoTest();
 //	MwTcpHelloTest();
 	MwDatetimeGet();
-	MwScanTest();
-	MwApJoin(1);
+//	MwScanTest();
+//	MwApJoin(1);
 //	MwApConfig();
+//	MwIpConfig();
 //	MwFlashTest();
 
 	while(1);
