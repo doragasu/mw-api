@@ -43,6 +43,13 @@ static inline void ByteToHexStr(uint8_t byte, char hexStr[]){
 	hexStr[2] = '\0';
 }
 
+static inline void DWordToHexStr(uint32_t dword, char hexStr[]) {
+	ByteToHexStr(dword>>24, hexStr);
+	ByteToHexStr(dword>>16, hexStr + 2);
+	ByteToHexStr(dword>>8, hexStr + 4);
+	ByteToHexStr(dword, hexStr + 6);
+}
+
 static inline void CheckUartIsr(uint8_t val) {
 	uint8_t c;
 	char hexByte[3];
@@ -288,6 +295,50 @@ void MwApConfig(void) {
 	dtext("AP configuration OK!", 1);
 }
 
+void MwConfigGet(uint8_t num) {
+	char hex[9];
+
+	cmd.cmd = MW_CMD_AP_CFG_GET;
+	cmd.datalen = 1;
+	cmd.data[0] = num;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("AP CFG GET failed!", 1);
+		return;
+	}
+	VDP_drawText("CFG ", 1, line);
+	ByteToHexStr(num, hex);
+	dtext(hex, 5);
+	VDP_drawText("SSID: ", 1, line);
+	dtext(rep.apCfg.ssid, 7);
+	VDP_drawText("PASS: ", 1, line);
+	dtext(rep.apCfg.pass, 7);
+	
+	cmd.cmd = MW_CMD_IP_CFG_GET;
+	cmd.datalen = 1;
+	cmd.data[0] = num;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("IP CFG GET failed!", 1);
+		return;
+	}
+	VDP_drawText("IP:   ", 1, line);
+	DWordToHexStr(rep.ipCfg.ip_addr, hex);
+	dtext(hex, 7);
+	VDP_drawText("MASK: ", 1, line);
+	DWordToHexStr(rep.ipCfg.mask, hex);
+	dtext(hex, 7);
+	VDP_drawText("GW:   ", 1, line);
+	DWordToHexStr(rep.ipCfg.gateway, hex);
+	dtext(hex, 7);
+	VDP_drawText("DNS1: ", 1, line);
+	DWordToHexStr(rep.ipCfg.dns1, hex);
+	dtext(hex, 7);
+	VDP_drawText("DNS2: ", 1, line);
+	DWordToHexStr(rep.ipCfg.dns2, hex);
+	dtext(hex, 7);
+}
+
 void MwIpConfig(void) {
 	cmd.cmd = MW_CMD_IP_CFG;
 	cmd.datalen = sizeof(MwMsgIpCfg);
@@ -330,10 +381,36 @@ void MwScanTest(void) {
 	MwApScanPrint(&rep);
 }
 
+void MwSntpCfgSet(void) {
+	uint8_t offset;
+	const char *servers[3] = {"0.es.pool.ntp.org", "1.europe.pool.ntp.org",
+	"3.europe.pool.ntp.org"};
+
+	cmd.cmd = MW_CMD_SNTP_CFG;
+	cmd.sntpCfg.upDelay = 60;
+	cmd.sntpCfg.tz = 1;
+	cmd.sntpCfg.dst = 1;
+	strcpy(cmd.sntpCfg.servers, servers[0]);
+	// Offset: server length + 1 ('\0')
+	offset  = strlen(servers[0]) + 1;
+	strcpy(cmd.sntpCfg.servers + offset, servers[1]);
+	offset += strlen(servers[1]) + 1;
+	strcpy(cmd.sntpCfg.servers + offset, servers[2]);
+	offset += strlen(servers[2]) + 1;
+	// Mark the end of the list with two adjacent '\0'
+	cmd.sntpCfg.servers[offset] = '\0';
+	cmd.datalen = offset + 1;
+	MwCmdSend(&cmd);
+	if ((MwCmdReplyGet(&rep) < 0) || (MW_CMD_OK != rep.cmd)) {
+		dtext("SNTP configuration failed!", 1);
+		return;
+	}
+	dtext("SNTP configuration set!", 1);
+}
+
 // Get date and time
 void MwDatetimeGet(void) {
-	char datetime[80];
-
+	char datetime[80]; 
 	cmd.cmd = MW_CMD_DATETIME;
 	cmd.datalen = 0;
 	MwCmdSend(&cmd);
@@ -440,6 +517,44 @@ void MwApJoin(uint8_t num) {
 	dtext("Joining AP...", 1);
 }
 
+// Get a bunch of numbers from the hardware random number generator
+void MwHrngGet(void) {
+	char hex[9];
+	uint8_t i;
+
+	cmd.cmd = MW_CMD_HRNG_GET;
+	cmd.datalen = 2;
+	cmd.rndLen = 4 * 4 * 16;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("HRNG get failed!", 1);
+		return;
+	}
+	dtext("Dice roll:", 1);
+	for (i = 0; i < 16; i++) {
+		DWordToHexStr(rep.dwData[4 * i], hex);
+		VDP_drawText(hex, 1, line);
+		DWordToHexStr(rep.dwData[4 * i + 1], hex);
+		VDP_drawText(hex, 10, line);
+		DWordToHexStr(rep.dwData[4 * i + 2], hex);
+		VDP_drawText(hex, 19, line);
+		DWordToHexStr(rep.dwData[4 * i + 3], hex);
+		dtext(hex, 28);
+	}
+}
+
+void MwCfgDefaultSet(void) {
+	cmd.cmd = MW_CMD_DEF_CFG_SET;
+	cmd.datalen = 4;
+	cmd.dwData[0] = 0xFEAA5501;
+	MwCmdSend(&cmd);
+	if (MwCmdReplyGet(&rep) < 0) {
+		dtext("Factory reset failed!", 1);
+		return;
+	}
+	dtext("Configuration reset to default.", 1);
+}
+
 int main(void) {
 	line = 0;
 	dtext("MeGaWiFi TEST PROGRAM", 1);
@@ -462,6 +577,12 @@ int main(void) {
 //	MwEchoTest();
 //	MwTcpHelloTest();
 	MwDatetimeGet();
+	MwHrngGet();
+//	MwCfgDefaultSet();
+//	MwConfigGet(0);
+//	MwConfigGet(1);
+//	MwConfigGet(2);
+//	MwSntpCfgSet();
 //	MwScanTest();
 //	MwApJoin(1);
 //	MwApConfig();

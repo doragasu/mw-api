@@ -43,7 +43,7 @@
 #define MW_CMD_FLASH_ID 	 25		///< Get WiFi flash chip identifiers
 #define MW_CMD_SYS_STAT		 26		///< Get system status
 #define MW_CMD_DEF_CFG_SET	 27		///< Set default configuration
-#define MW_HRNG_GET			 28		///< Gets random numbers
+#define MW_CMD_HRNG_GET		 28		///< Gets random numbers
 #define MW_CMD_ERROR		255		///< Error command reply
 /** \} */
 
@@ -73,6 +73,14 @@ typedef struct {
 	uint32_t dns2;
 } MwMsgIpCfg;
 
+/// SNTP and timezone configuration
+typedef struct {
+	uint16_t upDelay;
+	int8_t tz;
+	uint8_t dst;
+	char servers[MW_CMD_MAX_BUFLEN - 4];
+} MwMsgSntpCfg;
+
 /// Date and time message
 typedef struct {
 	uint32_t dtBin[2];
@@ -99,14 +107,17 @@ typedef struct {
 	union {
 		uint8_t ch;		// Channel number for channel related requests
 		uint8_t data[MW_CMD_MAX_BUFLEN];// Might need adjusting data length!
+		uint32_t dwData[MW_CMD_MAX_BUFLEN / sizeof(uint32_t)];
 		MwMsgInAddr inAddr;
 		MwMsgApCfg apCfg;
 		MwMsgIpCfg ipCfg;
+		MwMsgSntpCfg sntpCfg;
 		MwMsgDateTime datetime;
 		MwMsgFlashData flData;
 		MwMsgFlashRange flRange;
 		uint16_t flSect;	// Flash sector
 		uint32_t flId;		// Flash IDs
+		uint16_t rndLen;	// Length of the random buffer to fill
 	};
 } MwCmd;
 /** \} */
