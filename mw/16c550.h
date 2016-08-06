@@ -24,7 +24,8 @@
 //#define UART_CLK		7670500LU
 
 /// Desired baud rate
-#define UART_BR			115200LU
+//#define UART_BR			115200LU
+#define UART_BR			(UART_CLK/16)
 
 /// Length of the TX FIFO in bytes
 #define UART_TX_FIFO_LEN		16
