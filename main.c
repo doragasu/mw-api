@@ -570,6 +570,8 @@ int main(void) {
 	MwModuleRun();
 	// Wait 3 seconds for the module to start
 	DelayFrames(3 * 60);
+
+
 //	MwVersionGet();
 	// Wait 6 additional seconds for the module to get ready
 	dtext("Connecting to router...", 1);

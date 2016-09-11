@@ -14,20 +14,22 @@ void UartInit(void) {
 	UART_DLL = UART_DLL_VAL;
 	UartSet(LCR, 0x03);
 
-	// Disable flow control
-	// TODO: Use auto flow control and auto #RTS/#CTS
-	
-	// Enable FIFOs
-	UART_FCR = 0x01;
-	// Reset FIFOs
-	UartSet(FCR, 0x07);
+	// Enable auto RTS/CTS.
+	UartSet(MCR, 0x22);
 
-	// Set IER and MCR to their default values, for the shadow registers
-	// to be initialized.
-	UartSet(MCR, 0x00);
+	// Enable FIFOs, set trigger level to 14 bytes.
+	// NOTE: Even though trigger level is 14 bytes, RTS is de-asserted when
+	// receiving the first bit of the 16th byte entering the FIFO. See Fig. 9
+	// of the SC16C550B datasheet.
+	UART_FCR = 0xC1;
+	// Reset FIFOs
+	UartSet(FCR, 0xC7);
+
+	// Set IER default value (for the shadow register to load).
 	UartSet(IER, 0x00);
 
 	// Ready to go! Interrupt and DMA modes were not configured since the
-	// Megadrive console lacks interrupt/DMA control pins on cart connector.
+	// Megadrive console lacks interrupt/DMA control pins on cart connector
+	// (shame on Masami Ishikawa for not including a single interrupt line!).
 }
 
