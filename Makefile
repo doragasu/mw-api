@@ -138,7 +138,7 @@ out.iso: out.elf_scd
 %.elf: $(OBJS) $(BOOT_RESOURCES)
 	echo $(CS)
 	echo $(OBJS)
-	$(CC) -o $@ $(LINKFLAGS) $(BOOT_RESOURCES) $(ARCHIVES) $(OBJS) $(LIBS)
+	$(CC) -o $@ $(LINKFLAGS) $(BOOT_RESOURCES) $(ARCHIVES) $(OBJS) $(LIBS) -Wl,-Map=out.map
 
 %.elf_scd: $(OBJS) $(SCDBOOT_RESOURCES)
 	$(CC) -o $@ $(SCDLINKFLAGS) $(SCDBOOT_RESOURCES) $(ARCHIVES) $(OBJS) $(LIBS)

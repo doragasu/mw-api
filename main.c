@@ -5,17 +5,20 @@
  * \author Jesus Alonso (doragasu)
  ****************************************************************************/
 
+#include <stdint.h>
+#include <genesis.h>
+#include <string.h>
 #include "mw/megawifi.h"
 // Remove this when 16c550 driver is complete, it should be included only
 // by megawifi module.
-#include "mw/16c550.h"
-#include "mw/lsd.h"
 #include "mw/util.h"
 #include "ssid_config.h"
+#include "mw/16c550.h"
 // SGDK includes must be after mw ones, or they will conflict with stdint.h
-#include <genesis.h>
 
 #define TCP_TEST_CH		1
+
+#define CMD_BUFLEN		1024
 
 #define dtext(str, col)	do{VDP_drawText(str, col, line++);\
                            if ((line) > 28)line = 0;}while(0)
@@ -26,16 +29,14 @@ static inline void DelayFrames(unsigned int fr) {
 	while (fr--) VDP_waitVSync();
 }
 
-static const char echoTestStr[] = "OLAKASE, ECO O KASE!";
+// Command buffer
+static char cmdBuf[CMD_BUFLEN];
+
+static const char echoTestStr[] = "ECHO TEST STRING!";
 
 static const char spinner[] = "|/-\\";
 static const char hexTable[] = "0123456789ABCDEF";
 static unsigned char line;
-
-// Command to send
-static MwCmd cmd;
-// Command reply
-static MwCmd rep;
 
 static inline void ByteToHexStr(uint8_t byte, char hexStr[]){
 	hexStr[0] = hexTable[byte>>4];
@@ -161,66 +162,24 @@ void MwModuleRun() {
 	DelayFrames(30);
 	MwModuleStart();
 }
-
-void MwEchoTest(void) {
-	int i;
-
-	// Try sending and receiving echo
-	cmd.cmd = MW_CMD_ECHO;
-	cmd.datalen = sizeof(echoTestStr) - 1;
-	strcpy((char*)cmd.data, echoTestStr);
-	dtext("Sending echo string...\n", 1);
-	UartResetFifos();
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
-		dtext("Echo recv failed!\n", 1);
-		return;
-	}
-	dtext("Got response!\n", 1);
-	for (i = 0; i < cmd.datalen; i++) {
-		if (cmd.data[i] != rep.data[i]) break;
-	}
-	if (i != cmd.datalen) {
-		dtext("Echo reply differs!", 1);
-	}
-	else {
-		dtext("Echo test OK", 1);
-	}
-}
-
 void MwTcpHelloTest(void) {
-	MwMsgInAddr* addr = (MwMsgInAddr*)cmd.data;
 	const char dstport[] = "1234";
 	const char dstaddr[] = "192.168.1.10";
 	const char helloStr[] = "Hello world, this is a MEGADRIVE!\n";
 	char echoBuff[80];
 	uint16_t len = 80 - 1;
 
-	// Configure TCP socket
-	cmd.cmd = MW_CMD_TCP_CON;
-	// Length is the length of both ports, the channel and the address.
-	cmd.datalen = 6 + 6 + 1 + sizeof(dstaddr);
-	memset(addr->dst_port, 0, cmd.datalen);
-	strcpy(addr->dst_port, dstport);
-	strcpy(addr->data, dstaddr);
-	addr->channel = TCP_TEST_CH;
-
-	// Try to establish connection
 	dtext("Connecting to host...", 1);
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwTcpConnect(TCP_TEST_CH, (char*)dstaddr, (char*)dstport, NULL) < 0) {
 		dtext("Connection failed!", 1);
 		return;
 	}
-	// TODO check returned code
 	dtext("Connecton established", 1);
 
-	// Enable channel 1
-	LsdChEnable(TCP_TEST_CH);
 	// Send hello string on channel 1
-	LsdSend((uint8_t*)helloStr, sizeof(helloStr) - 1, TCP_TEST_CH);
+	MwSend(TCP_TEST_CH, (uint8_t*)helloStr, sizeof(helloStr) - 1);
 	// Try receiving the echoed string
-	if (TCP_TEST_CH == LsdRecv((uint8_t*)echoBuff, &len, UINT32_MAX)) {
+	if (MwRecv((uint8_t**)&echoBuff, &len, UINT32_MAX) == TCP_TEST_CH) {
 		echoBuff[len] = '\0';
 		VDP_drawText("Rx:", 1, line);
 		dtext(echoBuff, 5);
@@ -228,19 +187,12 @@ void MwTcpHelloTest(void) {
 		dtext("Error waiting for data", 1);
 	}
 	// Disconnect from host
-	cmd.cmd = MW_CMD_TCP_DISC;
-	cmd.datalen = 1;
-	cmd.data[0] = TCP_TEST_CH;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
-		dtext("Disconnect failed!", 1);
-	} else {
-		dtext("Disconnected from host.", 1);
-	}
+	MwTcpDisconnect(TCP_TEST_CH);
+	dtext("Disconnected from host.", 1);
 }
 
 #define AUTH_MAX 5
-void MwApScanPrint(MwCmd *rep) {
+void MwApPrint(MwApData *ap) {
 	// Character strings related to supported authentication modes
 	const char *authStr[AUTH_MAX + 1] = {
 		"OPEN", "WEP", "WPA_PSK", "WPA2_PSK", "WPA_WPA2_PSK", "???"
@@ -248,47 +200,36 @@ void MwApScanPrint(MwCmd *rep) {
 	const uint8_t authStrLen[] = {
 		4, 3, 7, 8, 12, 3
 	};
-	uint16_t i,  x;
+	uint16_t x;
 	char hex[3];
 	char ssid[33];
 
-	i = 0;
-	while (i < rep->datalen) {
-		x = 1;
-		// Print auth mode
-		VDP_drawText(authStr[MIN(rep->data[i], AUTH_MAX)], x, line);
-		x += authStrLen[MIN(rep->data[i], AUTH_MAX)];
-		i++;
-		VDP_drawText(", ", x, line);
-		x += 2;
-		// Print channel
-		ByteToHexStr(rep->data[i++], hex);
-		VDP_drawText(hex, x, line);
-		x += 2;
-		VDP_drawText(", ", x, line);
-		x += 2;
-		// Print strength
-		ByteToHexStr(rep->data[i++], hex);
-		VDP_drawText(hex, x, line);
-		x += 2;
-		VDP_drawText(", ", x, line);
-		x += 2;
-		// Print SSID
-		memcpy(ssid, rep->data + i + 1, rep->data[i]);
-		ssid[rep->data[i]] = '\0';
-		VDP_drawText(ssid, x, line++);
-		i += rep->data[i] + 1;
-	}
+	x = 1;
+	// Print auth mode
+	VDP_drawText(authStr[MIN(ap->auth, AUTH_MAX)], x, line);
+	x += authStrLen[MIN(ap->auth, AUTH_MAX)];
+	VDP_drawText(", ", x, line);
+	x += 2;
+	// Print channel
+	ByteToHexStr(ap->channel, hex);
+	VDP_drawText(hex, x, line);
+	x += 2;
+	VDP_drawText(", ", x, line);
+	x += 2;
+	// Print strength
+	ByteToHexStr(ap->str, hex);
+	VDP_drawText(hex, x, line);
+	x += 2;
+	VDP_drawText(", ", x, line);
+	x += 2;
+	// Print SSID
+	memcpy(ssid, ap->ssid, ap->ssidLen);
+	ssid[(uint8_t)ap->ssidLen] = '\0';
+	VDP_drawText(ssid, x, line++);
 }
 
 void MwApConfig(void) {
-	cmd.cmd = MW_CMD_AP_CFG;
-	cmd.datalen = sizeof(MwMsgApCfg);
-	cmd.apCfg.cfgNum = 0;
-	strcpy(cmd.apCfg.ssid, WIFI_SSID);
-	strcpy(cmd.apCfg.pass, WIFI_PASS);
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwApCfgSet(0, WIFI_SSID, WIFI_PASS) < 0) {
 		dtext("AP configuration failed!", 1);
 		return;
 	}
@@ -297,12 +238,12 @@ void MwApConfig(void) {
 
 void MwConfigGet(uint8_t num) {
 	char hex[9];
+	char *ssid;
+	char *pass;
 
-	cmd.cmd = MW_CMD_AP_CFG_GET;
-	cmd.datalen = 1;
-	cmd.data[0] = num;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	MwIpCfg *ip;
+
+	if (MwApCfgGet(num, &ssid, &pass) < 0) {
 		dtext("AP CFG GET failed!", 1);
 		return;
 	}
@@ -310,49 +251,41 @@ void MwConfigGet(uint8_t num) {
 	ByteToHexStr(num, hex);
 	dtext(hex, 5);
 	VDP_drawText("SSID: ", 1, line);
-	dtext(rep.apCfg.ssid, 7);
+	dtext(ssid, 7);
 	VDP_drawText("PASS: ", 1, line);
-	dtext(rep.apCfg.pass, 7);
+	dtext(pass, 7);
 	
-	cmd.cmd = MW_CMD_IP_CFG_GET;
-	cmd.datalen = 1;
-	cmd.data[0] = num;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwIpCfgGet(num, &ip) < 0) {
 		dtext("IP CFG GET failed!", 1);
 		return;
 	}
 	VDP_drawText("IP:   ", 1, line);
-	DWordToHexStr(rep.ipCfg.ip_addr, hex);
+	DWordToHexStr(ip->addr, hex);
 	dtext(hex, 7);
 	VDP_drawText("MASK: ", 1, line);
-	DWordToHexStr(rep.ipCfg.mask, hex);
+	DWordToHexStr(ip->mask, hex);
 	dtext(hex, 7);
 	VDP_drawText("GW:   ", 1, line);
-	DWordToHexStr(rep.ipCfg.gateway, hex);
+	DWordToHexStr(ip->gateway, hex);
 	dtext(hex, 7);
 	VDP_drawText("DNS1: ", 1, line);
-	DWordToHexStr(rep.ipCfg.dns1, hex);
+	DWordToHexStr(ip->dns1, hex);
 	dtext(hex, 7);
 	VDP_drawText("DNS2: ", 1, line);
-	DWordToHexStr(rep.ipCfg.dns2, hex);
+	DWordToHexStr(ip->dns2, hex);
 	dtext(hex, 7);
 }
 
 void MwIpConfig(void) {
-	cmd.cmd = MW_CMD_IP_CFG;
-	cmd.datalen = sizeof(MwMsgIpCfg);
-	cmd.ipCfg.cfgNum = 0;
-	cmd.ipCfg.reserved[0] = 0;
-	cmd.ipCfg.reserved[1] = 0;
-	cmd.ipCfg.reserved[2] = 0;
-	cmd.ipCfg.ip_addr = IPV4_BUILD(192, 168, 1, 60);
-	cmd.ipCfg.mask    = IPV4_BUILD(255, 255, 255, 0);
-	cmd.ipCfg.gateway = IPV4_BUILD(192, 168, 1, 5);
-	cmd.ipCfg.dns1 = IPV4_BUILD(87, 216, 1, 65);
-	cmd.ipCfg.dns2 = IPV4_BUILD(87, 216, 1, 66);
-	MwCmdSend(&cmd);
-	if ((MwCmdReplyGet(&rep) < 0) || (MW_CMD_OK != rep.cmd)) {
+	MwIpCfg ip;
+	
+	ip.addr = IPV4_BUILD(192, 168, 1, 60);
+	ip.mask    = IPV4_BUILD(255, 255, 255, 0);
+	ip.gateway = IPV4_BUILD(192, 168, 1, 5);
+	ip.dns1 = IPV4_BUILD(87, 216, 1, 65);
+	ip.dns2 = IPV4_BUILD(87, 216, 1, 66);
+
+	if (MwIpCfgSet(0, &ip) < 0) {
 		dtext("IP configuration failed!", 1);
 		return;
 	}
@@ -360,48 +293,32 @@ void MwIpConfig(void) {
 }
 
 void MwScanTest(void) {
+	char *apData;
+	int pos = 0;
+	int dataLen;
+	MwApData ap;
+
 	// Leave current AP
 	dtext("Leaving AP...", 1);
-	cmd.cmd = MW_CMD_AP_LEAVE;
-	cmd.datalen = 0;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwApLeave() < 0) {
 		dtext("AP leave failed!", 1);
 		return;
 	}
 	// Start scan and get scan result
 	dtext("AP left, starting scan", 1);
-	cmd.cmd = MW_CMD_AP_SCAN;
-	cmd.datalen = 0;
-	MwCmdSend(&cmd);
-	if ((MwCmdReplyGet(&rep) < 0) || (MW_CMD_OK != rep.cmd)) {
+	if ((dataLen = MwApScan(&apData)) < 0) {
 		dtext("AP Scan failed!", 1);
 		return;
 	}
-	MwApScanPrint(&rep);
+	while ((pos = MwApFillNext(apData, pos, &ap, dataLen)) <= 0)
+		MwApPrint(&ap);
 }
 
-void MwSntpCfgSet(void) {
-	uint8_t offset;
+void MwSntpConfSet(void) {
 	const char *servers[3] = {"0.es.pool.ntp.org", "1.europe.pool.ntp.org",
 	"3.europe.pool.ntp.org"};
 
-	cmd.cmd = MW_CMD_SNTP_CFG;
-	cmd.sntpCfg.upDelay = 60;
-	cmd.sntpCfg.tz = 1;
-	cmd.sntpCfg.dst = 1;
-	strcpy(cmd.sntpCfg.servers, servers[0]);
-	// Offset: server length + 1 ('\0')
-	offset  = strlen(servers[0]) + 1;
-	strcpy(cmd.sntpCfg.servers + offset, servers[1]);
-	offset += strlen(servers[1]) + 1;
-	strcpy(cmd.sntpCfg.servers + offset, servers[2]);
-	offset += strlen(servers[2]) + 1;
-	// Mark the end of the list with two adjacent '\0'
-	cmd.sntpCfg.servers[offset] = '\0';
-	cmd.datalen = offset + 1;
-	MwCmdSend(&cmd);
-	if ((MwCmdReplyGet(&rep) < 0) || (MW_CMD_OK != rep.cmd)) {
+	if (MwSntpCfgSet((char**)servers, 60, 1, 1) < 0) {
 		dtext("SNTP configuration failed!", 1);
 		return;
 	}
@@ -409,108 +326,80 @@ void MwSntpCfgSet(void) {
 }
 
 // Get date and time
-void MwDatetimeGet(void) {
-	char datetime[80]; 
-	cmd.cmd = MW_CMD_DATETIME;
-	cmd.datalen = 0;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+void MwDatetime(void) {
+	char *datetime; 
+
+	if ((datetime = MwDatetimeGet(NULL)) == NULL) {
 		dtext("Date and time query failed!", 1);
 		return;
 	}
-	memcpy(datetime, rep.datetime.dtStr, rep.datalen - 2*sizeof(uint32_t));
-	datetime[rep.datalen - 2*sizeof(uint32_t)] = '\0';
 	dtext(datetime, 1);
 }
 
 // Query and print MegaWiFi version
-void MwVersionGet(void) {
+void MwVersionGetTest(void) {
+	char *variant;
+	uint8_t verMajor, verMinor;
 	char hex[3];
-	char variant[80];
 
-	cmd.cmd = MW_CMD_VERSION;
-	cmd.datalen = 0;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwVersionGet(&verMajor, &verMinor, &variant) < 0) {
 		dtext("Version query failed!", 1);
 		return;
 	}
 	VDP_drawText("MegaWiFi cart version ", 1, line);
-	ByteToHexStr(rep.data[0], hex);
+	ByteToHexStr(verMajor, hex);
 	VDP_drawText(hex, 23, line);
 	VDP_drawText(".", 25, line);
-	ByteToHexStr(rep.data[1], hex);
+	ByteToHexStr(verMinor, hex);
 	VDP_drawText(hex, 26, line);
 	VDP_drawText("-", 28, line);
-	memcpy(variant, rep.data + 2, rep.datalen - 2);
-	variant[rep.datalen - 2] = '\0';
-	VDP_drawText(variant, 29, line);
-	VDP_drawText(" detected!", 29 + rep.datalen - 2, line++);
+	VDP_drawText(variant, 29, line++);
 }
 
 void MwFlashTest(void) {
+	uint8_t id[3];
 	char hex[3];
 	const char str[] = "MegaWiFi flash API test string!";
+	char *readed;
 
 	// Obtain and print Flash manufacturer and device IDs
-	cmd.cmd = MW_CMD_FLASH_ID;
-	cmd.datalen = 0;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwFlashIdGet(id) < 0) {
 		dtext("FlashID query failed!", 1);
 		return;
 	}
 	VDP_drawText("FlashIDs: ", 1, line);
-	ByteToHexStr(rep.data[0], hex);
+	ByteToHexStr(id[0], hex);
 	VDP_drawText(hex, 11, line);
-	ByteToHexStr(rep.data[1], hex);
+	ByteToHexStr(id[1], hex);
 	VDP_drawText(hex, 14, line);
-	ByteToHexStr(rep.data[2], hex);
+	ByteToHexStr(id[2], hex);
 	VDP_drawText(hex, 17, line++);
 
 	// Try reading some data
-	cmd.cmd = MW_CMD_FLASH_READ;
-	cmd.flRange.addr = 0;	// Corresponds to 0x80000
-	cmd.flRange.len = 80;
-	cmd.datalen = sizeof(MwMsgFlashRange);
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if ((readed = (char*)MwFlashRead(0, 80)) == NULL) {
 		dtext("Flash read failed!\n", 1);
 		return;
 	}
 	dtext("Flash read OK:", 1);
-	dtext((const char*)rep.data, 1);
+	dtext(readed, 1);
 
 	// Erase sector
-	cmd.cmd = MW_CMD_FLASH_ERASE;
-	cmd.datalen = sizeof(uint16_t);
-	cmd.flSect = 0;	// Corresponds to sector 0x80
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwFlashSectorErase(0) < 0) {
 		dtext("Sector erase failed!", 1);
 		return;
 	}
 	dtext("Sector erase OK!", 1);
 
 	// Write some data
-	cmd.cmd = MW_CMD_FLASH_WRITE;
-	cmd.datalen = sizeof(str) + sizeof(uint32_t);
-	cmd.flData.addr = 0;
-	strcpy((char*)cmd.flData.data, str);
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwFlashWrite(0, (uint8_t*)str, sizeof(str)) < 0) {
 		dtext("Flash write failed!", 1);
 		return;
 	}
 	dtext("Flash write OK!", 1);
 }
 
-void MwApJoin(uint8_t num) {
-	cmd.cmd = MW_CMD_AP_JOIN;
-	cmd.datalen = 1;
-	cmd.data[0] = num;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+void MwApJoinTest(uint8_t num) {
+	if (MwApJoin(num) < 0) {
 		dtext("AP join failed!", 1);
 		return;
 	}
@@ -518,37 +407,30 @@ void MwApJoin(uint8_t num) {
 }
 
 // Get a bunch of numbers from the hardware random number generator
-void MwHrngGet(void) {
+void MwHrng(void) {
+	uint32_t *data;
 	char hex[9];
 	uint8_t i;
 
-	cmd.cmd = MW_CMD_HRNG_GET;
-	cmd.datalen = 2;
-	cmd.rndLen = 4 * 4 * 16;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if ((data = (uint32_t*)MwHrngGet(4 * 4 * 16)) == NULL) {
 		dtext("HRNG get failed!", 1);
 		return;
 	}
 	dtext("Dice roll:", 1);
 	for (i = 0; i < 16; i++) {
-		DWordToHexStr(rep.dwData[4 * i], hex);
+		DWordToHexStr(data[4 * i], hex);
 		VDP_drawText(hex, 1, line);
-		DWordToHexStr(rep.dwData[4 * i + 1], hex);
+		DWordToHexStr(data[4 * i + 1], hex);
 		VDP_drawText(hex, 10, line);
-		DWordToHexStr(rep.dwData[4 * i + 2], hex);
+		DWordToHexStr(data[4 * i + 2], hex);
 		VDP_drawText(hex, 19, line);
-		DWordToHexStr(rep.dwData[4 * i + 3], hex);
+		DWordToHexStr(data[4 * i + 3], hex);
 		dtext(hex, 28);
 	}
 }
 
 void MwCfgDefaultSet(void) {
-	cmd.cmd = MW_CMD_DEF_CFG_SET;
-	cmd.datalen = 4;
-	cmd.dwData[0] = 0xFEAA5501;
-	MwCmdSend(&cmd);
-	if (MwCmdReplyGet(&rep) < 0) {
+	if (MwDefaultCfgSet() < 0) {
 		dtext("Factory reset failed!", 1);
 		return;
 	}
@@ -560,7 +442,7 @@ int main(void) {
 	dtext("MeGaWiFi TEST PROGRAM", 1);
 
 	// MegaWifi module initialization
-	MwInit();
+	MwInit(cmdBuf, CMD_BUFLEN);
 
 	//UartTxLoop();
 	//UartEchoLoop();
@@ -570,25 +452,23 @@ int main(void) {
 	MwModuleRun();
 	// Wait 3 seconds for the module to start
 	DelayFrames(3 * 60);
-
-
-//	MwVersionGet();
+	MwVersionGetTest();
 	// Wait 6 additional seconds for the module to get ready
 	dtext("Connecting to router...", 1);
-	DelayFrames(6 * 60);
+	DelayFrames(10 * 60);
 //	MwEchoTest();
 //	MwTcpHelloTest();
-	MwDatetimeGet();
-	MwHrngGet();
-//	MwCfgDefaultSet();
-//	MwConfigGet(0);
-//	MwConfigGet(1);
-//	MwConfigGet(2);
-//	MwSntpCfgSet();
-//	MwScanTest();
-//	MwApJoin(1);
 //	MwApConfig();
 //	MwIpConfig();
+	MwDatetime();
+//	MwHrng();
+//	MwCfgDefaultSet();
+	MwConfigGet(0);
+	MwConfigGet(1);
+	MwConfigGet(2);
+//	MwSntpConfSet();
+//	MwScanTest();
+//	MwApJoinTest(1);
 //	MwFlashTest();
 
 	while(1);

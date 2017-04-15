@@ -14,7 +14,7 @@
  * \{
  ****************************************************************************/
 
-/**
+/*
  * USAGE:
  * First initialize the module calling LsdInit().
  * Then enable at least one channel calling LsdEnable().
@@ -98,11 +98,19 @@ int LsdChDisable(uint8_t ch);
  * \param[in] data Buffer to send.
  * \param[in] len  Length of the buffer to send.
  * \param[in] ch   Channel number to use.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
+ * 		   otherwise. Note returned value might be 0 if no characters were
+ * 		   sent due to maxLoopCnt value reached (timeout).
+ *
+ * \note   maxLoopCnt value is only used for the wait before starting
+ *         sending the frame header. For sending the data payload and the
+ *         ETX, UINT32_MAX value is used for loop counts. If tighter control
+ *         of the timing is necessary, frame must be sent using split
+ *         functions.
  ****************************************************************************/
-int LsdSend(uint8_t *data, uint16_t len, uint8_t ch);
+int LsdSend(uint8_t *data, uint16_t len, uint8_t ch, uint32_t maxLoopCnt);
 
 /************************************************************************//**
  * Starts sending data through a previously enabled channel. Once started,
@@ -114,12 +122,17 @@ int LsdSend(uint8_t *data, uint16_t len, uint8_t ch);
  * \param[in] len   Length of the data buffer to send.
  * \param[in] total Total length of the data to send using a split frame.
  * \param[in] ch    Channel number to use for sending.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
  * 		   otherwise.
+ *
+ * \note     maxLoopCnt is only used for the wait before starting sending
+ *           the frame header. Optional data field is sent using UINT32_MAX
+ *           as loop count.
  ****************************************************************************/
 int LsdSplitStart(uint8_t *data, uint16_t len,
-		              uint16_t total, uint8_t ch);
+		          uint16_t total, uint8_t ch, uint32_t maxLoopCnt);
 
 /************************************************************************//**
  * Appends (sends) additional data to a frame previously started by an
@@ -127,11 +140,12 @@ int LsdSplitStart(uint8_t *data, uint16_t len,
  *
  * \param[in] data  Buffer to send.
  * \param[in] len   Length of the data buffer to send.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
  * 		   otherwise.
  ****************************************************************************/
-int LsdSplitNext(uint8_t *data, uint16_t len);
+int LsdSplitNext(uint8_t *data, uint16_t len, uint32_t maxLoopCnt);
 
 /************************************************************************//**
  * Appends (sends) additional data to a frame previously started by an
@@ -139,12 +153,26 @@ int LsdSplitNext(uint8_t *data, uint16_t len);
  *
  * \param[in] data  Buffer to send.
  * \param[in] len   Length of the data buffer to send.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
  * 		   otherwise.
  ****************************************************************************/
-int LsdSplitEnd(uint8_t *data, uint16_t len);
+int LsdSplitEnd(uint8_t *data, uint16_t len, uint32_t maxLoopCnt);
 
+/************************************************************************//**
+ * Receives a frame using LSD protocol.
+ *
+ * \param[out]   buf Buffer that will hold the received data.
+ * \param[inout] maxLen When calling the function, the variable pointed by
+ *               maxLen, must hold the maximum number of bytes buf can
+ *               store. On return, the variable is updated to the number
+ *               of bytes received.
+ * \param[in]    maxLoopCnt Maximum number of loops trying to read data.
+ *
+ * \return On success, the number of the channel in which data has been
+ * 		   received. On failure, a negative number.
+ ****************************************************************************/
 int LsdRecv(uint8_t* buf, uint16_t* maxLen, uint32_t maxLoopCnt);
 //int LsdRecv(MwMsgBuf* buf, uint16_t maxLen, uint32_t maxLoopCnt);
 

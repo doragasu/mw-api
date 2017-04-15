@@ -19,19 +19,6 @@
 /// Start of data in the buffer (skips STX and LEN fields).
 #define LSD_BUF_DATA_START 		3
 
-static inline void LsdPollSend(uint8_t data[], uint16_t len) {
-	int16_t i;
-	uint8_t n;
-
-	// Buffer is sent in chunks of up to UART_TX_FIFO_LEN bytes.
-	// Only the last chunck gets some advantage of the FIFOs :(
-	for (i = 0; i < len;) {
-		n = MIN(UART_TX_FIFO_LEN, len - i);
-		while (!UartTxReady());
-		while (n--) UartPutc(data[i++]);
-	}
-}
-
 /** \addtogroup lsd LsdState Allowed states for reception state machine.
  *  \{ */
 typedef enum {
@@ -59,6 +46,26 @@ typedef struct {
 
 // Module global data
 static LsdData d;
+
+/// \note Loop count is reset each time a data segment is successfully copied
+///       to the TX FIFO.
+static inline int LsdPollSend(uint8_t data[], uint16_t len,
+							   uint32_t maxLoopCnt) {
+	int16_t i;
+	uint8_t n;
+	uint32_t loopCnt = maxLoopCnt;
+
+	// Buffer is sent in chunks of up to UART_TX_FIFO_LEN bytes.
+	// Only the last chunck gets some advantage of the FIFOs :(
+	for (i = 0; i < len;) {
+		n = MIN(UART_TX_FIFO_LEN, len - i);
+		while (!UartTxReady() && loopCnt) loopCnt--;
+		if (!maxLoopCnt) return -1;
+		while (n--) UartPutc(data[i++]);
+		loopCnt = maxLoopCnt;
+	}
+	return len;
+}
 
 /************************************************************************//**
  * Module initialization. Call this function before any other one in this
@@ -113,11 +120,19 @@ int LsdChDisable(uint8_t ch) {
  * \param[in] data Buffer to send.
  * \param[in] len  Length of the buffer to send.
  * \param[in] ch   Channel number to use.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
+ * 		   otherwise. Note returned value might be 0 if no characters were
+ * 		   sent due to maxLoopCnt value reached (timeout).
+ *
+ * \note   maxLoopCnt value is only used for the wait before starting
+ *         sending the frame header. For sending the data payload and the
+ *         ETX, UINT32_MAX value is used for loop counts. If tighter control
+ *         of the timing is necessary, frame must be sent using split
+ *         functions.
  ****************************************************************************/
-int LsdSend(uint8_t *data, uint16_t len, uint8_t ch) {
+int LsdSend(uint8_t *data, uint16_t len, uint8_t ch, uint32_t maxLoopCnt) {
 	if (ch >= LSD_MAX_CH) {
 		return -1;
 	}
@@ -128,7 +143,8 @@ int LsdSend(uint8_t *data, uint16_t len, uint8_t ch) {
 		return -1;
 	}
 
-	while (!UartTxReady());
+	while ((!UartTxReady()) && maxLoopCnt) maxLoopCnt--;
+	if (!maxLoopCnt) return 0;
 	// Send STX
 	UartPutc(LSD_STX_ETX);
 	// Send ch and high nibble of length
@@ -136,10 +152,11 @@ int LsdSend(uint8_t *data, uint16_t len, uint8_t ch) {
 	// Send low byte of length
 	UartPutc(len & 0xFF);
 	// Send data payload
-	LsdPollSend(data, len);
+	if (LsdPollSend(data, len, UINT32_MAX) != len) return -1;
 	// Send ETX
 	// TODO: It's stupid using FIFOs to end up doing this:
-	while (!UartTxReady());
+	for (maxLoopCnt = UINT32_MAX; (!UartTxReady()) && maxLoopCnt; maxLoopCnt--);
+	if (!maxLoopCnt) return -1;
 	UartPutc(LSD_STX_ETX);
 	
 	return len;
@@ -155,17 +172,23 @@ int LsdSend(uint8_t *data, uint16_t len, uint8_t ch) {
  * \param[in] len   Length of the data buffer to send.
  * \param[in] total Total length of the data to send using a split frame.
  * \param[in] ch    Channel number to use for sending.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
  * 		   otherwise.
+ *
+ * \note     maxLoopCnt is only used for the wait before starting sending
+ *           the frame header. Optional data field is sent using UINT32_MAX
+ *           as loop count.
  ****************************************************************************/
 int LsdSplitStart(uint8_t *data, uint16_t len,
-	              uint16_t total, uint8_t ch) {
+	              uint16_t total, uint8_t ch, uint32_t maxLoopCnt) {
 	if (ch >= LSD_MAX_CH) return -1;
 	if (total > LSD_MAX_LEN) return -1;
 	if (!d.en[ch]) return -1;
 
-	while (!UartTxReady());
+	while (!UartTxReady() && maxLoopCnt) maxLoopCnt--;
+	if (!maxLoopCnt) return -1;
 	// Send STX
 	UartPutc(LSD_STX_ETX);
 	// Send ch and high nibble of length
@@ -173,9 +196,8 @@ int LsdSplitStart(uint8_t *data, uint16_t len,
 	// Send low byte of length
 	UartPutc(len & 0xFF);
 	// Send data payload
-	if (len) LsdPollSend(data, len);
-	
-	return len;
+	if (len) return LsdPollSend(data, len, UINT32_MAX) != len?-1:len;
+	return 0;
 }
 
 /************************************************************************//**
@@ -184,12 +206,13 @@ int LsdSplitStart(uint8_t *data, uint16_t len,
  *
  * \param[in] data  Buffer to send.
  * \param[in] len   Length of the data buffer to send.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
  * 		   otherwise.
  ****************************************************************************/
-int LsdSplitNext(uint8_t *data, uint16_t len) {
-	LsdPollSend(data, len);
+int LsdSplitNext(uint8_t *data, uint16_t len, uint32_t maxLoopCnt) {
+	return LsdPollSend(data, len, maxLoopCnt);
 
 	return len;
 }
@@ -200,15 +223,19 @@ int LsdSplitNext(uint8_t *data, uint16_t len) {
  *
  * \param[in] data  Buffer to send.
  * \param[in] len   Length of the data buffer to send.
+ * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
  * \return -1 if there was an error, or the number of characterse sent
  * 		   otherwise.
  ****************************************************************************/
-int LsdSplitEnd(uint8_t *data, uint16_t len) {
-	if (len) LsdPollSend(data, len);
+int LsdSplitEnd(uint8_t *data, uint16_t len, uint32_t maxLoopCnt) {
+	if (len) {
+		if (LsdPollSend(data, len, maxLoopCnt) != len) return -1;
+	}
 	// Send ETX
 	// TODO: It's stupid using FIFOs to end up doing this:
-	while (!UartTxReady());
+	while (!UartTxReady() && maxLoopCnt) maxLoopCnt--;
+	if (!maxLoopCnt) return -1;
 	UartPutc(LSD_STX_ETX);
 
 	return len;

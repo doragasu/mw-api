@@ -16,7 +16,7 @@ void UartInit(void) {
 
 	// Enable auto RTS/CTS.
 	UartSet(MCR, 0x22);
-
+	
 	// Enable FIFOs, set trigger level to 14 bytes.
 	// NOTE: Even though trigger level is 14 bytes, RTS is de-asserted when
 	// receiving the first bit of the 16th byte entering the FIFO. See Fig. 9

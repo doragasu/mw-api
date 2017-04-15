@@ -2,7 +2,7 @@
  * \brief Simple 16C550 UART chip driver.
  *
  * \author Jesus Alonso (doragasu)
- * \date   2015
+ * \date   2016
  * \defgroup 16c550 16C550 UART chip driver.
  * \{
  ****************************************************************************/
@@ -16,16 +16,12 @@
 /// 16C550 UART base address
 #define UART_BASE		0xA130C1
 
-/// Clock applied to 17C550 chip
-/// \todo We should detect the machine (PAL/NTSC) and set the clock
-/// accordingly
-#define UART_CLK		7610000LU
-// For NTSC MACHINES
-//#define UART_CLK		7670500LU
+/// Clock applied to 16C550 chip. Currently using 24 MHz crystal
+#define UART_CLK		24000000LU
 
-/// Desired baud rate
-//#define UART_BR			115200LU
-#define UART_BR			(UART_CLK/32)
+/// Desired baud rate. Maximum achievable baudrate with 24  MHz crystal
+/// is 24000000/16 = 1.5 Mbps
+#define UART_BR			1500000LU
 
 /// Length of the TX FIFO in bytes
 #define UART_TX_FIFO_LEN		16
