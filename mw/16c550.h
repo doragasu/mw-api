@@ -3,7 +3,7 @@
  *
  * \author Jesus Alonso (doragasu)
  * \date   2016
- * \defgroup 16c550 16C550 UART chip driver.
+ * \defgroup 16C550 16c550
  * \{
  ****************************************************************************/
 
@@ -35,7 +35,8 @@
 #define UART_DLL_VAL	(DivWithRounding(UART_CLK, 16 * UART_BR) & 0xFF)
 //#define UART_DLL_VAL	((UART_CLK/16/UART_BR)&0xFF)
 
-/** \addtogroup 16c550 uartRegs 16C550 UART registers
+/** \addtogroup UartRegs UartRegs
+ *  \brief 16C550 UART registers
  *  \note Do NOT access IER, FCR, LCR and MCR directly, use Set/Get functions.
  *        Remaining registers can be directly accessed, but meeting the
  *        read only/write only restrictions.
@@ -67,17 +68,19 @@
 #define UART_DLM	(*((volatile uint8_t*)(UART_BASE +  2)))
 /** \} */
 
+/// Structure with the shadow registers.
 typedef struct {
-	uint8_t IER;
-	uint8_t FCR;
-	uint8_t LCR;
-	uint8_t MCR;
+	uint8_t IER;	///< Interrupt Enable Register
+	uint8_t FCR;	///< FIFO Control Register
+	uint8_t LCR;	///< Line Control Register
+	uint8_t MCR;	///< Modem Control Register
 } UartShadow;
 
 /// Uart shadow registers. Do NOT access directly!
 extern UartShadow sh;
 
-/** \addtogroup 16c550 uart_outs Output pins controlled by the MCR UART
+/** \addtogroup UartOuts UartOuts
+ *  \brief Output pins controlled by the MCR UART
  *  register.
  *  \{ */
 #define UART_MCR__DTR		0x01	///< Data Terminal Ready.
@@ -86,7 +89,8 @@ extern UartShadow sh;
 #define UART_MCR__OUT2		0x08	///< GPIO pin 2.
 /** \} */
 
-/** \addtogroup 16c550 uart_ins Input pins readed in the MSR UART register.
+/** \addtogroup UartIns UartIns
+ *  \brief Input pins readed in the MSR UART register.
  *  \{ */
 #define UART_MSR__DSR		0x20	///< Data Set Ready
 /** \} */

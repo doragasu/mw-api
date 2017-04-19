@@ -10,7 +10,7 @@
  *         Megadrive does not have an interrupt pin on the cart, implementing
  *         more efficient data transmission techniques will be tricky.
  * \todo   Proper implementation of error handling.
- * \defgroup lsd Local Symmetric Data-link
+ * \defgroup lsd lsd
  * \{
  ****************************************************************************/
 
@@ -37,7 +37,8 @@
 #include "16c550.h"
 #include "mw-msg.h"
 
-/** \addtogroup lsd ReturnCodes OK/Error codes returned by several functions.
+/** \addtogroup ReturnCodes ReturnCodes
+ *  \brief OK/Error codes returned by several functions.
  *  \{ */
 /// Function completed successfully
 #define LSD_OK				0

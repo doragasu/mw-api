@@ -650,6 +650,16 @@ char *MwDatetimeGet(uint32_t dtBin[2]) {
 	return cmd->datetime.dtStr;
 }
 
+/************************************************************************//**
+ * \brief Get Flash chip ID.
+ *
+ * \param[out] dtBin Date and time in seconds since Epoch. If set to NULL,
+ *                   this info is not filled (but return value will still
+ *                   be properly set).
+ *
+ * \return A string with the date and time in textual format, e.g.: "Thu Mar
+ *         3 12:26:51 2016”.
+ ****************************************************************************/
 int MwFlashIdGet(uint8_t id[3]) {
 	if (!mwReady) return MW_ERROR;
 

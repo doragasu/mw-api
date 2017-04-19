@@ -9,7 +9,7 @@
  * \todo Missing a lot of integrity checks, also module should track used
  *       channels, and is not currently doing it
  *
- * \defgroup megawifi MeGaWiFi API implementation.
+ * \defgroup MegaWiFi megawifi
  * \{
  ****************************************************************************/
 
@@ -17,12 +17,13 @@
 #define _MEGAWIFI_H_
 
 #include <stdint.h>
-#include <genesis.h>
+#include "genesis.h"
 #include "16c550.h"
 #include "mw-msg.h"
 #include "lsd.h"
 
-/** \addtogroup mw_ctrl_pins Pins used to control WiFi module.
+/** \addtogroup MwCtrlPins MwCtrlPins
+ *  \brief Pins used to control WiFi module.
  *  \{ */
 #define MW__RESET	UART_MCR__OUT1	///< Reset out.
 #define MW__PRG		UART_MCR__OUT2	///< Program out.
@@ -30,7 +31,8 @@
 #define MW__DAT		UART_MSR__DSR	///< Data request in.
 /** \} */
 
-/** \addtogroup MwRetVals Function return values.
+/** \addtogroup MwRetVals MwRetVals
+ *  \brief Function return values.
  *  \{ */
 /// The function completed successfully
 #define MW_OK		 0
@@ -317,9 +319,6 @@ int MwSntpCfgSet(char *servers[3], uint8_t upDelay, char timezone, char dst);
  ****************************************************************************/
 char *MwDatetimeGet(uint32_t dtBin[2]);
 
-/// TODO Documentation!
-int MwFlashIdGet(uint8_t id[3]);
-
 /************************************************************************//**
  * \brief Erase a 4 KiB Flash sector. Every byte of an erased sector can be
  *        read as 0xFF.
@@ -350,9 +349,6 @@ int MwFlashWrite(uint32_t addr, uint8_t data[], uint16_t dataLen);
  * \return Pointer to read data on success, or NULL if command failed.
  ****************************************************************************/
 uint8_t *MwFlashRead(uint32_t addr, uint16_t dataLen);
-
-/// TODO documentation
-uint8_t *MwHrngGet(uint16_t rndLen);
 
 /************************************************************************//**
  * \brief Puts the WiFi module in reset state.

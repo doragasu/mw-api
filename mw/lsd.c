@@ -19,8 +19,7 @@
 /// Start of data in the buffer (skips STX and LEN fields).
 #define LSD_BUF_DATA_START 		3
 
-/** \addtogroup lsd LsdState Allowed states for reception state machine.
- *  \{ */
+/// LsdState Allowed states for reception state machine.
 typedef enum {
 	LSD_ST_IDLE = 0,		///< Currently inactive
 	LSD_ST_STX_WAIT,		///< Waiting for STX
@@ -30,10 +29,8 @@ typedef enum {
 	LSD_ST_ETX_RECV,		///< Receiving ETX
 	LSD_ST_MAX				///< Number of states
 } LsdState;
-/** \} */
 
-/** \addtogroup lsd LsdData Local data required by the module.
- *  \{ */
+/// Local data required by the module.
 typedef struct {
 	//MwMsgBuf rx[LSD_BUF_FRAMES];	///< Reception buffers
 	LsdState rxs;					///< Reception state
@@ -42,9 +39,8 @@ typedef struct {
 	uint16_t pos;					///< Position in current buffer
 	uint8_t current;				///< Current buffer in use
 } LsdData;
-/** \} */
 
-// Module global data
+/// Module global data
 static LsdData d;
 
 /// \note Loop count is reset each time a data segment is successfully copied

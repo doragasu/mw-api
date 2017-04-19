@@ -6,7 +6,7 @@
  * \author Jesus Alonso (doragasu)
  * \date 2015
  *
- * \defgroup MwMsg MegaWiFi command message definitions.
+ * \defgroup MwMsg mwmsg
  * \{
  ****************************************************************************/
 #ifndef _MW_MSG_H_
@@ -28,7 +28,8 @@
 /// Maximum password length (including '\0').
 #define MW_PASS_MAXLEN		64
 
-/** \addtogroup MwCmds Supported commands.
+/** \addtogroup MwCmds MwCmds
+ *  \brief Supported commands.
  *  \{ */
 #define MW_CMD_OK			  0		///< OK command reply
 #define MW_CMD_VERSION        1		///< Get firmware version
