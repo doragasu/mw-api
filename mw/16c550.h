@@ -10,7 +10,7 @@
 #ifndef _16C550_H_
 #define _16C550_H_
 
-// stdint conflicts with some SGDK type definitions!
+// Warning, stdint conflicts with some SGDK type definitions!
 #include <stdint.h>
 
 /// 16C550 UART base address
@@ -22,6 +22,9 @@
 /// Desired baud rate. Maximum achievable baudrate with 24  MHz crystal
 /// is 24000000/16 = 1.5 Mbps
 #define UART_BR			1500000LU
+//#define UART_BR			500000LU
+//#define UART_BR			750000LU
+//#define UART_BR			115200
 
 /// Length of the TX FIFO in bytes
 #define UART_TX_FIFO_LEN		16
@@ -100,7 +103,7 @@ extern UartShadow sh;
  *        UART FIFOs are enabled. This function must be called before using
  *        any other API call.
  ****************************************************************************/
-void UartInit(void);
+void uart_init(void);
 
 /************************************************************************//**
  * \brief Checks if UART transmit register/FIFO is ready. In FIFO mode, up to
@@ -108,30 +111,30 @@ void UartInit(void);
  *
  * \return TRUE if transmitter is ready, FALSE otherwise.
  ****************************************************************************/
-#define UartTxReady()	(UART_LSR & 0x20)
+#define uart_tx_ready()	(UART_LSR & 0x20)
 
 /************************************************************************//**
  * \brief Checks if UART receive register/FIFO has data available.
  *
  * \return TRUE if at least 1 byte is available, FALSE otherwise.
  ****************************************************************************/
-#define UartRxReady()	(UART_LSR & 0x01)
+#define uart_rx_ready()	(UART_LSR & 0x01)
 
 /************************************************************************//**
  * \brief Sends a character. Please make sure there is room in the transmit
- *        register/FIFO by calling UartRxReady() before using this function.
+ *        register/FIFO by calling uart_rx_ready() before using this function.
  *
  * \return Received character.
  ****************************************************************************/
-#define UartPutc(c)		do{UART_RHR = (c);}while(0);
+#define uart_putc(c)		do{UART_RHR = (c);}while(0);
 
 /************************************************************************//**
  * \brief Returns a received character. Please make sure data is available by
- *        calling UartRxReady() before using this function.
+ *        calling uart_rx_ready() before using this function.
  *
  * \return Received character.
  ****************************************************************************/
-#define UartGetc()		(UART_RHR)
+#define uart_getc()		(UART_RHR)
 
 /************************************************************************//**
  * \brief Sets a value in IER, FCR, LCR or MCR register.
@@ -139,7 +142,7 @@ void UartInit(void);
  * \param[in] reg Register to modify (IER, FCR, LCR or MCR).
  * \param[in] val Value to set in IER, FCR, LCR or MCR register.
  ****************************************************************************/
-#define UartSet(reg, val)	do{sh.reg = (val);UART_##reg = (val);}while(0)
+#define uart_set(reg, val)	do{sh.reg = (val);UART_##reg = (val);}while(0)
 
 /************************************************************************//**
  * \brief Gets value of IER, FCR, LCR or MCR register.
@@ -147,7 +150,7 @@ void UartInit(void);
  * \param[in] reg Register to read (IER, FCR, LCR or MCR).
  * \return The value of the requested register.
  ****************************************************************************/
-#define UartGet(reg)		(sh.reg)
+#define uart_get(reg)		(sh.reg)
 
 /************************************************************************//**
  * \brief Sets bits in IER, FCR, LCR or MCR register.
@@ -155,8 +158,8 @@ void UartInit(void);
  * \param[in] reg Register to modify (IER, FCR, LCR or MCR).
  * \param[in] val Bits set in val, will be set in reg register.
  ****************************************************************************/
-#define UartSetBits(reg, val)	do{sh.reg |= (val);							\
-								UART_##reg = sh.reg;}while(0)
+#define uart_set_bits(reg, val)	do{sh.reg |= (val);			\
+	UART_##reg = sh.reg;}while(0)
 
 /************************************************************************//**
  * \brief Clears bits in IER, FCR, LCR or MCR register.
@@ -164,13 +167,13 @@ void UartInit(void);
  * \param[in] reg Register to modify (IER, FCR, LCR or MCR).
  * \param[in] val Bits set in val, will be cleared in reg register.
  ****************************************************************************/
-#define UartClrBits(reg, val)	do{sh.reg &= ~(val);						\
-								UART_##reg = sh.reg;}while(0)
+#define uart_clr_bits(reg, val)	do{sh.reg &= ~(val);						\
+	UART_##reg = sh.reg;}while(0)
 
 /************************************************************************//**
  * \brief Reset TX and RX FIFOs.
  ****************************************************************************/
-#define UartResetFifos()	UartSetBits(FCR, 0x07)
+#define uart_reset_fifos()	uart_set_bits(FCR, 0x07)
 
 #endif /*_16C550_H_*/
 

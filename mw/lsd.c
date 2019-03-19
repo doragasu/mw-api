@@ -11,318 +11,355 @@
  *         more efficient data transmission techniques will be tricky.
  * \todo   Proper implementation of error handling.
  ****************************************************************************/
+#include <string.h>
 #include "lsd.h"
-#include "util.h" 
-/// Number of buffer frames available
-#define LSD_BUF_FRAMES			2
+#include "../mw/util.h" 
+/// Uart used for LSD
+#define LSD_UART		0
+
+/// Start/end of transmission character
+#define LSD_STX_ETX		0x7E
 
 /// Start of data in the buffer (skips STX and LEN fields).
 #define LSD_BUF_DATA_START 		3
 
-/// LsdState Allowed states for reception state machine.
-typedef enum {
-	LSD_ST_IDLE = 0,		///< Currently inactive
-	LSD_ST_STX_WAIT,		///< Waiting for STX
-	LSD_ST_CH_LENH_RECV,	///< Receiving channel and length (high bits)
-	LSD_ST_LEN_RECV,		///< Receiving frame length
-	LSD_ST_DATA_RECV,		///< Receiving data length
-	LSD_ST_ETX_RECV,		///< Receiving ETX
-	LSD_ST_MAX				///< Number of states
-} LsdState;
+/// Allowed states for the reception state machine.
+enum recv_state {
+	LSD_RECV_ERROR = -1,	///< An error has occurred
+	LSD_RECV_IDLE = 0,	///< Currently inactive
+	LSD_RECV_STX,		///< Waiting for STX
+	LSD_RECV_CH_LENH,	///< Receiving channel and length (high bits)
+	LSD_RECV_LEN,		///< Receiving frame length
+	LSD_RECV_DATA,		///< Receiving data length
+	LSD_RECV_ETX,		///< Receiving ETX
+	LSD_RECV_MAX		///< Number of states
+};
+
+/// Allowed states for the sending state machine.
+enum send_state {
+	LSD_SEND_ERROR = -1,	///< An error has occurred
+	LSD_SEND_IDLE = 0,	///< Currently inactive
+	LSD_SEND_STX,           ///< Sending STX
+	LSD_SEND_CH_LENH,       ///< Sending channel and length (high bits)
+	LSD_SEND_LEN,           ///< Sending frame length
+	LSD_SEND_DATA,          ///< Sending data length
+	LSD_SEND_ETX,           ///< Sending ETX
+	LSD_SEND_MAX            ///< Number of states
+};
+
+/// Data holding the send state
+struct send_data {
+	enum send_state stat;	///< Status of the send process
+	const char *buf;	///< Send buffer
+	int16_t pos;		///< Buffer position
+	int16_t total; 		///< Total bytes to send
+	void *ctx;		///< Send context
+	lsd_send_cb cb;		///< Send completion callback
+	uint8_t ch;		///< Send channel
+};
+
+/// Data holding the recv state
+struct recv_data {
+	enum recv_state stat;	///< Status of the recv process
+	char *buf;		///< Receive buffer
+	int16_t pos;		///< Buffer position
+	int16_t frame_len;	///< Length of received frame
+	int16_t max;		///< Buffer size
+	void *ctx;		///< Receive context
+	lsd_recv_cb cb;		///< Reception callback
+	uint8_t ch;		///< Reception channel
+};
 
 /// Local data required by the module.
-typedef struct {
-	//MwMsgBuf rx[LSD_BUF_FRAMES];	///< Reception buffers
-	LsdState rxs;					///< Reception state
-	LsdState txs;					///< Send state
-	uint8_t en[LSD_MAX_CH];			///< Channel enable
-	uint16_t pos;					///< Position in current buffer
-	uint8_t current;				///< Current buffer in use
-} LsdData;
+struct lsd_data {
+	struct send_data tx;
+	struct recv_data rx;
+	uint8_t ch_enable[LSD_MAX_CH];
+};
 
 /// Module global data
-static LsdData d;
+static struct lsd_data d = {};
 
-/// \note Loop count is reset each time a data segment is successfully copied
-///       to the TX FIFO.
-static inline int LsdPollSend(uint8_t data[], uint16_t len,
-							   uint32_t maxLoopCnt) {
-	int16_t i;
-	uint8_t n;
-	uint32_t loopCnt = maxLoopCnt;
-
-	// Buffer is sent in chunks of up to UART_TX_FIFO_LEN bytes.
-	// Only the last chunck gets some advantage of the FIFOs :(
-	for (i = 0; i < len;) {
-		n = MIN(UART_TX_FIFO_LEN, len - i);
-		while (!UartTxReady() && loopCnt) loopCnt--;
-		if (!maxLoopCnt) return -1;
-		while (n--) UartPutc(data[i++]);
-		loopCnt = maxLoopCnt;
+static void recv_error(enum lsd_status stat)
+{
+	d.rx.stat = LSD_RECV_ERROR;
+	if (d.rx.cb) {
+		d.rx.cb(stat, 0, NULL, 0, d.rx.ctx);
 	}
-	return len;
 }
 
-/************************************************************************//**
- * Module initialization. Call this function before any other one in this
- * module.
- ****************************************************************************/
-void LsdInit(void) {
-	uint8_t i;
-
-	d.rxs = d.txs = LSD_ST_IDLE;
-	d.pos = d.current = 0;
-	for (i = 0; i < LSD_MAX_CH; i++) {
-		d.en[i] = FALSE;
+static void recv_add(uint8_t recv)
+{
+	d.rx.buf[d.rx.pos++] = recv;
+	if (d.rx.pos >= d.rx.frame_len) {
+		d.rx.stat = LSD_RECV_ETX;
 	}
-	UartInit();
 }
 
-/************************************************************************//**
- * Enables a channel to start reception and be able to send data.
- *
- * \param[in] ch Channel number.
- *
- * \return A pointer to an empty TX buffer, or NULL if no buffer is
- *         available.
- ****************************************************************************/
-int LsdChEnable(uint8_t ch) {
-	if (ch >= LSD_MAX_CH) return LSD_ERROR;
-
-	d.en[ch] = TRUE;
-	return LSD_OK;
+static void recv_complete(void)
+{
+	d.rx.stat = LSD_RECV_IDLE;
+	if (d.rx.cb) {
+		d.rx.cb(LSD_STAT_COMPLETE, d.rx.ch, d.rx.buf,
+				d.rx.pos, d.rx.ctx);
+	}
 }
 
-/************************************************************************//**
- * Disables a channel to stop reception and prohibit sending data.
- *
- * \param[in] ch Channel number.
- *
- * \return A pointer to an empty TX buffer, or NULL if no buffer is
- *         available.
- ****************************************************************************/
-int LsdChDisable(uint8_t ch) {
-	if (ch >= LSD_MAX_CH) return LSD_ERROR;
+static void process_recv(void)
+{
+	uint8_t recv = uart_getc();
 
-	d.en[ch] = FALSE;
+	switch (d.rx.stat) {
+	case LSD_RECV_STX:	// Wait for STX to arrive
+		if (LSD_STX_ETX == recv) {
+			d.rx.stat = LSD_RECV_CH_LENH;
+		}
+		break;
 
-	return LSD_OK;
+	case LSD_RECV_CH_LENH:	// Receive CH and len high
+		// Check special case: if we receive STX and pos == 0,
+		// then this is the real STX (previous one was ETX from
+		// previous frame!).
+		if (!(LSD_STX_ETX == recv && 0 == d.rx.pos)) {
+			d.rx.ch = recv>>4;
+			d.rx.frame_len = (recv & 0x0F)<<8;
+			// Sanity check (not exceding number of channels)
+			if (d.rx.ch >= LSD_MAX_CH ||
+					!d.ch_enable[d.rx.ch]) {
+				recv_error(LSD_STAT_ERR_INVALID_CH);
+			} else {
+				d.rx.stat = LSD_RECV_LEN;
+			}
+		}
+		break;
+
+	case LSD_RECV_LEN:	// Receive len low
+		d.rx.frame_len |= recv;
+		// Sanity check (not exceeding maximum buffer length)
+		if (d.rx.frame_len > d.rx.max) {
+			recv_error(LSD_STAT_ERR_FRAME_TOO_LONG);
+		} else if (d.rx.frame_len) {
+			// If there's payload, receive it. Else wait for ETX
+			d.rx.pos = 0;
+			d.rx.stat = LSD_RECV_DATA;
+		} else {
+			d.rx.stat = LSD_RECV_ETX;
+		}
+		break;
+
+	case LSD_RECV_DATA:	// Receive payload
+		recv_add(recv);
+		break;
+
+	case LSD_RECV_ETX:	// ETX should come here
+		if (LSD_STX_ETX == recv) {
+			recv_complete();
+		} else {
+			// Error, ETX not received.
+			recv_error(LSD_STAT_ERR_FRAMING);
+		}
+		break;
+
+	default:
+		// Code should never reach here!
+		recv_error(LSD_STAT_ERROR);
+	}
 }
 
+static void send_complete(void)
+{
+	d.tx.stat = LSD_SEND_IDLE;
+	if (d.tx.cb) {
+		d.tx.cb(LSD_STAT_COMPLETE, d.tx.ctx);
+	}
+}
 
-/************************************************************************//**
- * Sends data through a previously enabled channel.
- *
- * \param[in] data Buffer to send.
- * \param[in] len  Length of the buffer to send.
- * \param[in] ch   Channel number to use.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
- *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise. Note returned value might be 0 if no characters were
- * 		   sent due to maxLoopCnt value reached (timeout).
- *
- * \note   maxLoopCnt value is only used for the wait before starting
- *         sending the frame header. For sending the data payload and the
- *         ETX, UINT32_MAX value is used for loop counts. If tighter control
- *         of the timing is necessary, frame must be sent using split
- *         functions.
- ****************************************************************************/
-int LsdSend(uint8_t *data, uint16_t len, uint8_t ch, uint32_t maxLoopCnt) {
+static void process_send(void)
+{
+	switch (d.tx.stat) {
+	case LSD_SEND_STX:
+		uart_putc(LSD_STX_ETX);
+		d.tx.stat = LSD_SEND_CH_LENH;
+		break;
+
+	case LSD_SEND_CH_LENH:
+		uart_putc((d.tx.ch<<4) | (d.tx.total>>8));
+		d.tx.stat = LSD_SEND_LEN;
+		break;
+
+	case LSD_SEND_LEN:
+		uart_putc(d.tx.total & 0xFF);
+		d.tx.stat = LSD_SEND_DATA;
+		break;
+
+	case LSD_SEND_DATA:
+		uart_putc(d.tx.buf[d.tx.pos++]);
+		if (d.tx.pos >= d.tx.total) {
+			d.tx.stat = LSD_SEND_ETX;
+		}
+		break;
+
+	case LSD_SEND_ETX:
+		uart_putc(LSD_STX_ETX);
+		send_complete();
+		break;
+	default:
+		break;
+	}
+}
+
+void lsd_process(void)
+{
+	int active;
+
+	do {
+		active = FALSE;
+		if (d.rx.stat > LSD_RECV_IDLE && uart_rx_ready()) {
+			active = TRUE;
+			while (uart_rx_ready() && d.rx.stat > LSD_RECV_IDLE) {
+				process_recv();
+			}
+		}
+		if (uart_tx_ready() && d.tx.stat > LSD_SEND_IDLE) {
+			active = TRUE;
+			for (int i = 0; i < UART_TX_FIFO_LEN &&
+					d.tx.stat > LSD_SEND_IDLE; i++) {
+				process_send();
+			}
+		}
+	} while(active);
+}
+
+void lsd_init(void)
+{
+	uart_init();
+	memset(&d, 0, sizeof(struct lsd_data));
+}
+
+int lsd_ch_enable(uint8_t ch)
+{
 	if (ch >= LSD_MAX_CH) {
-		return -1;
+		return LSD_ERROR;
+	}
+
+	d.ch_enable[ch] = TRUE;
+	return LSD_OK;
+}
+
+int lsd_ch_disable(uint8_t ch)
+{
+	if (ch >= LSD_MAX_CH) {
+		return LSD_ERROR;
+	}
+
+	d.ch_enable[ch] = FALSE;
+	return LSD_OK;
+}
+
+/// \todo Should we call the send callback on errors?
+enum lsd_status lsd_send(uint8_t ch, const char *data, int16_t len,
+		void *ctx, lsd_send_cb send_cb)
+{
+	if (d.tx.stat > LSD_SEND_IDLE) {
+		return LSD_STAT_ERR_IN_PROGRESS;
+	}
+	if (ch >= LSD_MAX_CH || !d.ch_enable[ch]) {
+		return LSD_STAT_ERR_INVALID_CH;
 	}
 	if (len > LSD_MAX_LEN) {
-		return -1;
-	}
-	if (!d.en[ch]) {
-		return -1;
+		return LSD_STAT_ERR_FRAME_TOO_LONG;
 	}
 
-	while ((!UartTxReady()) && maxLoopCnt) maxLoopCnt--;
-	if (!maxLoopCnt) return 0;
-	// Send STX
-	UartPutc(LSD_STX_ETX);
-	// Send ch and high nibble of length
-	UartPutc((ch<<4) | (len>>8));
-	// Send low byte of length
-	UartPutc(len & 0xFF);
-	// Send data payload
-	if (LsdPollSend(data, len, UINT32_MAX) != len) return -1;
-	// Send ETX
-	// TODO: It's stupid using FIFOs to end up doing this:
-	for (maxLoopCnt = UINT32_MAX; (!UartTxReady()) && maxLoopCnt; maxLoopCnt--);
-	if (!maxLoopCnt) return -1;
-	UartPutc(LSD_STX_ETX);
-	
-	return len;
+	d.tx.ch = ch;
+	d.tx.buf = data;
+	d.tx.total = len;
+	d.tx.cb = send_cb;
+	d.tx.ctx = ctx;
+	d.tx.pos = 0;
+	d.tx.stat = LSD_SEND_STX;
+
+	/// \todo Optimization: start sending data right now. This must be
+	/// carefully evaluated as it can cause a race for very short frames
+	/// completing the transfer before returning from this function.
+//	lsd_process();
+//
+//	if (d.tx.stat <= LSD_SEND_IDLE) {
+//		return LSD_STAT_COMPLETE;
+//	} else {
+		return LSD_STAT_BUSY;
+//	}
 }
 
-/************************************************************************//**
- * Starts sending data through a previously enabled channel. Once started,
- * you can send more additional data inside of the frame by issuing as
- * many LsdSplitNext() calls as needed, and end the frame by calling
- * LsdSplitEnd().
- *
- * \param[in] data  Buffer to send.
- * \param[in] len   Length of the data buffer to send.
- * \param[in] total Total length of the data to send using a split frame.
- * \param[in] ch    Channel number to use for sending.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
- *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
- *
- * \note     maxLoopCnt is only used for the wait before starting sending
- *           the frame header. Optional data field is sent using UINT32_MAX
- *           as loop count.
- ****************************************************************************/
-int LsdSplitStart(uint8_t *data, uint16_t len,
-	              uint16_t total, uint8_t ch, uint32_t maxLoopCnt) {
-	if (ch >= LSD_MAX_CH) return -1;
-	if (total > LSD_MAX_LEN) return -1;
-	if (!d.en[ch]) return -1;
-
-	while (!UartTxReady() && maxLoopCnt) maxLoopCnt--;
-	if (!maxLoopCnt) return -1;
-	// Send STX
-	UartPutc(LSD_STX_ETX);
-	// Send ch and high nibble of length
-	UartPutc((ch<<4) | (len>>8));
-	// Send low byte of length
-	UartPutc(len & 0xFF);
-	// Send data payload
-	if (len) return LsdPollSend(data, len, UINT32_MAX) != len?-1:len;
-	return 0;
-}
-
-/************************************************************************//**
- * Appends (sends) additional data to a frame previously started by an
- * LsdSplitStart() call.
- *
- * \param[in] data  Buffer to send.
- * \param[in] len   Length of the data buffer to send.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
- *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
- ****************************************************************************/
-int LsdSplitNext(uint8_t *data, uint16_t len, uint32_t maxLoopCnt) {
-	return LsdPollSend(data, len, maxLoopCnt);
-
-	return len;
-}
-
-/************************************************************************//**
- * Appends (sends) additional data to a frame previously started by an
- * LsdSplitStart() call, and finally ends the frame.
- *
- * \param[in] data  Buffer to send.
- * \param[in] len   Length of the data buffer to send.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
- *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
- ****************************************************************************/
-int LsdSplitEnd(uint8_t *data, uint16_t len, uint32_t maxLoopCnt) {
-	if (len) {
-		if (LsdPollSend(data, len, maxLoopCnt) != len) return -1;
+enum lsd_status lsd_recv(char *buf, int16_t len, void *ctx,
+		lsd_recv_cb recv_cb)
+{
+	if (len >= LSD_MAX_LEN) {
+		return LSD_STAT_ERR_FRAME_TOO_LONG;
 	}
-	// Send ETX
-	// TODO: It's stupid using FIFOs to end up doing this:
-	while (!UartTxReady() && maxLoopCnt) maxLoopCnt--;
-	if (!maxLoopCnt) return -1;
-	UartPutc(LSD_STX_ETX);
 
-	return len;
+	d.rx.buf = buf;
+	d.rx.max = len;
+	d.rx.cb = recv_cb;
+	d.rx.ctx = ctx;
+	d.rx.pos = 0;
+	d.rx.frame_len = 0;
+	d.rx.ch = 0;
+	d.rx.stat = LSD_RECV_STX;
+
+	/// \todo Optimization: start receiving data right now. This must be
+	/// carefully evaluated as it can cause a race for very short frames
+	/// completing the reception before returning from this function.
+//	lsd_process();
+//
+//	if (d.tx.stat <= LSD_SEND_IDLE) {
+//		return LSD_STAT_COMPLETE;
+//	} else {
+		return LSD_STAT_BUSY;
+//	}
 }
 
+enum lsd_status lsd_send_sync(uint8_t ch, const char *data, int16_t len)
+{
+	enum lsd_status stat;
 
-/************************************************************************//**
- * Receives a frame using LSD protocol.
- *
- * \param[out]   buf Buffer that will hold the received data.
- * \param[inout] maxLen When calling the function, the variable pointed by
- *               maxLen, must hold the maximum number of bytes buf can
- *               store. On return, the variable is updated to the number
- *               of bytes received.
- * \param[in]    maxLoopCnt Maximum number of loops trying to read data.
- *
- * \return On success, the number of the channel in which data has been
- * 		   received. On failure, a negative number.
- ****************************************************************************/
-// Returns the channel number
-//int LsdRecv(MwMsgBuf* buf, uint16_t maxLen, uint32_t maxLoopCnt) {
-int LsdRecv(uint8_t* buf, uint16_t* maxLen, uint32_t maxLoopCnt) {
-	LsdState rxs = LSD_ST_STX_WAIT;
-	uint32_t loops;
-	uint16_t pos = 0;
-	uint16_t len = 0;
-	uint8_t recv;
-	int8_t ch = -1;
+	stat = lsd_send(ch, data, len, NULL, NULL);
 
-	while (1) {
-		// Receive a character
-		loops = maxLoopCnt;
-		while (!UartRxReady()) {
-			loops--;
-			if (!loops) return -1;
-		}
-		recv = UartGetc();
-		switch (rxs) {
-			case LSD_ST_IDLE:			// Do nothing!
-				return -1;
-	
-			case LSD_ST_STX_WAIT:		// Wait for STX to arrive
-				if (LSD_STX_ETX == recv) rxs = LSD_ST_CH_LENH_RECV;
-				break;
-	
-			case LSD_ST_CH_LENH_RECV:	// Receive CH and len high
-				// Check special case: if we receive STX and pos == 0,
-				// then this is the real STX (previous one was ETX from
-				// previous frame!).
-				if (!(LSD_STX_ETX == recv && 0 == pos)) {
-					ch = recv>>4;
-					len = (recv & 0x0F)<<8;
-					// Sanity check (not exceding number of channels)
-					if (ch >= LSD_MAX_CH) {
-						return -1;
-					}
-					else rxs = LSD_ST_LEN_RECV;
-				}
-				break;
-	
-			case LSD_ST_LEN_RECV:		// Receive len low
-				len |= recv;
-				// Sanity check (not exceeding maximum buffer length)
-				if (len > *maxLen) {
-					return -1;
-				}
-				// If there's payload, receive it. Else wait for ETX
-				if (len) {
-					pos = 0;
-					rxs = LSD_ST_DATA_RECV;
-				} else {
-					rxs = LSD_ST_ETX_RECV;
-				}
-				break;
-	
-			case LSD_ST_DATA_RECV:		// Receive payload
-				buf[pos++] = recv;
-				if (pos >= len) rxs = LSD_ST_ETX_RECV;
-				break;
-	
-			case LSD_ST_ETX_RECV:		// ETX should come here
-				if (LSD_STX_ETX == recv) {
-					*maxLen = pos;
-					return ch;
-				}
-				// Error, ETX not received.
-				return -1;
-	
-			default:
-				// Code should never reach here!
-				return -1;
-		} // switch(d.rxs)
-	} // while (1)
+	if (stat <= LSD_STAT_COMPLETE) {
+		return stat;
+	}
+
+	// Poll until sending is completed
+	while (d.tx.stat > LSD_SEND_IDLE) {
+		lsd_process();
+	}
+
+	if (LSD_SEND_IDLE == d.tx.stat) {
+		return LSD_STAT_COMPLETE;
+	} else {
+		return LSD_STAT_ERROR;
+	}
 }
+
+enum lsd_status lsd_recv_sync(char *buf, uint16_t *len, uint8_t *ch)
+{
+	enum lsd_status stat;
+
+	stat = lsd_recv(buf, *len, NULL, NULL);
+
+	if (stat <= LSD_STAT_COMPLETE) {
+		return stat;
+	}
+
+	while (d.rx.stat > LSD_RECV_IDLE) {
+		lsd_process();
+	}
+
+	if (LSD_RECV_IDLE == d.rx.stat) {
+		*len = d.rx.pos;
+		*ch = d.rx.ch;
+		return LSD_STAT_COMPLETE;
+	} else {
+		return LSD_STAT_ERROR;
+	}
+}
+

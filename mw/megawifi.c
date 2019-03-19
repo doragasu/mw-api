@@ -10,746 +10,933 @@
  *       channels, and is not currently doing it
  ****************************************************************************/
 
-#include "megawifi.h"
 #include <string.h>
+#include "megawifi.h"
 #include "util.h"
+#include "loop.h"
 
-/// Tries sending the specified command. Returns specified code if error.
-#define MW_TRY_CMD_SEND(pCmd, errRet) do {if (MwCmdSend((pCmd), \
-			MW_DEF_MAX_LOOP_CNT)  != 0) return (errRet);} while (0)
+#define MW_COMMAND_TOUT		MS_TO_FRAMES(MW_COMMAND_TOUT_MS)
+#define MW_SCAN_TOUT		MS_TO_FRAMES(MW_SCAN_TOUT_MS)
+#define MW_ASSOC_TOUT		MS_TO_FRAMES(MW_ASSOC_TOUT_MS)
+#define MW_STAT_POLL_TOUT	MS_TO_FRAMES(MW_STAT_POLL_MS)
 
-/// Tries receiving a command response. Returns specified code if error.
-#define MW_TRY_REP_RECV(pRep, errRet) do { \
-	if ((MwCmdReplyGet(pRep, MW_DEF_MAX_LOOP_CNT) < 0) || \
-				(MW_CMD_OK != cmd->cmd)) return errRet;} while (0)
+/*
+ * The module assumes that once started, sending always succeeds, but uses
+ * timers (when defined) for data reception.
+ */
 
-static MwCmd *cmd;
-static uint16_t maxLen;
-static uint16_t recvd;	// Number of bytes received on last frame
-static uint8_t fDr;		// Data received flag
-static uint8_t mwReady = FALSE;
+enum cmd_stat {
+	CMD_ERR_PROTO = -2,
+	CMD_ERR_TIMEOUT = -1,
+	CMD_OK = 1
+};
 
-/************************************************************************//**
- * \brief MwInit Module initialization. Must be called once before using any
- *        other function. It also initializes de UART.
- *
- * \param[in] cmdBuf Pointer to the buffer used to send and receive commands.
- * \param[in] bufLen Length of cmdBuf in bytes. 
- *
- * \return 0 if Initialization successful, lower than 0 otherwise.
- ****************************************************************************/
-int MwInit(char *cmdBuf, uint16_t bufLen) {
-	// Check input params
-	if ((cmdBuf == NULL) || (bufLen < MW_CMD_MIN_BUFLEN)) return MW_ERROR;
+struct recv_metadata {
+	uint16_t len;
+	uint8_t ch;
+};
 
-	// Set command buffer
-	cmd = (MwCmd*)cmdBuf;
-	maxLen = bufLen;
+struct mw_data {
+	mw_cmd *cmd;
+	lsd_recv_cb cmd_data_cb;
+	struct loop_timer timer;
+	int16_t buf_len;
+	int16_t recvd;
+	int16_t tout_frames;
+	union {
+		uint8_t flags;
+		struct {
+			uint8_t mw_ready:1;
+			uint8_t stat_poll:1;
+			uint8_t monitor_ch:4;
+		};
+	};
+};
 
-	// Initialize LSD
-	LsdInit();
+/// Data required by the module
+static struct mw_data d = {};
 
-	// TODO Set lines to default status (keep WiFi module in reset)
-	MwModuleReset();
+
+void cmd_tout_cb(struct loop_timer *t);
+
+int mw_init(char *cmd_buf, uint16_t buf_len)
+{
+	if (!cmd_buf || buf_len < MW_CMD_MIN_BUFLEN) {
+		return MW_ERR_BUFFER_TOO_SHORT;
+	}
+
+	memset(&d, 0, sizeof(struct mw_data));
+	d.cmd = (mw_cmd*)cmd_buf;
+	d.buf_len = buf_len;
+	d.timer.timer_cb = cmd_tout_cb;
+	loop_timer_add(&d.timer);
+
+	lsd_init();
+
+	// Keep WiFi module in reset
+	mw_module_reset();
 	// Power down and Program not active (required for the module to boot)
-	UartClrBits(MCR, MW__PRG | MW__PD);
+	uart_clr_bits(MCR, MW__PRG | MW__PD);
+
 	// Try accessing UART scratch pad register to see if it is installed
-	
 	UART_SPR = 0x55;
-	if (UART_SPR != 0x55) return MW_ERROR;
+	if (UART_SPR != 0x55) return MW_ERR;
 	UART_SPR = 0xAA;
-	if (UART_SPR != 0xAA) return MW_ERROR;
+	if (UART_SPR != 0xAA) return MW_ERR;
 
-	// Clear data received flag
-	fDr = FALSE;
-	recvd = 0;
 	// Enable control channel
-	LsdChEnable(MW_CTRL_CH);
+	lsd_ch_enable(MW_CTRL_CH);
 
-	mwReady = TRUE;
+	d.mw_ready = TRUE;
 
-	return MW_OK;
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Send a command to the WiFi module.
- *
- * \param[in] cmd Pointer to the filled MwCmd command structure.
- * \param[in]  maxLoopCnt Maximum number of loops trying to write command.
- *
- * \return 0 if OK. Nonzero if error.
- ****************************************************************************/
-int MwCmdSend(MwCmd* cmd, uint32_t maxLoopCnt) {
-	if (!mwReady) return MW_ERROR;
+static void cmd_send_cb(enum lsd_status err, void *ctx)
+{
+	UNUSED_PARAM(ctx);
 
-	// Send data on control channel (0).
-	return LsdSend((uint8_t*)cmd, cmd->datalen + 4, MW_CTRL_CH,
-			maxLoopCnt) < 0?-1:0;
+	loop_timer_stop(&d.timer);
+	if (!err) {
+		loop_post(CMD_OK);
+	} else {
+		loop_post(CMD_ERR_PROTO);
+	}
 }
 
-/************************************************************************//**
- * \brief Try obtaining a reply to a command.
- *
- * \param[out] rep Pointer to MwRep structure, containing the reply to the
- *                 command, if the call completed successfully.
- * \param[in]  maxLoopCnt Maximum number of loops trying to read data.
- *
- * \return The channel on which the data has been received (0 if it was on
- *         the control channel). Lower than 0 if there was a reception
- *         error.
- ****************************************************************************/
-int MwCmdReplyGet(MwCmd *rep, uint32_t maxLoopCnt) {
-	if (!mwReady) return MW_ERROR;
+static void cmd_recv_cb(enum lsd_status err, uint8_t ch,
+		char *data, uint16_t len, void *ctx)
+{
+	UNUSED_PARAM(data);
+	struct recv_metadata *md = (struct recv_metadata*)ctx;
 
-	uint16_t maxLen = sizeof(MwCmd);
-
-	return LsdRecv((uint8_t*)rep, &maxLen, maxLoopCnt);
+	loop_timer_stop(&d.timer);
+	if (!err) {
+		md->ch = ch;
+		md->len = len;
+		loop_post(CMD_OK);
+	} else {
+		loop_post(CMD_ERR_PROTO);
+	}
 }
 
-/************************************************************************//**
- * \brief Obtain module version numbers and string
- *
- * \param[out] verMajor Pointer to Major version number.
- * \param[out] verMinor Pointer to Minor version number.
- * \param[out] variant  String with firmware variant ("std" for standard).
- *
- * \return MW_OK if completed successfully, MW_ERROR otherwise.
- ****************************************************************************/
-int MwVersionGet(uint8_t *verMajor, uint8_t *verMinor, char *variant[]) {
-	if (!mwReady) return MW_ERROR;
+void cmd_tout_cb(struct loop_timer *t)
+{
+	UNUSED_PARAM(t);
 
-	cmd->cmd = MW_CMD_VERSION;
-	cmd->datalen = 0;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
-	*verMajor = cmd->data[0];
-	*verMinor = cmd->data[1];
-	// Version string is not NULL terminated, add proper termination
-	cmd->data[MIN(maxLen - 1, cmd->datalen)] = '\0';
-	*variant = (char*)(cmd->data + 2);
-
-	return MW_OK;
+	loop_post(CMD_ERR_TIMEOUT);
 }
 
-/************************************************************************//**
- * \brief Sends an Echo request with the specified data payload, and returns
- * the echo response.
- *
- * \param[in]    data Data buffer to send.
- * \param[inout] len  Pointer to the length of the data buffer to send. On
- *                    successful function exit, holds the length of the
- *                    received echo response.
- *
- * \return Pointer to the received buffer, of NULL if command has failed.
- *
- * \note Returned data pointer is valid until cmdBuf buffer configured
- *       during initialization, is reused.
- ****************************************************************************/
-char *MwEcho(char data[], int *len) {
-	if (!mwReady) return NULL;
+static enum mw_err mw_command(int timeout_frames)
+{
+	struct recv_metadata md;
+	int stat;
+	int done = FALSE;
 
-	if (*len + LSD_OVERHEAD + 4 < maxLen) return NULL;
+	mw_cmd_send(d.cmd, NULL, cmd_send_cb);
+	/// \todo Optimization: maybe we do not need to wait for the send
+	/// process to complete, just jump to reception.
+	loop_timer_start(&d.timer, timeout_frames);
+	stat = loop_pend();
+	if (CMD_OK != stat) {
+		return MW_ERR_SEND;
+	}
+
+	while (!done) {
+		mw_cmd_recv(d.cmd, &md, cmd_recv_cb);
+		loop_timer_start(&d.timer, timeout_frames);
+		stat = loop_pend();
+		if (CMD_OK != stat) {
+			return MW_ERR_RECV;
+		}
+		// We might receive network data while waiting
+		// for a command reply
+		if (MW_CTRL_CH == md.ch) {
+			done = TRUE;
+		} else if (d.cmd_data_cb) {
+			d.cmd_data_cb(LSD_STAT_COMPLETE, md.ch,
+					(char*)d.cmd, md.len, NULL);
+		}
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
+		uint16_t tout_frames)
+{
+	struct recv_metadata md;
+	int stat;
+
+	lsd_recv(buf, *buf_len, &md, cmd_recv_cb);
+	loop_timer_start(&d.timer, tout_frames);
+	stat = loop_pend();
+	if (CMD_OK != stat) {
+		return MW_ERR_RECV;
+	}
+
+	*ch = md.ch;
+	*buf_len = md.len;
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_send_sync(uint8_t ch, const char *data, int16_t len,
+		uint16_t tout_frames)
+{
+	int stat;
+
+	lsd_send(ch, data, len, NULL, cmd_send_cb);
+	loop_timer_start(&d.timer, tout_frames);
+	stat = loop_pend();
+	if (CMD_OK != stat) {
+		return MW_ERR_SEND;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_detect(uint8_t *major, uint8_t *minor, char **variant)
+{
+	int retries = 5;
+	enum mw_err err;
+
+	// Wait a bit and take module out of resest
+	loop_timer_start(&d.timer, MS_TO_FRAMES(30));
+	loop_pend();
+	mw_module_start();
+	loop_timer_start(&d.timer, MS_TO_FRAMES(1000));
+	loop_pend();
+
+	do {
+		retries--;
+		uart_reset_fifos();
+		err = mw_version_get(major, minor, variant);
+	} while (err != MW_ERR_NONE && retries);
+
+	return err;
+}
+
+enum mw_err mw_version_get(uint8_t *major, uint8_t *minor, char **variant)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_VERSION;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return err;
+	}
+	if (major) {
+		*major = d.cmd->data[0];
+	}
+	if (minor) {
+		*minor = d.cmd->data[1];
+	}
+	if (variant) {
+		/// \todo check this
+		// Version string is not NULL terminated, add proper termination
+		d.cmd->data[MIN(d.buf_len - 1, d.cmd->data_len)] = '\0';
+		*variant = (char*)(d.cmd->data + 2);
+	}
+
+	return MW_ERR_NONE;
+}
+
+char *mw_echo(const char *data, int *len)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return NULL;
+	}
+	if (*len + LSD_OVERHEAD + 4 < d.buf_len) {
+		return NULL;
+	}
 
 	// Try sending and receiving echo
-	cmd->cmd = MW_CMD_ECHO;
-	cmd->datalen = *len;
-	memcpy((char*)cmd->data, data, *len);
-	MW_TRY_CMD_SEND(cmd, NULL);
-	MW_TRY_REP_RECV(cmd, NULL);
-	// Got response, return
-	*len = cmd->datalen;
+	d.cmd->cmd = MW_CMD_ECHO;
+	d.cmd->data_len = *len;
+	memcpy(d.cmd->data, data, *len);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+	*len = d.cmd->data_len;
 
-	return (char*)cmd->data;
+	return (char*)d.cmd->data;
 }
 
-/************************************************************************//**
- * \brief Set default module configuration.
- *
- * \return MW_OK if configuration successfully reset, MW_ERROR otherwise.
- *
- * \note For this command to take effect, it must be followed by a module
- *       reset.
- ****************************************************************************/
-int MwDefaultCfgSet(void) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_default_cfg_set(void)
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_DEF_CFG_SET;
-	cmd->datalen = 4;
-	cmd->dwData[0] = 0xFEAA5501;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	return MW_OK;
+	d.cmd->cmd = MW_CMD_DEF_CFG_SET;
+	d.cmd->data_len = 4;
+	d.cmd->dw_data[0] = 0xFEAA5501;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Set access point configuration (SSID and password).
- *
- * \param[in] index Index of the configuration to set.
- * \param[in] ssid  String with the AP SSID to set.
- * \param[in] pass  String with the AP SSID to set.
- *
- * \return MW_OK if configuration successfully set, MW_ERROR otherwise.
- *
- * \note Strings must be NULL terminated. Maximum SSID length is 32 bytes,
- *       maximum pass length is 64 bytes.
- ****************************************************************************/
-int MwApCfgSet(uint8_t index, const char ssid[], const char pass[]) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass)
+{
+	enum mw_err err;
 
-	if (index >= MW_NUM_AP_CFGS) return MW_ERROR;
-	if (strlen(ssid) > MW_SSID_MAXLEN) return MW_ERROR;
-	if (strlen(pass) > MW_PASS_MAXLEN) return MW_ERROR;
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+	if (!ssid) {
+		// At least SSID is required.
+		return MW_ERR_PARAM;
+	}
+	if (slot >= MW_NUM_CFG_SLOTS) {
+		return MW_ERR_PARAM;
+	}
 
-	cmd->cmd = MW_CMD_AP_CFG;
-	cmd->datalen = sizeof(MwMsgApCfg);
-	cmd->apCfg.cfgNum = index;
-	// Note: *NOT* NULL terminated strings are allowed on cmd.apCfg.ssid and
-	// cmd.apCfg.pass
-	// No stupid strncpy() supported by SGDK, so workaround it
-	memset(&cmd->apCfg, 0, sizeof(MwMsgApCfg));
-	memcpy(cmd->apCfg.ssid, ssid, strlen(ssid));
-	memcpy(cmd->apCfg.pass, pass, strlen(pass));
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	d.cmd->cmd = MW_CMD_AP_CFG;
+	d.cmd->data_len = sizeof(struct mw_msg_ap_cfg);
 
-	return MW_OK;
+	memset(&d.cmd->ap_cfg, 0, sizeof(struct mw_msg_ap_cfg));
+	d.cmd->ap_cfg.cfg_num = slot;
+	// Note: *NOT* NULL terminated strings are allowed on cmd.ap_cfg.ssid
+	// and cmd.ap_cfg.pass
+	memcpy(d.cmd->ap_cfg.ssid, ssid, strnlen(ssid, MW_SSID_MAXLEN));
+	if (pass) {
+		memcpy(d.cmd->ap_cfg.pass, pass, strnlen(pass, MW_PASS_MAXLEN));
+	}
+
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Gets access point configuration (SSID and password).
- *
- * \param[in]  index Index of the configuration to get.
- * \param[out] ssid  String with the AP SSID got.
- * \param[out] pass  String with the AP SSID got.
- *
- * \return MW_OK if configuration successfully got, MW_ERROR otherwise.
- *
- * \warning ssid is zero padded up to 32 bytes, and pass is zero padded up
- *          to 64 bytes. If ssid is 32 bytes, it will NOT be NULL terminated.
- *          Also if pass is 64 bytes, it will NOT be NULL terminated.
- ****************************************************************************/
-int MwApCfgGet(uint8_t index, char *ssid[], char *pass[]) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_ap_cfg_get(uint8_t slot, char **ssid, char **pass)
+{
+	enum mw_err err;
 
-	if (index >= MW_NUM_AP_CFGS) return MW_ERROR;
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+	if (slot >= MW_NUM_CFG_SLOTS) {
+		return MW_ERR_PARAM;
+	}
 
-	cmd->cmd = MW_CMD_AP_CFG_GET;
-	cmd->datalen = 1;
-	cmd->data[0] = index;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
-	*ssid = cmd->apCfg.ssid;
-	*pass = cmd->apCfg.pass;
+	d.cmd->cmd = MW_CMD_AP_CFG_GET;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = slot;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
 
-	return index;
+	if (ssid) {
+		*ssid = d.cmd->ap_cfg.ssid;
+	}
+	if (pass) {
+		*pass = d.cmd->ap_cfg.pass;
+	}
+
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Set IPv4 configuration.
- *
- * \param[in] index Index of the configuration to set.
- * \param[in] ip    Pointer to the MwIpCfg structure, with IP configuration.
- *
- * \return MW_OK if configuration successfully set, MW_ERROR otherwise.
- ****************************************************************************/
-int MwIpCfgSet(uint8_t index, const MwIpCfg *ip) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_ip_cfg_set(uint8_t slot, const struct mw_ip_cfg *ip)
+{
+	enum mw_err err;
 
-	if (index >= MW_NUM_AP_CFGS) return MW_ERROR;
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+	if (slot >= MW_NUM_CFG_SLOTS) {
+		return MW_ERR_PARAM;
+	}
 
-	cmd->cmd = MW_CMD_IP_CFG;
-	cmd->datalen = sizeof(MwMsgIpCfg);
-	cmd->ipCfg.cfgNum = index;
-	cmd->ipCfg.reserved[0] = 0;
-	cmd->ipCfg.reserved[1] = 0;
-	cmd->ipCfg.reserved[2] = 0;
-	cmd->ipCfg.ip = *ip;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	d.cmd->cmd = MW_CMD_IP_CFG;
+	d.cmd->data_len = sizeof(struct mw_msg_ip_cfg);
+	d.cmd->ip_cfg.cfg_slot = slot;
+	d.cmd->ip_cfg.reserved[0] = 0;
+	d.cmd->ip_cfg.reserved[1] = 0;
+	d.cmd->ip_cfg.reserved[2] = 0;
+	d.cmd->ip_cfg.ip = *ip;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
 
-	return index;
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Get IPv4 configuration.
- *
- * \param[in]  index Index of the configuration to get.
- * \param[out] ip    Double pointer to MwIpCfg structure, with IP conf.
- *
- * \return MW_OK if configuration successfully got, MW_ERROR otherwise.
- ****************************************************************************/
-int MwIpCfgGet(uint8_t index, MwIpCfg **ip) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_ip_cfg_get(uint8_t slot, struct mw_ip_cfg **ip)
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_IP_CFG_GET;
-	cmd->datalen = 1;
-	cmd->data[0] = index;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
-	*ip = &cmd->ipCfg.ip;
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	return index;
+	d.cmd->cmd = MW_CMD_IP_CFG_GET;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = slot;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	*ip = &d.cmd->ip_cfg.ip;
+
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Scan for access points.
- *
- * \param[out] apData Data of the found access points. Each entry has the
- *             format specified on the MwApData structure.
- *
- * \return Length in bytes of the output data if operation completes
- *         successfully, or MW_ERROR if scan fails.
- ****************************************************************************/
-int MwApScan(char *apData[]) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_ip_current(struct mw_ip_cfg **ip)
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_AP_SCAN;
-	cmd->datalen = 0;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
-	*apData = (char*)cmd->data;
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	return cmd->datalen;
+	d.cmd->cmd = MW_CMD_IP_CURRENT;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	*ip = &d.cmd->ip_cfg.ip;
+
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Parses received AP data and fills information of the AP at "pos".
- *        Useful to extract AP information from the data obtained by
- *        calling MwApScan() function.
- *
- * \param[in]  apData  Access point data obtained from MwApScan().
- * \param[in]  pos     Position at which to extract data.
- * \param[out] apd     Pointer to the extracted data from an AP.
- * \param[in]  dataLen Lenght of apData.
- *
- * \return Position of the next AP entry in apData, 0 if no more APs
- *         available or MW_ERROR if apData/pos combination is not valid.
- *
- * \note This functions executes locally, does not communicate with the
- *       WiFi module.
- ****************************************************************************/
-int MwApFillNext(char apData[], uint16_t pos,
-		         MwApData *apd, uint16_t dataLen) {
+int mw_ap_scan(char **ap_data, uint8_t *aps)
+{
+	enum mw_err err;
 
-	if (pos >= dataLen) return 0;	// End reached
-	if ((pos + apData[pos + 3] + 4) > dataLen) return MW_ERROR;
-	apd->auth = apData[pos++];
-	apd->channel = apData[pos++];
-	apd->str = apData[pos++];
-	apd->ssidLen = apData[pos++];
-	apd->ssid = apData + pos;
+	if (!d.mw_ready) {
+		return -1;
+	}
+
+	d.cmd->cmd = MW_CMD_AP_SCAN;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_SCAN_TOUT);
+	if (err) {
+		return -1;
+	}
+
+	// Fill number of APs and skip it for the apData array
+	*aps = *d.cmd->data;
+	*ap_data = ((char*)d.cmd->data) + 1;
+
+	return d.cmd->data_len - 1;
+}
+
+int mw_ap_fill_next(const char *ap_data, uint16_t pos,
+		struct mw_ap_data *apd, uint16_t data_len)
+{
+	if (pos >= data_len) {
+		return 0;	// End reached
+	}
+	if ((pos + ap_data[pos + 3] + 4) > data_len) {
+		return -1;
+	}
+	apd->auth = ap_data[pos++];
+	apd->channel = ap_data[pos++];
+	apd->rssi = ap_data[pos++];
+	apd->ssid_len = ap_data[pos++];
+	apd->ssid = (char*)ap_data + pos;
 
 	// Return updated position
-	return pos + apd->ssidLen;
+	return pos + apd->ssid_len;
 }
 
+enum mw_err mw_ap_assoc(uint8_t slot)
+{
+	enum mw_err err;
 
-/************************************************************************//**
- * \brief Tries joining an AP. If successful, also configures IPv4.
- *
- * \param[in] index Index of the configuration used to join the AP.
- *
- * \return MW_OK if AP joined successfully and ready to send/receive data,
- *         or MW_ERROR if AP join/IP configuration failed.
- ****************************************************************************/
-int MwApJoin(uint8_t index) {
-	if (!mwReady) return MW_ERROR;
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	cmd->cmd = MW_CMD_AP_JOIN;
-	cmd->datalen = 1;
-	cmd->data[0] = index;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	d.cmd->cmd = MW_CMD_AP_JOIN;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = slot;
+	err = mw_command(MW_ASSOC_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
 
-	return MW_OK;
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Leaves a previously joined AP.
- *
- * \return MW_OK if AP successfully left, or MW_ERROR if operation failed.
- ****************************************************************************/
-int MwApLeave(void) {
-	if (!mwReady) return MW_ERROR;
+static void stat_reply_cb(enum lsd_status err, uint8_t ch, char *data,
+		uint16_t len, void *ctx)
+{
+	UNUSED_PARAM(ctx);
+	UNUSED_PARAM(len);
+	UNUSED_PARAM(data);
 
-	cmd->cmd = MW_CMD_AP_LEAVE;
-	cmd->datalen = 0;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
-
-	return MW_OK;
+	if (!err && MW_CTRL_CH == ch && d.stat_poll &&
+			d.cmd->sys_stat.sys_stat >= MW_ST_READY) {
+		// We are associated!
+		loop_timer_stop(&d.timer);
+		d.stat_poll = FALSE;
+		loop_post(1);
+	} else {
+		// Query the system status again
+		d.cmd->cmd = MW_CMD_SYS_STAT;
+		d.cmd->data_len = 0;
+		mw_cmd_send(d.cmd, NULL, NULL);
+	}
 }
 
-/************************************************************************//**
- * \brief Tries establishing a TCP connection with specified server.
- *
- * \param[in] ch Channel used for the connection.
- * \param[in] dstaddr Address (IP or DNS entry) of the server.
- * \param[in] dstport Port in which server is listening.
- * \param[in] srcport Port from which try establishing connection. Set to
- *                    0 or empty string for automatic port allocation.
- *
- * \return MW_OK if connection successfully established, or MW_ERROR if
- *         connection failed.
- ****************************************************************************/
-int MwTcpConnect(uint8_t ch, char dstaddr[], char dstport[], char srcport[]) {
-	if (!mwReady) return MW_ERROR;
+static void assoc_poll_timer_cb(struct loop_timer *t)
+{
+	if (d.tout_frames) {
+		d.tout_frames -= MW_STAT_POLL_TOUT;
+		if (d.tout_frames <= 0) {
+			d.stat_poll = FALSE;
+			loop_timer_stop(t);
+			loop_post(-1);
+			return;
+		}
+	}
+	mw_cmd_recv(d.cmd, NULL, stat_reply_cb);
+}
 
-	if (ch > MW_MAX_SOCK) return MW_ERROR;
+enum mw_err mw_ap_assoc_wait(int tout_frames)
+{
+	int ret;
+
+	// Send command and do not look back
+	d.cmd->cmd = MW_CMD_SYS_STAT;
+	d.cmd->data_len = 0;
+	mw_cmd_send(d.cmd, NULL, NULL);
+
+	// Carefully reuse the command timer
+	d.tout_frames = tout_frames;
+	d.stat_poll = TRUE;
+	d.timer.timer_cb = assoc_poll_timer_cb;
+	d.timer.auto_reload = TRUE;
+	loop_timer_start(&d.timer, MW_STAT_POLL_TOUT);
+	ret = loop_pend();
+
+	// Restore default timer values
+	d.timer.timer_cb = cmd_tout_cb;
+	d.timer.auto_reload = FALSE;
+
+	return ret < 0?MW_ERR_NOT_READY:MW_ERR_NONE;
+}
+
+enum mw_err mw_ap_disassoc(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_AP_LEAVE;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_def_ap_cfg(uint8_t slot)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->data_len = 1;
+	d.cmd->cmd = MW_CMD_DEF_AP_CFG;
+	d.cmd->data[0] = slot;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+int mw_def_ap_cfg_get(void)
+{
+	enum mw_err err;
+
+	d.cmd->data_len = 0;
+	d.cmd->cmd = MW_CMD_DEF_AP_CFG_GET;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return -1;
+	}
+
+	return d.cmd->data[0];
+}
+
+enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr,
+		const char *dst_port, const char *src_port)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+	if (ch > MW_MAX_SOCK) {
+		return MW_ERR_PARAM;
+	}
 	// TODO Check at least dstaddr length and port numbers
 	// TODO Maybe we should keep track of used channels
 
 	// Configure TCP socket
-	cmd->cmd = MW_CMD_TCP_CON;
+	d.cmd->cmd = MW_CMD_TCP_CON;
 	// Length is the length of both ports, the channel and the address.
-	cmd->datalen = 6 + 6 + 1 + strlen(dstaddr);
+	d.cmd->data_len = 6 + 6 + 1 + strlen(dst_addr);
 	// Zero structure data
-	memset(cmd->inAddr.dst_port, 0, cmd->datalen);
-	strcpy(cmd->inAddr.dst_port, dstport);
-	if (srcport) strcpy(cmd->inAddr.src_port, srcport);
-	cmd->inAddr.channel = ch;
-	strcpy(cmd->inAddr.dstAddr, dstaddr);
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	memset(d.cmd->in_addr.dst_port, 0, d.cmd->data_len);
+	strcpy(d.cmd->in_addr.dst_port, dst_port);
+	if (src_port) {
+		strcpy(d.cmd->in_addr.src_port, src_port);
+	}
+	d.cmd->in_addr.channel = ch;
+	strcpy(d.cmd->in_addr.dst_addr, dst_addr);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
 
 	// Enable channel
-	LsdChEnable(ch);
+	lsd_ch_enable(ch);
 
-	return MW_OK;
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Disconnects a TCP socket from specified channel.
- *
- * \param[in] ch Channel associated to the socket to disconnect.
- *
- * \return MW_OK if socket successfully disconnected, or MW_ERROR if command
- *         failed.
- ****************************************************************************/
-int MwTcpDisconnect(uint8_t ch) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_tcp_disconnect(uint8_t ch)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
 	// TODO Check if used channel/socket
-	cmd->cmd = MW_CMD_TCP_DISC;
-	cmd->datalen = 1;
-	cmd->data[0] = ch;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	d.cmd->cmd = MW_CMD_TCP_DISC;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = ch;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
 
 	// Disable channel
-	LsdChDisable(ch);
+	lsd_ch_disable(ch);
 
-	return MW_OK;
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Binds a socket to a port, and listens to connections on the port.
- *        If a connection request is received, it will be automatically
- *        accepted.
- *
- * \param[in] ch   Channel associated to the socket bound t port.
- * \param[in] port Port number to which the socket will be bound.
- *
- * \return MW_OK if socket successfully bound, or MW_ERROR if command failed.
- ****************************************************************************/
-int MwTcpBind(uint8_t ch, uint16_t port) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_tcp_bind(uint8_t ch, uint16_t port)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
 	// TODO Check if used channel/socket
-	cmd->cmd = MW_CMD_TCP_BIND;
-	cmd->datalen = 7;
-	cmd->bind.reserved = 0;
-	cmd->bind.port = port;
-	cmd->bind.channel = ch;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	d.cmd->cmd = MW_CMD_TCP_BIND;
+	d.cmd->data_len = 7;
+	d.cmd->bind.reserved = 0;
+	d.cmd->bind.port = port;
+	d.cmd->bind.channel = ch;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
 
 	// TODO This should maybe be done later.
-	LsdChEnable(ch);
+	lsd_ch_enable(ch);
 
-	return MW_OK;
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Waits until data is received or loop timeout. If data is received,
- *        return the channel on which it has been.
- *
- * \param[in] maxLoopCnt Maximum number of loop tries before desisting from
- *            waiting. Set to 0 avoid waiting if no data is available.
- *
- * \return Channel in which data has been received, or MW_ERROR if an error
- *         has occurred.
- *
- * \note If data has been received on control channel, 0 will be returned.
- ****************************************************************************/
-int MwDataWait(uint32_t maxLoopCnt) {
-	int ch;
-	uint16_t bufLen = maxLen;
+static void sock_stat_reply_cb(enum lsd_status err, uint8_t ch, char *data,
+		uint16_t len, void *ctx)
+{
+	UNUSED_PARAM(ctx);
+	UNUSED_PARAM(len);
+	UNUSED_PARAM(data);
 
-	if (!mwReady) return MW_ERROR;
-
-	ch = LsdRecv((uint8_t*)cmd, &bufLen, maxLoopCnt);
-
-	// Check if error
-	if (ch < 0) return ch;
-	if (0 == ch) return 0;
-	if (ch > MW_MAX_SOCK) return MW_ERROR;
-
-	// Signal data received and return channel
-	fDr = ch;
-	recvd = bufLen;
-
-	return ch;
+	if (!err && MW_CTRL_CH == ch && d.stat_poll &&
+			d.cmd->data[0] >= MW_SOCK_TCP_EST) {
+		// Ready to send/receive data
+		loop_timer_stop(&d.timer);
+		d.stat_poll = FALSE;
+		loop_post(1);
+	} else {
+		// Query the system status again
+		d.cmd->cmd = MW_CMD_SOCK_STAT;
+		d.cmd->data_len = 1;
+		d.cmd->data[0] = d.monitor_ch;
+		mw_cmd_send(d.cmd, NULL, NULL);
+	}
 }
 
-/************************************************************************//**
- * \brief Receive data.
- *
- * \param[out] data       Double pointer to received data.
- * \param[out] len        Length of the received data.
- * \param[in]  maxLoopCnt Maximum number of iterations to try before giving
- *                        up. Set to 0 to avoid waiting if no data available.
- *
- * \return On success, channel on which data has been received, or MW_ERROR
- *         if no data was received.
- ****************************************************************************/
-int MwRecv(uint8_t **data, uint16_t *len, uint32_t maxLoopCnt) {
-	int ch;
+static void sock_poll_timer_cb(struct loop_timer *t)
+{
+	if (d.tout_frames) {
+		d.tout_frames -= MW_STAT_POLL_TOUT;
+		if (d.tout_frames <= 0) {
+			d.stat_poll = FALSE;
+			loop_timer_stop(t);
+			loop_post(-1);
+			return;
+		}
+	}
+	mw_cmd_recv(d.cmd, NULL, sock_stat_reply_cb);
+}
 
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_sock_conn_wait(uint8_t ch, int tout_frames)
+{
+	int ret;
 
-	// If data already received and pending, return immediately
-	if (fDr) {
-		ch = fDr;
-		fDr = FALSE;
-		*data = (uint8_t*)cmd;
-		*len = recvd;
-		recvd = 0;
-		return ch;
+	// Send command and do not look back
+	d.monitor_ch = ch;
+	d.cmd->cmd = MW_CMD_SOCK_STAT;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = ch;
+	mw_cmd_send(d.cmd, NULL, NULL);
+
+	// Carefully reuse the command timer
+	d.tout_frames = tout_frames;
+	d.stat_poll = TRUE;
+	d.timer.timer_cb = sock_poll_timer_cb;
+	d.timer.auto_reload = TRUE;
+	loop_timer_start(&d.timer, MW_STAT_POLL_TOUT);
+	ret = loop_pend();
+
+	// Restore default timer values
+	d.timer.timer_cb = cmd_tout_cb;
+	d.timer.auto_reload = FALSE;
+
+	return ret < 0?MW_ERR_NOT_READY:MW_ERR_NONE;
+}
+
+union mw_msg_sys_stat *mw_sys_stat_get(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return NULL;
 	}
 
-	*len = maxLen;
-	ch = LsdRecv((uint8_t*)cmd, len, maxLoopCnt);
-
-	// Check if data received on control channel
-	if (0 == ch) {
-		*data = NULL;
-		*len = 0;
-		return 0;
+	d.cmd->cmd = MW_CMD_SYS_STAT;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
 	}
 
-	// Check if error	
-	if (ch > MW_MAX_SOCK) {
-		*data = NULL;
-		*len = 0;
-		return MW_ERROR;
+	return &d.cmd->sys_stat;
+}
+
+enum mw_sock_stat mw_sock_stat_get(uint8_t ch)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return -1;
 	}
 
-	// Assign received data and return
-	*data = (uint8_t*)cmd;
+	d.cmd->cmd = MW_CMD_SOCK_STAT;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = ch;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return -1;
+	}
 
-	return ch;
+	return d.cmd->data[0];
 }
 
-
-/************************************************************************//**
- * \brief Get system status.
- *
- * \return Pointer to system status structure on success, or NULL on error.
- ****************************************************************************/
-MwMsgSysStat *MwSysStatGet(void) {
-	if (!mwReady) return NULL;
-
-	cmd->cmd = MW_CMD_SYS_STAT;
-	cmd->datalen = 0;
-	MW_TRY_CMD_SEND(cmd, NULL);
-	MW_TRY_REP_RECV(cmd, NULL);
-
-	return &cmd->sysStat;
-}
-
-/************************************************************************//**
- * \brief Get socket status.
- *
- * \param[in] ch Channel associated to the socket asked for status.
- *
- * \return Socket status data on success, or MW_ERROR on error.
- ****************************************************************************/
-MwSockStat MwSockStatGet(uint8_t ch) {
-	if (!mwReady) return MW_ERROR;
-
-	cmd->cmd = MW_CMD_SOCK_STAT;
-	cmd->datalen = 1;
-	cmd->data[0] = ch;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
-
-	return cmd->data[0];
-}
-
-
-/************************************************************************//**
- * \brief Configure SNTP parameters and timezone.
- *
- * \param[in] servers  Array of up to three NTP servers. If less than three
- *                     servers are desired, unused entries must be empty.
- * \param[in] upDelay  Update delay in seconds. Minimum value is 15.
- * \param[in] timezone Time zone information (from -11 to 13).
- * \param[in] dst      Daylight saving. Set to 1 to apply 1 hour offset.
- *
- * \return MW_OK on success, MW_ERROR if command fails.
- ****************************************************************************/
 // TODO Check for overflows when copying server data.
-int MwSntpCfgSet(char *servers[3], uint8_t upDelay, char timezone, char dst) {
+enum mw_err mw_sntp_cfg_set(const char *servers[3], uint8_t up_delay,
+		int8_t timezone, int8_t dst)
+{
+	enum mw_err err;
 	uint8_t offset;
 
-	if (!mwReady) return MW_ERROR;
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	cmd->cmd = MW_CMD_SNTP_CFG;
-	cmd->sntpCfg.upDelay = upDelay;
-	cmd->sntpCfg.tz = timezone;
-	cmd->sntpCfg.dst = dst;
-	strcpy(cmd->sntpCfg.servers, servers[0]);
+	d.cmd->cmd = MW_CMD_SNTP_CFG;
+	d.cmd->sntp_cfg.up_delay = up_delay;
+	d.cmd->sntp_cfg.tz = timezone;
+	d.cmd->sntp_cfg.dst = dst;
+	strcpy(d.cmd->sntp_cfg.servers, servers[0]);
 	// Offset: server length + 1 ('\0')
 	offset  = strlen(servers[0]) + 1;
-	strcpy(cmd->sntpCfg.servers + offset, servers[1]);
+	strcpy(d.cmd->sntp_cfg.servers + offset, servers[1]);
 	offset += strlen(servers[1]) + 1;
-	strcpy(cmd->sntpCfg.servers + offset, servers[2]);
+	strcpy(d.cmd->sntp_cfg.servers + offset, servers[2]);
 	offset += strlen(servers[2]) + 1;
 	// Mark the end of the list with two adjacent '\0'
-	cmd->sntpCfg.servers[offset] = '\0';
-	cmd->datalen = offset + 1;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	d.cmd->sntp_cfg.servers[offset] = '\0';
+	d.cmd->data_len = offset + 1;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
 
-	return MW_OK;
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Get date and time.
- *
- * \param[out] dtBin Date and time in seconds since Epoch. If set to NULL,
- *                   this info is not filled (but return value will still
- *                   be properly set).
- *
- * \return A string with the date and time in textual format, e.g.: "Thu Mar
- *         3 12:26:51 2016”.
- ****************************************************************************/
-char *MwDatetimeGet(uint32_t dtBin[2]) {
-	if (!mwReady) return NULL;
+char *mw_date_time_get(uint32_t dt_bin[2])
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_DATETIME;
-	cmd->datalen = 0;
-	MW_TRY_CMD_SEND(cmd, NULL);
-	MW_TRY_REP_RECV(cmd, NULL);
-	if (dtBin) dtBin = cmd->datetime.dtBin;
+	if (!d.mw_ready) {
+		return NULL;
+	}
+
+	d.cmd->cmd = MW_CMD_DATETIME;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+
+	if (dt_bin) {
+		dt_bin = d.cmd->date_time.dt_bin;
+	}
 	// Set NULL termination of the string
-	cmd->data[cmd->datalen] = '\0';
+	d.cmd->data[d.cmd->data_len] = '\0';
 
-	return cmd->datetime.dtStr;
+	return d.cmd->date_time.dt_str;
 }
 
-/************************************************************************//**
- * \brief Get Flash chip ID.
- *
- * \param[out] dtBin Date and time in seconds since Epoch. If set to NULL,
- *                   this info is not filled (but return value will still
- *                   be properly set).
- *
- * \return A string with the date and time in textual format, e.g.: "Thu Mar
- *         3 12:26:51 2016”.
- ****************************************************************************/
-int MwFlashIdGet(uint8_t id[3]) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_flash_id_get(uint8_t id[3])
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_FLASH_ID;
-	cmd->datalen = 0;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
-	id[0] = cmd->data[0];
-	id[1] = cmd->data[1];
-	id[2] = cmd->data[2];
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	return MW_OK;
+	d.cmd->cmd = MW_CMD_FLASH_ID;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	id[0] = d.cmd->data[0];
+	id[1] = d.cmd->data[1];
+	id[2] = d.cmd->data[2];
+
+	return MW_ERR_NONE;
 }
 
-
-/************************************************************************//**
- * \brief Erase a 4 KiB Flash sector. Every byte of an erased sector can be
- *        read as 0xFF.
- *
- * \param[in] sect Sector number to erase.
- *
- * \return MW_OK if success, MW_ERROR if sector could not be erased.
- ****************************************************************************/
 // sect = 0 corresponds to flash sector 0x80
-int MwFlashSectorErase(uint16_t sect) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_flash_sector_erase(uint16_t sect)
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_FLASH_ERASE;
-	cmd->datalen = sizeof(uint16_t);
-	cmd->flSect = sect;
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	return MW_OK;
+	d.cmd->cmd = MW_CMD_FLASH_ERASE;
+	d.cmd->data_len = sizeof(uint16_t);
+	d.cmd->fl_sect = sect;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Write data to specified flash address.
- *
- * \param[in] addr    Address to which data will be written.
- * \param[in] data    Data to be written to flash chip.
- * \param[in] dataLen Length in bytes of data field.
- *
- * \return MW_OK if success, MW_ERROR if data could not be written.
- ****************************************************************************/
 // Address 0 corresponds to flash address 0x80000
-int MwFlashWrite(uint32_t addr, uint8_t data[], uint16_t dataLen) {
-	if (!mwReady) return MW_ERROR;
+enum mw_err mw_flash_write(uint32_t addr, uint8_t *data, uint16_t data_len)
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_FLASH_WRITE;
-	cmd->datalen = dataLen + sizeof(uint32_t);
-	cmd->flData.addr = addr;
-	memcpy(cmd->flData.data, data, dataLen);
-	MW_TRY_CMD_SEND(cmd, MW_ERROR);
-	MW_TRY_REP_RECV(cmd, MW_ERROR);
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
 
-	return MW_OK;
+	d.cmd->cmd = MW_CMD_FLASH_WRITE;
+	d.cmd->data_len = data_len + sizeof(uint32_t);
+	d.cmd->fl_data.addr = addr;
+	memcpy(d.cmd->fl_data.data, data, data_len);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
 }
 
-/************************************************************************//**
- * \brief Read data from specified flash address.
- *
- * \param[in] addr    Address from which data will be read.
- * \param[in] dataLen Number of bytes to read from addr.
- *
- * \return Pointer to read data on success, or NULL if command failed.
- ****************************************************************************/
 // Address 0 corresponds to flash address 0x80000
-uint8_t *MwFlashRead(uint32_t addr, uint16_t dataLen) {
-	if (!mwReady) return NULL;
+uint8_t *mw_flash_read(uint32_t addr, uint16_t data_len)
+{
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_FLASH_READ;
-	cmd->flRange.addr = addr;
-	cmd->flRange.len = dataLen;
-	cmd->datalen = sizeof(MwMsgFlashRange);
-	MW_TRY_CMD_SEND(cmd, NULL);
-	MW_TRY_REP_RECV(cmd, NULL);
+	if (!d.mw_ready || data_len > d.buf_len) {
+		return NULL;
+	}
 
-	return cmd->data;
+	d.cmd->cmd = MW_CMD_FLASH_READ;
+	d.cmd->fl_range.addr = addr;
+	d.cmd->fl_range.len = data_len;
+	d.cmd->data_len = sizeof(struct mw_msg_flash_range);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+
+	return d.cmd->data;
 }
 
-uint8_t *MwHrngGet(uint16_t rndLen) {
-	if (!mwReady) return NULL;
+uint8_t *mw_hrng_get(uint16_t rnd_len) {
+	enum mw_err err;
 
-	cmd->cmd = MW_CMD_HRNG_GET;
-	cmd->datalen = sizeof(uint16_t);
-	cmd->rndLen = rndLen;
-	MW_TRY_CMD_SEND(cmd, NULL);
-	MW_TRY_REP_RECV(cmd, NULL);
+	if (!d.mw_ready) {
+		return NULL;
+	}
 
-	return cmd->data;
+	d.cmd->cmd = MW_CMD_HRNG_GET;
+	d.cmd->data_len = sizeof(uint16_t);
+	d.cmd->rnd_len = rnd_len;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+
+	return d.cmd->data;
+}
+
+void mw_sleep(uint16_t frames)
+{
+	loop_timer_start(&d.timer, frames);
+	loop_pend();
 }
 

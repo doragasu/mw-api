@@ -3,24 +3,33 @@
  *         protocol to link two full-duplex devices, multiplexing the
  *         data link.
  *
+ * The multiplexing facility allows having up to LSD_MAX_CH simultaneous
+ * channels on the serial link.
+ *
+ * The module has synchronous functions to send/receive data (easy to use, but
+ * due to polling hang the console until transfer is complete) and their
+ * asyncronous counterparts. The asynchronous functions return immediately,
+ * but require calling frequently lsd_process() to actually send/receive data.
+ * Once the asynchronous functions complete sending/receiving data, the
+ * specified callback is run.
+ *
  * \author Jesus Alonso (doragasu)
- * \date   2016
- * \todo   Implement UART RTS/CTS handshaking.
- * \todo   Current implementation uses polling. Unfortunately as the Genesis/
+ * \date   2019
+ * \note   Unfortunately the Megadrive does have neither an interrupt pin nor
+ *         DMA threshold pins in the cartridge slot, so polling is the only 
+ *         way. So you have
  *         Megadrive does not have an interrupt pin on the cart, implementing
  *         more efficient data transmission techniques will be tricky.
- * \todo   Proper implementation of error handling.
+ * \warning The syncrhonous API is easier to use, but a lot less reliable:
+ * * It polls, using all the CPU until the send/recv operation completes.
+ * * A lsd_recv_sync() can freeze the machine if no frame is received. USE IT
+ *   WITH CARE!
+ *
  * \defgroup lsd lsd
  * \{
  ****************************************************************************/
 
 /*
- * USAGE:
- * First initialize the module calling LsdInit().
- * Then enable at least one channel calling LsdEnable().
- *
- * To send data call LsdSend();
- *
  * Frame format is:
  *
  * STX : CH-LENH : LENL : DATA : ETX
@@ -41,9 +50,9 @@
  *  \brief OK/Error codes returned by several functions.
  *  \{ */
 /// Function completed successfully
-#define LSD_OK				0
+#define LSD_OK			0
 /// Generic error code
-#define LSD_ERROR			-1
+#define LSD_ERROR		-1
 /// A framing error occurred. Possible data loss.
 #define LSD_FRAMING_ERROR	-2
 /** \} */
@@ -51,131 +60,119 @@
 /// LSD frame overhead in bytes
 #define LSD_OVERHEAD		4
 
-/// Uart used for LSD
-#define LSD_UART			0
-
-/// Start/end of transmission character
-#define LSD_STX_ETX		0x7E
-
 /// Maximum number of available simultaneous channels
-#define LSD_MAX_CH			4
-
-/// Receive task priority
-#define LSD_RECV_PRIO		2
+#define LSD_MAX_CH		4
 
 /// Maximum data payload length
 #define LSD_MAX_LEN		 4095
 
-/************************************************************************//**
- * Module initialization. Call this function before any other one in this
- * module.
- ****************************************************************************/
-void LsdInit(void);
+/// Number of buffer frames available
+#define LSD_BUF_FRAMES		2
+
+/// Return status codes for LSD functions
+enum lsd_status {
+	LSD_STAT_ERR_FRAMING = -5,		///< Frame format error
+	LSD_STAT_ERR_INVALID_CH = -4,		///< Invalid channel
+	LSD_STAT_ERR_FRAME_TOO_LONG = -3,	///< Frame is too long
+	LSD_STAT_ERR_IN_PROGRESS = -2,		///< Operation in progress
+	LSD_STAT_ERROR = -1,			///< General error
+	LSD_STAT_COMPLETE = 0,			///< No error
+	LSD_STAT_BUSY = 1			///< Doing requested operation
+};
+
+/// Callback for the asynchronous lsd_send() function.
+typedef void (*lsd_send_cb)(enum lsd_status stat, void *ctx);
+/// Callback for the asynchronous lsd_recv() function.
+typedef void (*lsd_recv_cb)(enum lsd_status stat, uint8_t ch,
+		char *data, uint16_t len, void *ctx);
 
 /************************************************************************//**
- * Enables a channel to start reception and be able to send data.
+ * \brief Module initialization.
+ ****************************************************************************/
+void lsd_init(void);
+
+/************************************************************************//**
+ * \brief Enables a channel to start reception and be able to send data.
  *
  * \param[in] ch Channel number.
  *
- * \return A pointer to an empty TX buffer, or NULL if no buffer is
- *         available.
+ * \return LSD_OK on success, LSD_ERROR otherwise.
  ****************************************************************************/
-int LsdChEnable(uint8_t ch);
+int lsd_ch_enable(uint8_t ch);
 
 /************************************************************************//**
- * Disables a channel to stop reception and prohibit sending data.
+ * \brief Disables a channel to stop reception and prohibit sending data.
  *
  * \param[in] ch Channel number.
  *
- * \return A pointer to an empty TX buffer, or NULL if no buffer is
- *         available.
+ * \return LSD_OK on success, LSD_ERROR otherwise.
  ****************************************************************************/
-int LsdChDisable(uint8_t ch);
+int lsd_ch_disable(uint8_t ch);
 
 
 /************************************************************************//**
- * Sends data through a previously enabled channel.
+ * \brief Asynchronously sends data through a previously enabled channel.
  *
+ * \param[in] ch      Channel number to use.
+ * \param[in] data    Buffer to send.
+ * \param[in] len     Length of the buffer to send.
+ * \param[in] ctx     Context for the send callback function.
+ * \param[in] send_cb Callback to run when send completes or errors.
+ *
+ * \return Status of the send procedure. Usually LSD_STAT_BUSY is returned,
+ * and the send procedure is then performed in background.
+ * \note Calling this function while there is a send procedure in progress,
+ * will cause the function call to fail with LSD_STAT_SEND_ERR_IN_PROGRESS.
+ ****************************************************************************/
+enum lsd_status lsd_send(uint8_t ch, const char *data, int16_t len,
+		void *ctx, lsd_send_cb send_cb);
+
+/************************************************************************//**
+ * \brief Synchronously sends data through a previously enabled channel.
+ *
+ * \param[in] ch   Channel number to use.
  * \param[in] data Buffer to send.
  * \param[in] len  Length of the buffer to send.
- * \param[in] ch   Channel number to use.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
  *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise. Note returned value might be 0 if no characters were
- * 		   sent due to maxLoopCnt value reached (timeout).
- *
- * \note   maxLoopCnt value is only used for the wait before starting
- *         sending the frame header. For sending the data payload and the
- *         ETX, UINT32_MAX value is used for loop counts. If tighter control
- *         of the timing is necessary, frame must be sent using split
- *         functions.
+ * \return Status of the send procedure.
+ * \warning This function polls until the procedure is complete (or errors).
  ****************************************************************************/
-int LsdSend(uint8_t *data, uint16_t len, uint8_t ch, uint32_t maxLoopCnt);
+enum lsd_status lsd_send_sync(uint8_t ch, const char *data, int16_t len);
 
 /************************************************************************//**
- * Starts sending data through a previously enabled channel. Once started,
- * you can send more additional data inside of the frame by issuing as
- * many LsdSplitNext() calls as needed, and end the frame by calling
- * LsdSplitEnd().
+ * \brief Asyncrhonously Receives a frame using LSD protocol.
  *
- * \param[in] data  Buffer to send.
- * \param[in] len   Length of the data buffer to send.
- * \param[in] total Total length of the data to send using a split frame.
- * \param[in] ch    Channel number to use for sending.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
+ * \param[in] buf     Buffer for reception.
+ * \param[in] len     Buffer length.
+ * \param[in] ctx     Context for the receive callback function.
+ * \param[in] recv_cb Callback to run when receive completes or errors.
  *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
- *
- * \note     maxLoopCnt is only used for the wait before starting sending
- *           the frame header. Optional data field is sent using UINT32_MAX
- *           as loop count.
+ * \return Status of the receive procedure.
  ****************************************************************************/
-int LsdSplitStart(uint8_t *data, uint16_t len,
-		          uint16_t total, uint8_t ch, uint32_t maxLoopCnt);
+enum lsd_status lsd_recv(char *buf, int16_t len, void *ctx,
+		lsd_recv_cb recv_cb);
 
 /************************************************************************//**
- * Appends (sends) additional data to a frame previously started by an
- * LsdSplitStart() call.
+ * \brief Syncrhonously Receives a frame using LSD protocol.
  *
- * \param[in] data  Buffer to send.
- * \param[in] len   Length of the data buffer to send.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
+ * \param[out]   buf Buffer for received data.
+ * \param[inout] len On input: buffer length. On output: received frame length.
+ * \param[out]   ch  Channel on which the data has been received.
  *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
+ * \warning This function polls until the reception is complete, or a reception
+ * error occurs.
+ * \warning If no frame is received when this function is called, the machine
+ * will lock.
  ****************************************************************************/
-int LsdSplitNext(uint8_t *data, uint16_t len, uint32_t maxLoopCnt);
+enum lsd_status lsd_recv_sync(char *buf, uint16_t *len, uint8_t *ch);
 
 /************************************************************************//**
- * Appends (sends) additional data to a frame previously started by an
- * LsdSplitStart() call, and finally ends the frame.
+ * \brief Processes sends/receives pending data.
  *
- * \param[in] data  Buffer to send.
- * \param[in] len   Length of the data buffer to send.
- * \param[in] maxLoopCnt Maximum number of loops trying to write data.
- *
- * \return -1 if there was an error, or the number of characterse sent
- * 		   otherwise.
+ * Call this function as much as possible when using the asynchronous
+ * lsd_send() and lsd_receive() functions.
  ****************************************************************************/
-int LsdSplitEnd(uint8_t *data, uint16_t len, uint32_t maxLoopCnt);
-
-/************************************************************************//**
- * Receives a frame using LSD protocol.
- *
- * \param[out]   buf Buffer that will hold the received data.
- * \param[inout] maxLen When calling the function, the variable pointed by
- *               maxLen, must hold the maximum number of bytes buf can
- *               store. On return, the variable is updated to the number
- *               of bytes received.
- * \param[in]    maxLoopCnt Maximum number of loops trying to read data.
- *
- * \return On success, the number of the channel in which data has been
- * 		   received. On failure, a negative number.
- ****************************************************************************/
-int LsdRecv(uint8_t* buf, uint16_t* maxLen, uint32_t maxLoopCnt);
-//int LsdRecv(MwMsgBuf* buf, uint16_t maxLen, uint32_t maxLoopCnt);
+void lsd_process(void);
 
 /** \} */
 
