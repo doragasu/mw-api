@@ -215,7 +215,7 @@ About the API calls, basically all of them are synchronous or pseudo-synchronous
 * `mw_cmd_send()`: Send a command to the WiFi module.
 * `mw_cmd_recv()`: Receive a command reply from the WiFi module.
 
-Usually `mw_cmd_send()` and `mw_cmd_recv()` are not needed unless you decide to go down the hard path (using `mw-msg` to build commands yourself). For sending/receiving data, it's up to you using the asynchronous `mw_send()` and `mw_recv()` or their pseudo-synchronous counterparts `mw_send_sync()` and `mw_recv_sync()`. Note that while pseudo-synchronous functions are blocked, loop processing continues running, and if the function blocked on a `loop_pend()` is enabled (i.e. it is a timer with *auto_reload* enabled, or it is a not previously disabled *loop_func*), it will be re-entered. This is usually not what you will want. Thus when calling syncrhonous functions, make sure calling function cannot be re-entered, e.g.: by calling `loop_func_disable()` before entering the synchronous function, or by using loop timers without auto-reload.
+Usually `mw_cmd_send()` and `mw_cmd_recv()` are not needed unless you decide to go down the hard path (using `mw-msg` to build commands yourself). For sending/receiving data, it's up to you using the asynchronous `mw_send()` and `mw_recv()` or their pseudo-synchronous counterparts `mw_send_sync()` and `mw_recv_sync()`.
 
 To save precious RAM, command functions reuse the same buffer. Thus when a command reply is obtained, you have to copy the needed data from the buffer before issuing another command. Otherwise the data in the previously received buffer will be lost.
 
