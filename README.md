@@ -4,6 +4,10 @@
 
 This repository contains the MegaWiFi API, to use the WiFi capabilities of the MegaWiFi cartridges.
 
+## API documentation
+
+The full API documentation [can be found here](https://doragasu.github.io/mw-api/doc/html/index.html).
+
 ## Building
 
 You will need a complete Genesis/Megadrive toolchain. The sources use some C standard library calls, such as `memcpy()`, `setjmp()`, `longjmp()`, etc. Thus your toolchain must include a C standard library implementation such as *newlib*.
