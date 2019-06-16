@@ -184,6 +184,15 @@ const char *str_to_uint8(const char *strIn, uint8_t *result);
 int long_to_str(long num, char *str, int buf_len, int pad_len, char pad_chr);
 
 /************************************************************************//**
+ * \brief Converts a 8-bit number to its hexadecimal string representation.
+ *
+ * \param[in]  num Number to convert.
+ * \param[out] str Converted equivalent string. Must have room for at least
+ *             3 characters to guarantee an overrun will not accur.
+ ****************************************************************************/
+void uint8_to_hex_str(uint8_t num, char *str);
+
+/************************************************************************//**
  * \brief Converts a 32-bit number to its hexadecimal string representation.
  *
  * \param[in]  num Number to convert.

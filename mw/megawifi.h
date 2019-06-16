@@ -92,6 +92,13 @@ struct mw_ap_data {
 	char *ssid;		///< SSID string (not NULL terminated).
 };
 
+/// Interface type for the mw_bssid_get() function.
+enum mw_if_type {
+	MW_IF_STATION = 0,	///< Station interface
+	MW_IF_SOFTAP,		///< Access Point interface
+	MW_IF_MAX		///< Number of supported interface types
+};
+
 /************************************************************************//**
  * \brief Module initialization. Must be called once before using any
  *        other function. It also initializes de UART.
@@ -147,6 +154,15 @@ enum mw_err mw_detect(uint8_t *major, uint8_t *minor, char **variant);
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
 enum mw_err mw_version_get(uint8_t *major, uint8_t *minor, char **variant);
+
+/************************************************************************//**
+ * \brief Gets the module BSSID (the MAC address) for the specified interface.
+ *
+ * \param[in] interface_type Type of the interface to obtain BSSID from.
+ *
+ * \return The requested BSSID (6 byte binary data), or NULL on error.
+ ****************************************************************************/
+uint8_t *mw_bssid_get(enum mw_if_type interface_type);
 
 /************************************************************************//**
  * \brief Set default module configuration.
@@ -567,6 +583,13 @@ uint8_t *mw_flash_read(uint32_t addr, uint16_t data_len);
  ****************************************************************************/
 #define mw_module_start()	do{uart_clr_bits(MCR, MW__RESET);}while(0)
 
+/************************************************************************//**
+ * \brief Sleep the specified amount of frames
+ *
+ * \param[in] frames Number of frames to sleep.
+ ****************************************************************************/
+void mw_sleep(uint16_t frames);
+
 /****** THE FOLLOWING COMMANDS ARE LOWER LEVEL AND USUALLY NOT NEEDED ******/
 
 /************************************************************************//**
@@ -600,12 +623,9 @@ static inline enum lsd_status mw_cmd_recv(mw_cmd *rep, void *ctx,
 	return lsd_recv(rep->packet, sizeof(mw_cmd), ctx, recv_cb);
 }
 
-/************************************************************************//**
- * \brief Sleep the specified amount of frames
- *
- * \param[in] frames Number of frames to sleep.
- ****************************************************************************/
-void mw_sleep(uint16_t frames);
+enum mw_err mw_gamertag_set(uint8_t slot, struct mw_gamertag *gamertag);
+
+struct mw_gamertag *mw_gamertag_get(uint8_t slot);
 
 #endif /*_MEGAWIFI_H_*/
 

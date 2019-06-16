@@ -34,6 +34,17 @@
 /// Maximum password length (including '\0').
 #define MW_PASS_MAXLEN		64
 
+/// Gamertag nickname maximum length
+#define MW_GT_NICKNAME_MAX		32
+/// Gamertag security maximum length
+#define MW_GT_SECURITY_MAX		32
+/// Gamertag tagline maximum length
+#define MW_GT_TAGLINE_MAX		32
+/// Gamertag avatar graphick width in pixels
+#define MW_GT_AVATAR_WIDTH		32
+/// Gamertag avatar graphick height in pixels
+#define MW_GT_AVATAR_HEIGHT		48
+
 /// Supported commands.
 enum PACKED mw_command {
 	MW_CMD_OK		=   0,	///< OK command reply
@@ -69,6 +80,9 @@ enum PACKED mw_command {
 	MW_CMD_SYS_STAT		=  30,	///< Get system status
 	MW_CMD_DEF_CFG_SET	=  31,	///< Set default configuration
 	MW_CMD_HRNG_GET		=  32,	///< Gets random numbers
+	MW_CMD_BSSID_GET	=  33,	///< Gets the WiFi BSSID
+	MW_CMD_GAMERTAG_SET	=  34,	///< Configures a gamertag
+	MW_CMD_GAMERTAG_GET	=  35,	///< Gets a stored gamertag
 	MW_CMD_ERROR		= 255	///< Error command reply
 };
 
@@ -166,6 +180,29 @@ struct mw_msg_bind {
 	uint8_t  channel;	///< Channel used for the socket bound to port
 };
 
+/// Gamertag data
+struct mw_gamertag {
+	/// Unique gamertag id
+	int id;
+	/// User nickname
+	char nickname[MW_GT_NICKNAME_MAX];
+	/// User security string
+	char security[MW_GT_SECURITY_MAX];
+	/// User defined text tag
+	char tagline[MW_GT_TAGLINE_MAX];
+	/// Avatar image tiles
+	uint8_t avatar_tiles[MW_GT_AVATAR_WIDTH * MW_GT_AVATAR_HEIGHT / 2];
+	/// Avatar image palette
+	uint8_t avatar_pal[32];
+};
+
+/// Gamertag set message data
+struct mw_gamertag_set_msg {
+	uint8_t slot;			///< Slot to store gamertag (0 to 2)
+	uint8_t reserved[3];		///< Reserved, set to 0
+	struct mw_gamertag gamertag;	///< Gamertag to set
+};
+
 /// MwState Possible states of the system state machine.
 enum mw_state {
 	MW_ST_INIT = 0,		///< Initialization state.
@@ -174,7 +211,7 @@ enum mw_state {
 	MW_ST_SCAN,		///< Scanning access points.
 	MW_ST_READY,		///< Connected to The Internet.
 	MW_ST_TRANSPARENT,	///< Transparent communication state.
-	MW_ST_MAX			///< Limit number for state machine.
+	MW_ST_MAX		///< Limit number for state machine.
 };
 
 /// Socket status.
@@ -223,6 +260,8 @@ typedef union mw_cmd {
 			struct mw_msg_flash_range fl_range;	///< Flash memory range
 			struct mw_msg_bind bind;		///< Bind message
 			union mw_msg_sys_stat sys_stat;		///< System status
+			struct mw_gamertag_set_msg gamertag_set;///< Gamertag set
+			struct mw_gamertag gamertag_get;	///< Gamertag get
 			uint16_t fl_sect;	///< Flash sector
 			uint32_t fl_id;		///< Flash IDs
 			uint16_t rnd_len;	///< Length of the random buffer to fill

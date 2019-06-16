@@ -968,6 +968,68 @@ uint8_t *mw_hrng_get(uint16_t rnd_len) {
 	return d.cmd->data;
 }
 
+uint8_t *mw_bssid_get(enum mw_if_type interface_type)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready || interface_type >= MW_IF_MAX) {
+		return NULL;
+	}
+
+	d.cmd->cmd = MW_CMD_BSSID_GET;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = interface_type;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+
+	return d.cmd->data;
+}
+
+enum mw_err mw_gamertag_set(uint8_t slot, struct mw_gamertag *gamertag)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_GAMERTAG_SET;
+	d.cmd->gamertag_set.slot = slot;
+	d.cmd->gamertag_set.reserved[0] = 0;
+	d.cmd->gamertag_set.reserved[1] = 0;
+	d.cmd->gamertag_set.reserved[2] = 0;
+	d.cmd->data_len = sizeof(struct mw_gamertag_set_msg);
+	memcpy(&d.cmd->gamertag_set.gamertag, gamertag,
+			sizeof(struct mw_gamertag));
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+struct mw_gamertag *mw_gamertag_get(uint8_t slot)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return NULL;
+	}
+
+	d.cmd->cmd = MW_CMD_GAMERTAG_GET;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = slot;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+
+	return &d.cmd->gamertag_get;
+}
+
 void mw_sleep(uint16_t frames)
 {
 	loop_timer_start(&d.timer, frames);

@@ -206,6 +206,15 @@ int long_to_str(long num, char *str, int buf_len, int pad_len, char pad_chr)
 	return pad_len;
 }
 
+void uint8_to_hex_str(uint8_t num, char *str)
+{
+	const char map[] = "0123456789ABCDEF";
+
+	str[0] = map[num>>4];
+	str[1] = map[num & 0x0F];
+	str[2] = '\0';
+}
+
 int uint32_to_hex_str(uint32_t num, char *str, int pad)
 {
 	const char map[] = "0123456789ABCDEF";
