@@ -5,6 +5,7 @@
  * \defgroup 1985ch main
  * \{
  ****************************************************************************/
+#include <string.h>
 #include "vdp.h"
 #include "mw/util.h"
 #include "mw/mpool.h"
@@ -63,9 +64,73 @@ static void udp_echo(struct loop_timer *t)
 	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
 }
 
+static void bssid_bin_to_str(const uint8_t *bssid, char *bssid_str)
+{
+	int i;
+
+	for (i = 0; i < 5; i++) {
+		uint8_to_hex_str(bssid[i], &bssid_str[7 + 3 * i]);
+		bssid_str[9 + 3 * i] = ':';
+	}
+	uint8_to_hex_str(bssid[i], &bssid_str[6 + 3 * i]);
+}
+
+//static void gamertag_init(int id, const char *name, const char *security,
+//		const char *tagline, struct mw_gamertag *gamertag)
+//{
+//	memset(gamertag, 0, sizeof(struct mw_gamertag));
+//	gamertag->id = id;
+//	strcpy(gamertag->nickname, name);
+//	strcpy(gamertag->security, security);
+//	strcpy(gamertag->tagline, tagline);
+//}
+
+static void print_gamertag(struct mw_gamertag *gamertag)
+{
+	char id[9];
+	uint32_to_hex_str(gamertag->id, id, 0);
+	println(id, VDP_TXT_COL_CYAN);
+	println(gamertag->nickname, VDP_TXT_COL_WHITE);
+	println(gamertag->security, VDP_TXT_COL_WHITE);
+	println(gamertag->tagline, VDP_TXT_COL_WHITE);
+	println("", VDP_TXT_COL_WHITE);
+}
+
 static void run_test(struct loop_timer *t)
 {
 	enum mw_err err;
+	uint8_t *bssid;
+	char bssid_str[7 + 17 + 1] = "BSSID: ";
+//	struct mw_gamertag gamertag;
+	struct mw_gamertag *pgt;
+
+	// Set test gamertags
+//	gamertag_init(1, "doragasu", "secure_password", "If it's not broken, "
+//			"I'll fix it", &gamertag);
+//	mw_gamertag_set(0, &gamertag);
+//	gamertag_init(2, "Pocket_Lucho", "Me encanta git", "SEEEEEGAAAAAAA!",
+//			&gamertag);
+//	mw_gamertag_set(1, &gamertag);
+//	gamertag_init(3, "Davidian", "Murcianete", "A topeeeeeeeeee!",
+//			&gamertag);
+//	mw_gamertag_set(2, &gamertag);
+
+	// Read back and print gamertags
+	for (int i = 0; i < 3; i++) {
+		pgt = mw_gamertag_get(i);
+		if (pgt) {
+			print_gamertag(pgt);
+		}
+	}
+
+
+	// Get BSSID
+	bssid = mw_bssid_get(MW_IF_STATION);
+	if (!bssid) {
+		goto err;
+	}
+	bssid_bin_to_str(bssid, bssid_str);
+	println(bssid_str, VDP_TXT_COL_WHITE);
 
 	// Join AP
 	println("Associating to AP", VDP_TXT_COL_WHITE);
