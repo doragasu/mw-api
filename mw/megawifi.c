@@ -591,6 +591,21 @@ int mw_def_ap_cfg_get(void)
 	return d.cmd->data[0];
 }
 
+static int fill_addr(const char *dst_addr, const char *dst_port,
+		const char *src_port, struct mw_msg_in_addr *in_addr)
+{
+	// Zero structure data
+	memset(in_addr->dst_port, 0, d.cmd->data_len);
+	strcpy(in_addr->dst_port, dst_port);
+	if (src_port) {
+		strcpy(in_addr->src_port, src_port);
+	}
+	strcpy(in_addr->dst_addr, dst_addr);
+
+	// Length is the length of both ports, the channel and the address.
+	return 6 + 6 + 1 + strlen(dst_addr);
+}
+
 enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr,
 		const char *dst_port, const char *src_port)
 {
@@ -602,21 +617,12 @@ enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr,
 	if (ch > MW_MAX_SOCK) {
 		return MW_ERR_PARAM;
 	}
-	// TODO Check at least dstaddr length and port numbers
-	// TODO Maybe we should keep track of used channels
 
 	// Configure TCP socket
 	d.cmd->cmd = MW_CMD_TCP_CON;
-	// Length is the length of both ports, the channel and the address.
-	d.cmd->data_len = 6 + 6 + 1 + strlen(dst_addr);
-	// Zero structure data
-	memset(d.cmd->in_addr.dst_port, 0, d.cmd->data_len);
-	strcpy(d.cmd->in_addr.dst_port, dst_port);
-	if (src_port) {
-		strcpy(d.cmd->in_addr.src_port, src_port);
-	}
+	d.cmd->data_len = fill_addr(dst_addr, dst_port, src_port,
+			&d.cmd->in_addr);
 	d.cmd->in_addr.channel = ch;
-	strcpy(d.cmd->in_addr.dst_addr, dst_addr);
 	err = mw_command(MW_COMMAND_TOUT);
 	if (err) {
 		return MW_ERR;
@@ -628,7 +634,7 @@ enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr,
 	return MW_ERR_NONE;
 }
 
-enum mw_err mw_tcp_disconnect(uint8_t ch)
+enum mw_err mw_close(uint8_t ch)
 {
 	enum mw_err err;
 
@@ -637,7 +643,7 @@ enum mw_err mw_tcp_disconnect(uint8_t ch)
 	}
 
 	// TODO Check if used channel/socket
-	d.cmd->cmd = MW_CMD_TCP_DISC;
+	d.cmd->cmd = MW_CMD_CLOSE;
 	d.cmd->data_len = 1;
 	d.cmd->data[0] = ch;
 	err = mw_command(MW_COMMAND_TOUT);
@@ -671,6 +677,34 @@ enum mw_err mw_tcp_bind(uint8_t ch, uint16_t port)
 	}
 
 	// TODO This should maybe be done later.
+	lsd_ch_enable(ch);
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_udp_set(uint8_t ch, const char *dst_addr, const char *dst_port,
+		const char *src_port)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+	if (ch > MW_MAX_SOCK) {
+		return MW_ERR_PARAM;
+	}
+
+	// Configure UDP socket
+	d.cmd->cmd = MW_CMD_UDP_SET;
+	d.cmd->data_len = fill_addr(dst_addr, dst_port, src_port,
+			&d.cmd->udp_set.addr) + 1;
+	d.cmd->in_addr.channel = ch;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	// Enable channel
 	lsd_ch_enable(ch);
 
 	return MW_ERR_NONE;

@@ -1,0 +1,8 @@
+tmp
+boot/rom_head.o
+hello-wifi
+hello-wifi.bin
+hello-wifi.elf
+.ycm_extra_conf.py
+*.vim
+

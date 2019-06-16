@@ -42,9 +42,29 @@ static void idle_cb(struct loop_func *f)
 	mw_process();
 }
 
+void udp_recv_cb(enum lsd_status stat, uint8_t ch,
+		char *data, uint16_t len, void *ctx)
+{
+	const struct mw_reuse_payload *udp =
+		(const struct mw_reuse_payload*)data;
+	UNUSED_PARAM(ctx);
+
+	if (LSD_STAT_COMPLETE == stat) {
+		mw_udp_reuse_send(ch, udp, len, NULL, NULL);
+	}
+}
+
+static void udp_echo(struct loop_timer *t)
+{
+	struct mw_reuse_payload *pkt =
+		(struct mw_reuse_payload * const)cmd_buf;
+	UNUSED_PARAM(t);
+
+	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
+}
+
 static void run_test(struct loop_timer *t)
 {
-	UNUSED_PARAM(t);
 	enum mw_err err;
 
 	// Join AP
@@ -74,6 +94,10 @@ static void run_test(struct loop_timer *t)
 	println("Test finished, all OK!", VDP_TXT_COL_WHITE);
 	
 	mw_tcp_disconnect(1);
+
+	// Start UDP echo task
+	mw_udp_set(1, NULL, NULL, "7");
+	t->timer_cb = udp_echo;
 	goto out;
 
 err:

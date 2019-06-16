@@ -38,10 +38,6 @@ struct loop_func;
 /// Loop function callback definition
 typedef void (*loop_func_cb)(struct loop_func *f);
 
-struct loop_runnable {
-
-};
-
 /// Loop function data structure
 struct loop_func {
 	/// Function callback to run on the loop
