@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">0.3</span>
+   &#160;<span id="projectnumber">0.4</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -182,6 +182,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga312e2d6c6ba4c6b237f316453b833ca2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga312e2d6c6ba4c6b237f316453b833ca2">long_to_str</a> (long num, char *str, int buf_len, int pad_len, char pad_chr)</td></tr>
 <tr class="memdesc:ga312e2d6c6ba4c6b237f316453b833ca2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an integer to a character string.  <a href="#ga312e2d6c6ba4c6b237f316453b833ca2">More...</a><br /></td></tr>
 <tr class="separator:ga312e2d6c6ba4c6b237f316453b833ca2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafb94df8994a87fe786b0f62db37f8a15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#gafb94df8994a87fe786b0f62db37f8a15">uint8_to_hex_str</a> (uint8_t num, char *str)</td></tr>
+<tr class="memdesc:gafb94df8994a87fe786b0f62db37f8a15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 8-bit number to its hexadecimal string representation.  <a href="#gafb94df8994a87fe786b0f62db37f8a15">More...</a><br /></td></tr>
+<tr class="separator:gafb94df8994a87fe786b0f62db37f8a15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadc2fe63f7c4fde6fd40fdcbd34019d8b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#gadc2fe63f7c4fde6fd40fdcbd34019d8b">uint32_to_hex_str</a> (uint32_t num, char *str, int pad)</td></tr>
 <tr class="memdesc:gadc2fe63f7c4fde6fd40fdcbd34019d8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit number to its hexadecimal string representation.  <a href="#gadc2fe63f7c4fde6fd40fdcbd34019d8b">More...</a><br /></td></tr>
 <tr class="separator:gadc2fe63f7c4fde6fd40fdcbd34019d8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -608,6 +611,43 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Length of the resulting IP string. </dd></dl>
+
+</div>
+</div>
+<a id="gafb94df8994a87fe786b0f62db37f8a15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafb94df8994a87fe786b0f62db37f8a15">&#9670;&nbsp;</a></span>uint8_to_hex_str()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void uint8_to_hex_str </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>str</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts a 8-bit number to its hexadecimal string representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">num</td><td>Number to convert. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">str</td><td>Converted equivalent string. Must have room for at least 3 characters to guarantee an overrun will not accur. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

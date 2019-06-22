@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">0.3</span>
+   &#160;<span id="projectnumber">0.4</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -133,11 +133,19 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__msg__bind.html">mw_msg_bind</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bind message data.  <a href="structmw__msg__bind.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__gamertag.html">mw_gamertag</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag data.  <a href="structmw__gamertag.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__gamertag__set__msg.html">mw_gamertag_set_msg</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag set message data.  <a href="structmw__gamertag__set__msg.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionmw__msg__sys__stat.html">mw_msg_sys_stat</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">System status.  <a href="unionmw__msg__sys__stat.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionmw__cmd.html">mw_cmd</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command sent to system FSM.  <a href="unionmw__cmd.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
@@ -162,6 +170,26 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga4624ada68840b53714507bf5037dbd4a">MW_PASS_MAXLEN</a>&#160;&#160;&#160;64</td></tr>
 <tr class="memdesc:ga4624ada68840b53714507bf5037dbd4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum password length (including '\0'). <br /></td></tr>
 <tr class="separator:ga4624ada68840b53714507bf5037dbd4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa4692f86d0549c9526d7c1751b468c4b"><td class="memItemLeft" align="right" valign="top"><a id="gaa4692f86d0549c9526d7c1751b468c4b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#gaa4692f86d0549c9526d7c1751b468c4b">MW_GT_NICKNAME_MAX</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:gaa4692f86d0549c9526d7c1751b468c4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag nickname maximum length. <br /></td></tr>
+<tr class="separator:gaa4692f86d0549c9526d7c1751b468c4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6062902c950950c930337a5ca802fd52"><td class="memItemLeft" align="right" valign="top"><a id="ga6062902c950950c930337a5ca802fd52"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga6062902c950950c930337a5ca802fd52">MW_GT_SECURITY_MAX</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:ga6062902c950950c930337a5ca802fd52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag security maximum length. <br /></td></tr>
+<tr class="separator:ga6062902c950950c930337a5ca802fd52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga50277ef01588c04bd12a6a97e5a5fa44"><td class="memItemLeft" align="right" valign="top"><a id="ga50277ef01588c04bd12a6a97e5a5fa44"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga50277ef01588c04bd12a6a97e5a5fa44">MW_GT_TAGLINE_MAX</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:ga50277ef01588c04bd12a6a97e5a5fa44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag tagline maximum length. <br /></td></tr>
+<tr class="separator:ga50277ef01588c04bd12a6a97e5a5fa44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71ebcdbe2287f654e0321fd866c906aa"><td class="memItemLeft" align="right" valign="top"><a id="ga71ebcdbe2287f654e0321fd866c906aa"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga71ebcdbe2287f654e0321fd866c906aa">MW_GT_AVATAR_WIDTH</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:ga71ebcdbe2287f654e0321fd866c906aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag avatar graphick width in pixels. <br /></td></tr>
+<tr class="separator:ga71ebcdbe2287f654e0321fd866c906aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2b8cfdfcb00a122ee8b6f55a3640151e"><td class="memItemLeft" align="right" valign="top"><a id="ga2b8cfdfcb00a122ee8b6f55a3640151e"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga2b8cfdfcb00a122ee8b6f55a3640151e">MW_GT_AVATAR_HEIGHT</a>&#160;&#160;&#160;48</td></tr>
+<tr class="memdesc:ga2b8cfdfcb00a122ee8b6f55a3640151e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag avatar graphick height in pixels. <br /></td></tr>
+<tr class="separator:ga2b8cfdfcb00a122ee8b6f55a3640151e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -208,7 +236,7 @@ enum <a class="el" href="group__util.html#ga36d525cf4d116b2fe4ecc00222b256f1">PA
 <p>MegaWiFi command message definitions. </p>
 <p>Contains the definition of the command codes and the data structures conforming the command message queries and responses. Usually this module is not directly used by the application, but by megawifi internally.</p>
 <dl class="section author"><dt>Author</dt><dd>Jesus Alonso (doragasu) </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>2015 </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>2015~2019 </dd></dl>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="ga03b1792dd84b65e0e291cb4cdb58b6b3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga03b1792dd84b65e0e291cb4cdb58b6b3">&#9670;&nbsp;</a></span>mw_sock_stat</h2>
@@ -234,7 +262,7 @@ enum <a class="el" href="group__util.html#ga36d525cf4d116b2fe4ecc00222b256f1">PA
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="mw-msg_8h_source.html#l00175">175</a> of file <a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mw-msg_8h_source.html#l00213">213</a> of file <a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>.</p>
 
 </div>
 </div>
@@ -268,7 +296,7 @@ enum <a class="el" href="group__util.html#ga36d525cf4d116b2fe4ecc00222b256f1">PA
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="mw-msg_8h_source.html#l00164">164</a> of file <a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mw-msg_8h_source.html#l00202">202</a> of file <a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>.</p>
 
 </div>
 </div>

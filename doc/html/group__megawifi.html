@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">0.3</span>
+   &#160;<span id="projectnumber">0.4</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -165,6 +165,14 @@ Macros</h2></td></tr>
 <tr class="separator:ga2ff041a0b70c4930e1f131825488d73f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa2a1c8956ba89554e008d7e877104073"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaa2a1c8956ba89554e008d7e877104073">MW_CMD_MIN_BUFLEN</a>&#160;&#160;&#160;104</td></tr>
 <tr class="separator:gaa2a1c8956ba89554e008d7e877104073"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1fba45bbaeb37503895f2261ea23a954"><td class="memItemLeft" align="right" valign="top"><a id="ga1fba45bbaeb37503895f2261ea23a954"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga1fba45bbaeb37503895f2261ea23a954">mw_tcp_disconnect</a>(ch)&#160;&#160;&#160;<a class="el" href="group__megawifi.html#ga2deb2a29f38acd84f8db310d12657f44">mw_close</a>(ch)</td></tr>
+<tr class="memdesc:ga1fba45bbaeb37503895f2261ea23a954"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes a TCP socket. This is an alias of <a class="el" href="group__megawifi.html#ga2deb2a29f38acd84f8db310d12657f44" title="Closes and disconnects a socket from specified channel.">mw_close()</a>. <br /></td></tr>
+<tr class="separator:ga1fba45bbaeb37503895f2261ea23a954"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae8e653c57b71e824611d623dfe05ce6a"><td class="memItemLeft" align="right" valign="top"><a id="gae8e653c57b71e824611d623dfe05ce6a"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gae8e653c57b71e824611d623dfe05ce6a">mw_udp_unset</a>(ch)&#160;&#160;&#160;<a class="el" href="group__megawifi.html#ga2deb2a29f38acd84f8db310d12657f44">mw_close</a>(ch)</td></tr>
+<tr class="memdesc:gae8e653c57b71e824611d623dfe05ce6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees a UDP socket. This is an alias of <a class="el" href="group__megawifi.html#ga2deb2a29f38acd84f8db310d12657f44" title="Closes and disconnects a socket from specified channel.">mw_close()</a>. <br /></td></tr>
+<tr class="separator:gae8e653c57b71e824611d623dfe05ce6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae5c5d130e64d774a04d68370efd2735c"><td class="memItemLeft" align="right" valign="top"><a id="gae5c5d130e64d774a04d68370efd2735c"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gae5c5d130e64d774a04d68370efd2735c">mw_module_reset</a>()&#160;&#160;&#160;do{uart_set_bits(MCR, <a class="el" href="group__mw__ctrl__pins.html#ga80e0f5c9f48d726abca6673dafbf5ee6">MW__RESET</a>);}while(0)</td></tr>
 <tr class="memdesc:gae5c5d130e64d774a04d68370efd2735c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts the WiFi module in reset state. <br /></td></tr>
@@ -189,6 +197,12 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:ga777c2b3caa535d405278734b0f5aad2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error codes for MegaWiFi API functions.  <a href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">More...</a><br /></td></tr>
 <tr class="separator:ga777c2b3caa535d405278734b0f5aad2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa395ab95fb1639b3faea74217972dda9"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaa395ab95fb1639b3faea74217972dda9">mw_if_type</a> { <a class="el" href="group__megawifi.html#ggaa395ab95fb1639b3faea74217972dda9a913ca58caf0372816e9499fa366f1ebb">MW_IF_STATION</a> = 0, 
+<a class="el" href="group__megawifi.html#ggaa395ab95fb1639b3faea74217972dda9a470d80a295112912059427d64d44cd52">MW_IF_SOFTAP</a>, 
+<a class="el" href="group__megawifi.html#ggaa395ab95fb1639b3faea74217972dda9aaa8cca31aca4bd31a8895e09104b8845">MW_IF_MAX</a>
+ }</td></tr>
+<tr class="memdesc:gaa395ab95fb1639b3faea74217972dda9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface type for the <a class="el" href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6" title="Gets the module BSSID (the MAC address) for the specified interface.">mw_bssid_get()</a> function.  <a href="group__megawifi.html#gaa395ab95fb1639b3faea74217972dda9">More...</a><br /></td></tr>
+<tr class="separator:gaa395ab95fb1639b3faea74217972dda9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -207,6 +221,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga817e2088be79653bf665db41849ca668"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga817e2088be79653bf665db41849ca668">mw_version_get</a> (uint8_t *major, uint8_t *minor, char **variant)</td></tr>
 <tr class="memdesc:ga817e2088be79653bf665db41849ca668"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtain module version numbers and string.  <a href="#ga817e2088be79653bf665db41849ca668">More...</a><br /></td></tr>
 <tr class="separator:ga817e2088be79653bf665db41849ca668"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabcab943ad7996de14e41a669a369d2b6"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6">mw_bssid_get</a> (enum <a class="el" href="group__megawifi.html#gaa395ab95fb1639b3faea74217972dda9">mw_if_type</a> interface_type)</td></tr>
+<tr class="memdesc:gabcab943ad7996de14e41a669a369d2b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the module BSSID (the MAC address) for the specified interface.  <a href="#gabcab943ad7996de14e41a669a369d2b6">More...</a><br /></td></tr>
+<tr class="separator:gabcab943ad7996de14e41a669a369d2b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga603dad869097a4f978f2dbb6fc882f73"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga603dad869097a4f978f2dbb6fc882f73">mw_default_cfg_set</a> (void)</td></tr>
 <tr class="memdesc:ga603dad869097a4f978f2dbb6fc882f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set default module configuration.  <a href="#ga603dad869097a4f978f2dbb6fc882f73">More...</a><br /></td></tr>
 <tr class="separator:ga603dad869097a4f978f2dbb6fc882f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -247,9 +264,12 @@ Functions</h2></td></tr>
 <tr class="memitem:gaaf6aaaa928b6085b6ecf7012e2c6aa1b"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">mw_tcp_connect</a> (uint8_t ch, const char *dst_addr, const char *dst_port, const char *src_port)</td></tr>
 <tr class="memdesc:gaaf6aaaa928b6085b6ecf7012e2c6aa1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries establishing a TCP connection with specified server.  <a href="#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">More...</a><br /></td></tr>
 <tr class="separator:gaaf6aaaa928b6085b6ecf7012e2c6aa1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga30dc61ce2008d71661e93b0971b91c38"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga30dc61ce2008d71661e93b0971b91c38">mw_tcp_disconnect</a> (uint8_t ch)</td></tr>
-<tr class="memdesc:ga30dc61ce2008d71661e93b0971b91c38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disconnects a TCP socket from specified channel.  <a href="#ga30dc61ce2008d71661e93b0971b91c38">More...</a><br /></td></tr>
-<tr class="separator:ga30dc61ce2008d71661e93b0971b91c38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2deb2a29f38acd84f8db310d12657f44"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga2deb2a29f38acd84f8db310d12657f44">mw_close</a> (uint8_t ch)</td></tr>
+<tr class="memdesc:ga2deb2a29f38acd84f8db310d12657f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes and disconnects a socket from specified channel.  <a href="#ga2deb2a29f38acd84f8db310d12657f44">More...</a><br /></td></tr>
+<tr class="separator:ga2deb2a29f38acd84f8db310d12657f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaabaf8bfcd3efbb4ea4acec7889825cf8"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8">mw_udp_set</a> (uint8_t ch, const char *dst_addr, const char *dst_port, const char *src_port)</td></tr>
+<tr class="memdesc:gaabaf8bfcd3efbb4ea4acec7889825cf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures a UDP socket to send/receive data.  <a href="#gaabaf8bfcd3efbb4ea4acec7889825cf8">More...</a><br /></td></tr>
+<tr class="separator:gaabaf8bfcd3efbb4ea4acec7889825cf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga82f774de9f50b730de578cb0e7512d16"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga82f774de9f50b730de578cb0e7512d16">mw_tcp_bind</a> (uint8_t ch, uint16_t port)</td></tr>
 <tr class="memdesc:ga82f774de9f50b730de578cb0e7512d16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Binds a socket to a port, and listens to connections on the port. If a connection request is received, it will be automatically accepted.  <a href="#ga82f774de9f50b730de578cb0e7512d16">More...</a><br /></td></tr>
 <tr class="separator:ga82f774de9f50b730de578cb0e7512d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -259,6 +279,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8227c5ef923c4eee7f978ccf80cff9af"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga8227c5ef923c4eee7f978ccf80cff9af">mw_recv</a> (char *buf, int16_t len, void *ctx, lsd_recv_cb recv_cb)</td></tr>
 <tr class="memdesc:ga8227c5ef923c4eee7f978ccf80cff9af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive data, asyncrhonous interface.  <a href="#ga8227c5ef923c4eee7f978ccf80cff9af">More...</a><br /></td></tr>
 <tr class="separator:ga8227c5ef923c4eee7f978ccf80cff9af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3c07f0a16ac25b5dc8711b63027fb7b0"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga3c07f0a16ac25b5dc8711b63027fb7b0">mw_udp_reuse_recv</a> (struct <a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a> *data, int16_t len, void *ctx, lsd_recv_cb recv_cb)</td></tr>
+<tr class="memdesc:ga3c07f0a16ac25b5dc8711b63027fb7b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive data using an UDP socket in reuse mode.  <a href="#ga3c07f0a16ac25b5dc8711b63027fb7b0">More...</a><br /></td></tr>
+<tr class="separator:ga3c07f0a16ac25b5dc8711b63027fb7b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga670038f755210f5e80cbf76493a2add6"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga670038f755210f5e80cbf76493a2add6">mw_udp_reuse_send</a> (uint8_t ch, const struct <a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a> *data, int16_t len, void *ctx, lsd_send_cb send_cb)</td></tr>
+<tr class="memdesc:ga670038f755210f5e80cbf76493a2add6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send data using a UDP socket in reuse mode.  <a href="#ga670038f755210f5e80cbf76493a2add6">More...</a><br /></td></tr>
+<tr class="separator:ga670038f755210f5e80cbf76493a2add6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab99864c90151e2bffe5d685cd6e1b241"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gab99864c90151e2bffe5d685cd6e1b241">mw_send</a> (uint8_t ch, const char *data, int16_t len, void *ctx, lsd_send_cb send_cb)</td></tr>
 <tr class="memdesc:gab99864c90151e2bffe5d685cd6e1b241"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends data through a socket, using a previously allocated channel. Asynchronous interface.  <a href="#gab99864c90151e2bffe5d685cd6e1b241">More...</a><br /></td></tr>
 <tr class="separator:gab99864c90151e2bffe5d685cd6e1b241"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -274,9 +300,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga18c20474507a6d7ce65d57e5c46ad49a"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__mw-msg.html#ga03b1792dd84b65e0e291cb4cdb58b6b3">mw_sock_stat</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga18c20474507a6d7ce65d57e5c46ad49a">mw_sock_stat_get</a> (uint8_t ch)</td></tr>
 <tr class="memdesc:ga18c20474507a6d7ce65d57e5c46ad49a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get socket status.  <a href="#ga18c20474507a6d7ce65d57e5c46ad49a">More...</a><br /></td></tr>
 <tr class="separator:ga18c20474507a6d7ce65d57e5c46ad49a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga47ffc42bfefae19e09beec5191e4d0b7"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga47ffc42bfefae19e09beec5191e4d0b7">mw_sntp_cfg_set</a> (const char *servers[3], uint8_t up_delay, int8_t timezone, int8_t dst)</td></tr>
-<tr class="memdesc:ga47ffc42bfefae19e09beec5191e4d0b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure SNTP parameters and timezone.  <a href="#ga47ffc42bfefae19e09beec5191e4d0b7">More...</a><br /></td></tr>
-<tr class="separator:ga47ffc42bfefae19e09beec5191e4d0b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab19bcf42b1b242420bf199f49bb23297"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gab19bcf42b1b242420bf199f49bb23297">mw_sntp_cfg_set</a> (const char *server[3], uint16_t up_delay, int8_t timezone, int8_t dst)</td></tr>
+<tr class="memdesc:gab19bcf42b1b242420bf199f49bb23297"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure SNTP parameters and timezone.  <a href="#gab19bcf42b1b242420bf199f49bb23297">More...</a><br /></td></tr>
+<tr class="separator:gab19bcf42b1b242420bf199f49bb23297"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga87d5eebef47cb7a440d50f24cfd6d94f"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga87d5eebef47cb7a440d50f24cfd6d94f">mw_sntp_cfg_get</a> (char *server[3], uint16_t *up_delay, int8_t *timezone, int8_t *dst)</td></tr>
+<tr class="memdesc:ga87d5eebef47cb7a440d50f24cfd6d94f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get SNTP parameters and timezone configuration.  <a href="#ga87d5eebef47cb7a440d50f24cfd6d94f">More...</a><br /></td></tr>
+<tr class="separator:ga87d5eebef47cb7a440d50f24cfd6d94f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9eb5082f2dc47b0c802ba6dc233ada4e"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga9eb5082f2dc47b0c802ba6dc233ada4e">mw_date_time_get</a> (uint32_t dt_bin[2])</td></tr>
 <tr class="memdesc:ga9eb5082f2dc47b0c802ba6dc233ada4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get date and time.  <a href="#ga9eb5082f2dc47b0c802ba6dc233ada4e">More...</a><br /></td></tr>
 <tr class="separator:ga9eb5082f2dc47b0c802ba6dc233ada4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -292,18 +321,28 @@ Functions</h2></td></tr>
 <tr class="memitem:gae2183be207f9ef7fa2c14932aa87269d"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gae2183be207f9ef7fa2c14932aa87269d">mw_flash_read</a> (uint32_t addr, uint16_t data_len)</td></tr>
 <tr class="memdesc:gae2183be207f9ef7fa2c14932aa87269d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read data from specified flash address.  <a href="#gae2183be207f9ef7fa2c14932aa87269d">More...</a><br /></td></tr>
 <tr class="separator:gae2183be207f9ef7fa2c14932aa87269d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9ab26dbe9fc804915a4f8b5db4e194ed"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga9ab26dbe9fc804915a4f8b5db4e194ed">mw_gamertag_set</a> (uint8_t slot, const struct <a class="el" href="structmw__gamertag.html">mw_gamertag</a> *gamertag)</td></tr>
+<tr class="memdesc:ga9ab26dbe9fc804915a4f8b5db4e194ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set gamertag information for one slot.  <a href="#ga9ab26dbe9fc804915a4f8b5db4e194ed">More...</a><br /></td></tr>
+<tr class="separator:ga9ab26dbe9fc804915a4f8b5db4e194ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga635b2e45820d9872badae382a7730153"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structmw__gamertag.html">mw_gamertag</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga635b2e45820d9872badae382a7730153">mw_gamertag_get</a> (uint8_t slot)</td></tr>
+<tr class="memdesc:ga635b2e45820d9872badae382a7730153"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get gamertag information for one slot.  <a href="#ga635b2e45820d9872badae382a7730153">More...</a><br /></td></tr>
+<tr class="separator:ga635b2e45820d9872badae382a7730153"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabfff7a4ee92a0938b5462dbc0b2542fd"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gabfff7a4ee92a0938b5462dbc0b2542fd">mw_log</a> (const char *msg)</td></tr>
+<tr class="memdesc:gabfff7a4ee92a0938b5462dbc0b2542fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a message to the WiFi module log trace.  <a href="#gabfff7a4ee92a0938b5462dbc0b2542fd">More...</a><br /></td></tr>
+<tr class="separator:gabfff7a4ee92a0938b5462dbc0b2542fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad09542c947defced59a0fe9be0875d06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gad09542c947defced59a0fe9be0875d06">mw_sleep</a> (uint16_t frames)</td></tr>
+<tr class="memdesc:gad09542c947defced59a0fe9be0875d06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sleep the specified amount of frames.  <a href="#gad09542c947defced59a0fe9be0875d06">More...</a><br /></td></tr>
+<tr class="separator:gad09542c947defced59a0fe9be0875d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga79e05a128d08dce3df5f444a3b9af88b"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga79e05a128d08dce3df5f444a3b9af88b">mw_cmd_send</a> (<a class="el" href="unionmw__cmd.html">mw_cmd</a> *cmd, void *ctx, lsd_send_cb send_cb)</td></tr>
 <tr class="memdesc:ga79e05a128d08dce3df5f444a3b9af88b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a command to the WiFi module.  <a href="#ga79e05a128d08dce3df5f444a3b9af88b">More...</a><br /></td></tr>
 <tr class="separator:ga79e05a128d08dce3df5f444a3b9af88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae296015ee73ae119ae763bdae9839a60"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gae296015ee73ae119ae763bdae9839a60">mw_cmd_recv</a> (<a class="el" href="unionmw__cmd.html">mw_cmd</a> *rep, void *ctx, lsd_recv_cb recv_cb)</td></tr>
 <tr class="memdesc:gae296015ee73ae119ae763bdae9839a60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try obtaining a reply to a command.  <a href="#gae296015ee73ae119ae763bdae9839a60">More...</a><br /></td></tr>
 <tr class="separator:gae296015ee73ae119ae763bdae9839a60"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad09542c947defced59a0fe9be0875d06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gad09542c947defced59a0fe9be0875d06">mw_sleep</a> (uint16_t frames)</td></tr>
-<tr class="memdesc:gad09542c947defced59a0fe9be0875d06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sleep the specified amount of frames.  <a href="#gad09542c947defced59a0fe9be0875d06">More...</a><br /></td></tr>
-<tr class="separator:gad09542c947defced59a0fe9be0875d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>MegaWiFi API implementation. </p>
+<p>API to communicate with the wifi module and the Internet. API calls are documented and most of them are self explanatory. Mostly the only weird thing about the API is UDP reuse mode. If you enable reuse mode (setting the dst_addr and/or dst_port to NULL in the <a class="el" href="group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8" title="Configures a UDP socket to send/receive data.">mw_udp_set()</a> call), received data will prepend the IP and port of the peer (using <a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a> data structure), and data to be sent also requires the IP and port to be prepended to the payload.</p>
 <dl class="section author"><dt>Author</dt><dd>Jesus Alonso (doragasu) </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>2015</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This module uses a <a class="el" href="structloop__timer.html" title="Loop timer data structure.">loop_timer</a> from the loop module.</dd></dl>
@@ -320,9 +359,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Minimum command buffer length to be able to send all available commands with minimum data payload. This length might not guarantee that commands like <a class="el" href="group__megawifi.html#ga47ffc42bfefae19e09beec5191e4d0b7" title="Configure SNTP parameters and timezone.">mw_sntp_cfg_set()</a> can be sent if payload length is big enough). </p>
+<p>Minimum command buffer length to be able to send all available commands with minimum data payload. This length might not guarantee that commands like <a class="el" href="group__megawifi.html#gab19bcf42b1b242420bf199f49bb23297" title="Configure SNTP parameters and timezone.">mw_sntp_cfg_set()</a> can be sent if payload length is big enough). </p>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00076">76</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00084">84</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -357,7 +396,33 @@ Functions</h2></td></tr>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00037">37</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00045">45</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+
+</div>
+</div>
+<a id="gaa395ab95fb1639b3faea74217972dda9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa395ab95fb1639b3faea74217972dda9">&#9670;&nbsp;</a></span>mw_if_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#gaa395ab95fb1639b3faea74217972dda9">mw_if_type</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interface type for the <a class="el" href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6" title="Gets the module BSSID (the MAC address) for the specified interface.">mw_bssid_get()</a> function. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa395ab95fb1639b3faea74217972dda9a913ca58caf0372816e9499fa366f1ebb"></a>MW_IF_STATION&#160;</td><td class="fielddoc"><p>Station interface. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaa395ab95fb1639b3faea74217972dda9a470d80a295112912059427d64d44cd52"></a>MW_IF_SOFTAP&#160;</td><td class="fielddoc"><p>Access Point interface. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaa395ab95fb1639b3faea74217972dda9aaa8cca31aca4bd31a8895e09104b8845"></a>MW_IF_MAX&#160;</td><td class="fielddoc"><p>Number of supported interface types. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00096">96</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -620,6 +685,61 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gabcab943ad7996de14e41a669a369d2b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabcab943ad7996de14e41a669a369d2b6">&#9670;&nbsp;</a></span>mw_bssid_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* mw_bssid_get </td>
+          <td>(</td>
+          <td class="paramtype">enum <a class="el" href="group__megawifi.html#gaa395ab95fb1639b3faea74217972dda9">mw_if_type</a>&#160;</td>
+          <td class="paramname"><em>interface_type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the module BSSID (the MAC address) for the specified interface. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">interface_type</td><td>Type of the interface to obtain BSSID from.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The requested BSSID (6 byte binary data), or NULL on error. </dd></dl>
+
+</div>
+</div>
+<a id="ga2deb2a29f38acd84f8db310d12657f44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2deb2a29f38acd84f8db310d12657f44">&#9670;&nbsp;</a></span>mw_close()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_close </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>ch</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Closes and disconnects a socket from specified channel. </p>
+<p>This function can be used to free the channel associated to both TCP and UDP sockets.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">ch</td><td>Channel associated to the socket to disconnect.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+
+</div>
+</div>
 <a id="ga3b2916f947783fb3e1d4bdbcdaa137b2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga3b2916f947783fb3e1d4bdbcdaa137b2">&#9670;&nbsp;</a></span>mw_cmd_data_cb_set()</h2>
 
@@ -698,7 +818,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the reception procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00532">532</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00664">664</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -753,7 +873,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the send procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00515">515</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00647">647</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1034,6 +1154,71 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ga635b2e45820d9872badae382a7730153"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga635b2e45820d9872badae382a7730153">&#9670;&nbsp;</a></span>mw_gamertag_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structmw__gamertag.html">mw_gamertag</a>* mw_gamertag_get </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>slot</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get gamertag information for one slot. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">slot</td><td>Slot to get gamertag from.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Gamertag information on success, NULL on error. </dd></dl>
+
+</div>
+</div>
+<a id="ga9ab26dbe9fc804915a4f8b5db4e194ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9ab26dbe9fc804915a4f8b5db4e194ed">&#9670;&nbsp;</a></span>mw_gamertag_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_gamertag_set </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>slot</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const struct <a class="el" href="structmw__gamertag.html">mw_gamertag</a> *&#160;</td>
+          <td class="paramname"><em>gamertag</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set gamertag information for one slot. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">slot</td><td>Slot to use (from 0 to 2). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamertag</td><td>Gamertag information to set on specified slot.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+
+</div>
+</div>
 <a id="ga50526e0ea48208cd7ce658408e6777ab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga50526e0ea48208cd7ce658408e6777ab">&#9670;&nbsp;</a></span>mw_init()</h2>
 
@@ -1176,6 +1361,33 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gabfff7a4ee92a0938b5462dbc0b2542fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabfff7a4ee92a0938b5462dbc0b2542fd">&#9670;&nbsp;</a></span>mw_log()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_log </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Write a message to the WiFi module log trace. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>Message to write to the log trace.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+
+</div>
+</div>
 <a id="ga6ddfe7a25cc8615e4f8de5fe00f7c3f8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga6ddfe7a25cc8615e4f8de5fe00f7c3f8">&#9670;&nbsp;</a></span>mw_process()</h2>
 
@@ -1204,7 +1416,7 @@ Functions</h2></td></tr>
 <p>Call this function as much as possible to process incoming/outgoing data.</p>
 <dl class="section warning"><dt>Warning</dt><dd>No data will be sent/received if this function is not frequently invoked. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00106">106</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00121">121</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1266,7 +1478,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00346">346</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00394">394</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1390,7 +1602,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>Calling this function while there is a send procedure in progress, will cause the function call to fail with LSD_STAT_SEND_ERR_IN_PROGRESS. </dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>For very short data frames, it is possible that the send callback is run before this function returns. In this case, the function returns LSD_STAT_COMPLETE. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00371">371</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00454">454</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1473,8 +1685,60 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga47ffc42bfefae19e09beec5191e4d0b7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga47ffc42bfefae19e09beec5191e4d0b7">&#9670;&nbsp;</a></span>mw_sntp_cfg_set()</h2>
+<a id="ga87d5eebef47cb7a440d50f24cfd6d94f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga87d5eebef47cb7a440d50f24cfd6d94f">&#9670;&nbsp;</a></span>mw_sntp_cfg_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_sntp_cfg_get </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>server</em>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t *&#160;</td>
+          <td class="paramname"><em>up_delay</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t *&#160;</td>
+          <td class="paramname"><em>timezone</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get SNTP parameters and timezone configuration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">server</td><td>Array of three NTP server pointers. If less than 3 servers are configured, unused ones will be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">up_delay</td><td>Update delay in seconds. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">timezone</td><td>Time zone information (from -11 to 13). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>Daylight saving. When 1, 1 hour offset is applied.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+
+</div>
+</div>
+<a id="gab19bcf42b1b242420bf199f49bb23297"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab19bcf42b1b242420bf199f49bb23297">&#9670;&nbsp;</a></span>mw_sntp_cfg_set()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1483,12 +1747,12 @@ Functions</h2></td></tr>
           <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_sntp_cfg_set </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>servers</em>[3], </td>
+          <td class="paramname"><em>server</em>[3], </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramtype">uint16_t&#160;</td>
           <td class="paramname"><em>up_delay</em>, </td>
         </tr>
         <tr>
@@ -1514,7 +1778,7 @@ Functions</h2></td></tr>
 <p>Configure SNTP parameters and timezone. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">servers</td><td>Array of up to three NTP servers. If less than three servers are desired, unused entries must be empty. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">server</td><td>Array of up to three NTP servers. If less than three servers are desired, unused entries must be empty. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">up_delay</td><td>Update delay in seconds. Minimum value is 15. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">timezone</td><td>Time zone information (from -11 to 13). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dst</td><td>Daylight saving. Set to 1 to apply 1 hour offset.</td></tr>
@@ -1701,30 +1965,187 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga30dc61ce2008d71661e93b0971b91c38"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga30dc61ce2008d71661e93b0971b91c38">&#9670;&nbsp;</a></span>mw_tcp_disconnect()</h2>
+<a id="ga3c07f0a16ac25b5dc8711b63027fb7b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3c07f0a16ac25b5dc8711b63027fb7b0">&#9670;&nbsp;</a></span>mw_udp_reuse_recv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static enum lsd_status mw_udp_reuse_recv </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a> *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">lsd_recv_cb&#160;</td>
+          <td class="paramname"><em>recv_cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Receive data using an UDP socket in reuse mode. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>Receive buffer including the remote address and the data payload. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">len</td><td>Length of the receive buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>Context pointer to pass to the reception callbak. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">recv_cb</td><td>Callback to run when reception is complete or errors.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00411">411</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+
+</div>
+</div>
+<a id="ga670038f755210f5e80cbf76493a2add6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga670038f755210f5e80cbf76493a2add6">&#9670;&nbsp;</a></span>mw_udp_reuse_send()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static enum lsd_status mw_udp_reuse_send </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>ch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const struct <a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a> *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">lsd_send_cb&#160;</td>
+          <td class="paramname"><em>send_cb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send data using a UDP socket in reuse mode. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">ch</td><td>Channel to use for the send operation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>Send buffer including the remote address and the data payload. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">len</td><td>Length of the receive buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>Context pointer to pass to the reception callbak. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">send_cb</td><td>Callback to run when sending completes or errors.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00429">429</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+
+</div>
+</div>
+<a id="gaabaf8bfcd3efbb4ea4acec7889825cf8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaabaf8bfcd3efbb4ea4acec7889825cf8">&#9670;&nbsp;</a></span>mw_udp_set()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_tcp_disconnect </td>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_udp_set </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>ch</em></td><td>)</td>
+          <td class="paramname"><em>ch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>dst_addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>dst_port</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>src_port</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Disconnects a TCP socket from specified channel. </p>
+<p>Configures a UDP socket to send/receive data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ch</td><td>Channel associated to the socket to disconnect.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ch</td><td>Channel used for the connection. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dst_addr</td><td>Address (IP or DNS entry) to send data to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dst_port</td><td>Port to send data to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src_port</td><td>Local port to listen message on.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code if connection failed.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Setting to NULL dst_addr and/or dst_port, enables reuse mode. </dd></dl>
 
 </div>
 </div>

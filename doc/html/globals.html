@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">0.3</span>
+   &#160;<span id="projectnumber">0.4</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -258,6 +258,12 @@ $(document).ready(function(){initNavTree('globals.html','');});
 <li>MW_ASSOC_TOUT_MS
 : <a class="el" href="group__megawifi.html#ga431b9876483f11e3e9d927387d469e4b">megawifi.h</a>
 </li>
+<li>mw_bssid_get()
+: <a class="el" href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6">megawifi.h</a>
+</li>
+<li>mw_close()
+: <a class="el" href="group__megawifi.html#ga2deb2a29f38acd84f8db310d12657f44">megawifi.h</a>
+</li>
 <li>mw_cmd
 : <a class="el" href="group__mw-msg.html#gaf531833df0e261a264414ce80bfa5a79">mw-msg.h</a>
 </li>
@@ -275,6 +281,12 @@ $(document).ready(function(){initNavTree('globals.html','');});
 </li>
 <li>MW_CMD_AP_SCAN
 : <a class="el" href="mw-msg_8h.html#ab6130ad7cda3145f862230579eb46f67">mw-msg.h</a>
+</li>
+<li>MW_CMD_BSSID_GET
+: <a class="el" href="mw-msg_8h.html#a5cd65d838f951ce0a9bd73d6cbe6c749">mw-msg.h</a>
+</li>
+<li>MW_CMD_CLOSE
+: <a class="el" href="mw-msg_8h.html#aac3f2170f3e5f6b3f3418de24d8ba08c">mw-msg.h</a>
 </li>
 <li>mw_cmd_data_cb_set()
 : <a class="el" href="group__megawifi.html#ga3b2916f947783fb3e1d4bdbcdaa137b2">megawifi.h</a>
@@ -309,6 +321,12 @@ $(document).ready(function(){initNavTree('globals.html','');});
 <li>MW_CMD_FLASH_WRITE
 : <a class="el" href="mw-msg_8h.html#aac6b40840d63aef7b953259bed5327a5">mw-msg.h</a>
 </li>
+<li>MW_CMD_GAMERTAG_GET
+: <a class="el" href="mw-msg_8h.html#a4b30ca71406f7a2d1db51263afb9d2e5">mw-msg.h</a>
+</li>
+<li>MW_CMD_GAMERTAG_SET
+: <a class="el" href="mw-msg_8h.html#a0f00e9117f5ced2e6a4d9d1c90fa35bd">mw-msg.h</a>
+</li>
 <li>MW_CMD_HEADLEN
 : <a class="el" href="group__mw-msg.html#ga35ce401b2efd93171bd2a60dc1bee9bb">mw-msg.h</a>
 </li>
@@ -323,6 +341,9 @@ $(document).ready(function(){initNavTree('globals.html','');});
 </li>
 <li>MW_CMD_IP_CURRENT
 : <a class="el" href="mw-msg_8h.html#ae74a9f3918efbfc59aa46459aa0f93fe">mw-msg.h</a>
+</li>
+<li>MW_CMD_LOG
+: <a class="el" href="mw-msg_8h.html#a544dbd8bb346447da4779f3b530fea68">mw-msg.h</a>
 </li>
 <li>MW_CMD_MAX_BUFLEN
 : <a class="el" href="group__mw-msg.html#ga04d849bdc5bc400fc1b5c9543601a804">mw-msg.h</a>
@@ -339,9 +360,6 @@ $(document).ready(function(){initNavTree('globals.html','');});
 <li>mw_cmd_recv()
 : <a class="el" href="group__megawifi.html#gae296015ee73ae119ae763bdae9839a60">megawifi.h</a>
 </li>
-<li>MW_CMD_RESERVED
-: <a class="el" href="mw-msg_8h.html#a0f7a919d24533ecad566e49635254a42">mw-msg.h</a>
-</li>
 <li>mw_cmd_send()
 : <a class="el" href="group__megawifi.html#ga79e05a128d08dce3df5f444a3b9af88b">megawifi.h</a>
 </li>
@@ -357,20 +375,11 @@ $(document).ready(function(){initNavTree('globals.html','');});
 <li>MW_CMD_SYS_STAT
 : <a class="el" href="mw-msg_8h.html#ab7f1c61a05a7017ddc43439f4e02c8ce">mw-msg.h</a>
 </li>
-<li>MW_CMD_TCP_ACCEPT
-: <a class="el" href="mw-msg_8h.html#a3c8f358cc67ea347d13f29145b2c6fa2">mw-msg.h</a>
-</li>
 <li>MW_CMD_TCP_BIND
 : <a class="el" href="mw-msg_8h.html#a7e2977d9598eca04448f1d9764f29ecc">mw-msg.h</a>
 </li>
 <li>MW_CMD_TCP_CON
 : <a class="el" href="mw-msg_8h.html#a852fbe7f24714efb967afdeab8681382">mw-msg.h</a>
-</li>
-<li>MW_CMD_TCP_DISC
-: <a class="el" href="mw-msg_8h.html#af426ad71a42fd0c992036937b6754744">mw-msg.h</a>
-</li>
-<li>MW_CMD_UDP_CLR
-: <a class="el" href="mw-msg_8h.html#ab24ee79b0c10061eeb8cdee618a7a467">mw-msg.h</a>
 </li>
 <li>MW_CMD_UDP_SET
 : <a class="el" href="mw-msg_8h.html#a66a84fa6cc3b6a6192c0305b1b5857aa">mw-msg.h</a>
@@ -441,6 +450,39 @@ $(document).ready(function(){initNavTree('globals.html','');});
 <li>MW_FSM_QUEUE_LEN
 : <a class="el" href="group__megawifi.html#gae8a2035ff52d7a70f3c1ba60c6f83f11">megawifi.h</a>
 </li>
+<li>mw_gamertag_get()
+: <a class="el" href="group__megawifi.html#ga635b2e45820d9872badae382a7730153">megawifi.h</a>
+</li>
+<li>mw_gamertag_set()
+: <a class="el" href="group__megawifi.html#ga9ab26dbe9fc804915a4f8b5db4e194ed">megawifi.h</a>
+</li>
+<li>MW_GT_AVATAR_HEIGHT
+: <a class="el" href="group__mw-msg.html#ga2b8cfdfcb00a122ee8b6f55a3640151e">mw-msg.h</a>
+</li>
+<li>MW_GT_AVATAR_WIDTH
+: <a class="el" href="group__mw-msg.html#ga71ebcdbe2287f654e0321fd866c906aa">mw-msg.h</a>
+</li>
+<li>MW_GT_NICKNAME_MAX
+: <a class="el" href="group__mw-msg.html#gaa4692f86d0549c9526d7c1751b468c4b">mw-msg.h</a>
+</li>
+<li>MW_GT_SECURITY_MAX
+: <a class="el" href="group__mw-msg.html#ga6062902c950950c930337a5ca802fd52">mw-msg.h</a>
+</li>
+<li>MW_GT_TAGLINE_MAX
+: <a class="el" href="group__mw-msg.html#ga50277ef01588c04bd12a6a97e5a5fa44">mw-msg.h</a>
+</li>
+<li>MW_IF_MAX
+: <a class="el" href="group__megawifi.html#ggaa395ab95fb1639b3faea74217972dda9aaa8cca31aca4bd31a8895e09104b8845">megawifi.h</a>
+</li>
+<li>MW_IF_SOFTAP
+: <a class="el" href="group__megawifi.html#ggaa395ab95fb1639b3faea74217972dda9a470d80a295112912059427d64d44cd52">megawifi.h</a>
+</li>
+<li>MW_IF_STATION
+: <a class="el" href="group__megawifi.html#ggaa395ab95fb1639b3faea74217972dda9a913ca58caf0372816e9499fa366f1ebb">megawifi.h</a>
+</li>
+<li>mw_if_type
+: <a class="el" href="group__megawifi.html#gaa395ab95fb1639b3faea74217972dda9">megawifi.h</a>
+</li>
 <li>mw_init()
 : <a class="el" href="group__megawifi.html#ga50526e0ea48208cd7ce658408e6777ab">megawifi.h</a>
 </li>
@@ -452,6 +494,9 @@ $(document).ready(function(){initNavTree('globals.html','');});
 </li>
 <li>mw_ip_current()
 : <a class="el" href="group__megawifi.html#gaa9d6fc1f8168ba5519e1186067e8199e">megawifi.h</a>
+</li>
+<li>mw_log()
+: <a class="el" href="group__megawifi.html#gabfff7a4ee92a0938b5462dbc0b2542fd">megawifi.h</a>
 </li>
 <li>MW_MAX_SOCK
 : <a class="el" href="group__megawifi.html#gac7ca6eec24d3f2195108dfd3eb607db4">megawifi.h</a>
@@ -517,8 +562,11 @@ $(document).ready(function(){initNavTree('globals.html','');});
 <li>mw_sleep()
 : <a class="el" href="group__megawifi.html#gad09542c947defced59a0fe9be0875d06">megawifi.h</a>
 </li>
+<li>mw_sntp_cfg_get()
+: <a class="el" href="group__megawifi.html#ga87d5eebef47cb7a440d50f24cfd6d94f">megawifi.h</a>
+</li>
 <li>mw_sntp_cfg_set()
-: <a class="el" href="group__megawifi.html#ga47ffc42bfefae19e09beec5191e4d0b7">megawifi.h</a>
+: <a class="el" href="group__megawifi.html#gab19bcf42b1b242420bf199f49bb23297">megawifi.h</a>
 </li>
 <li>mw_sock_conn_wait()
 : <a class="el" href="group__megawifi.html#ga0f4fd1409dc625d7506960f09ddccef5">megawifi.h</a>
@@ -581,8 +629,20 @@ $(document).ready(function(){initNavTree('globals.html','');});
 <li>mw_tcp_connect()
 : <a class="el" href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">megawifi.h</a>
 </li>
-<li>mw_tcp_disconnect()
-: <a class="el" href="group__megawifi.html#ga30dc61ce2008d71661e93b0971b91c38">megawifi.h</a>
+<li>mw_tcp_disconnect
+: <a class="el" href="group__megawifi.html#ga1fba45bbaeb37503895f2261ea23a954">megawifi.h</a>
+</li>
+<li>mw_udp_reuse_recv()
+: <a class="el" href="group__megawifi.html#ga3c07f0a16ac25b5dc8711b63027fb7b0">megawifi.h</a>
+</li>
+<li>mw_udp_reuse_send()
+: <a class="el" href="group__megawifi.html#ga670038f755210f5e80cbf76493a2add6">megawifi.h</a>
+</li>
+<li>mw_udp_set()
+: <a class="el" href="group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8">megawifi.h</a>
+</li>
+<li>mw_udp_unset
+: <a class="el" href="group__megawifi.html#gae8e653c57b71e824611d623dfe05ce6a">megawifi.h</a>
 </li>
 <li>mw_version_get()
 : <a class="el" href="group__megawifi.html#ga817e2088be79653bf665db41849ca668">megawifi.h</a>
@@ -633,6 +693,9 @@ $(document).ready(function(){initNavTree('globals.html','');});
 </li>
 <li>uint32_to_ip_str()
 : <a class="el" href="group__util.html#gaa604833843bd10f3fedd956bc324a341">util.h</a>
+</li>
+<li>uint8_to_hex_str()
+: <a class="el" href="group__util.html#gafb94df8994a87fe786b0f62db37f8a15">util.h</a>
 </li>
 <li>uint8_to_str()
 : <a class="el" href="group__util.html#gaa541fa75f7d12a2e2f98530a11d064eb">util.h</a>

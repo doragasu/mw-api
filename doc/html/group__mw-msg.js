@@ -6,7 +6,7 @@ var group__mw_msg =
     ] ],
     [ "mw_msg_in_addr", "structmw__msg__in__addr.html", [
       [ "channel", "structmw__msg__in__addr.html#a51afb8de7e6c175d2bbf5d3bd6976831", null ],
-      [ "dst_addr", "structmw__msg__in__addr.html#a53970ba57cc1151b1f983af84c45702e", null ],
+      [ "dst_addr", "structmw__msg__in__addr.html#ac6d41152c7854987829b78684fba92d5", null ],
       [ "dst_port", "structmw__msg__in__addr.html#aa1b1842eb30a9c6db9575a0e4c585332", null ],
       [ "src_port", "structmw__msg__in__addr.html#aaf5ef94425df84a677b01af97f44d2be", null ]
     ] ],
@@ -50,6 +50,19 @@ var group__mw_msg =
       [ "port", "structmw__msg__bind.html#a5de544e6d7d3e6c4caad1cbcbccd42c5", null ],
       [ "reserved", "structmw__msg__bind.html#a2b0e8ea92ae07d8187feda5206ed70b2", null ]
     ] ],
+    [ "mw_gamertag", "structmw__gamertag.html", [
+      [ "avatar_pal", "structmw__gamertag.html#a1a9217a4a3b3b122a31a0e43020561e0", null ],
+      [ "avatar_tiles", "structmw__gamertag.html#afc74b8dd7f4225e5dca76268ca58abd7", null ],
+      [ "id", "structmw__gamertag.html#a4d1622737aa1ef49b5cda6c93e3d1036", null ],
+      [ "nickname", "structmw__gamertag.html#ad126e84a77ac1dc74d03b94d1c3f402c", null ],
+      [ "security", "structmw__gamertag.html#ab0931be9019b21951e3fe40f86d52243", null ],
+      [ "tagline", "structmw__gamertag.html#aef2019230d62535a3035a02853790e0d", null ]
+    ] ],
+    [ "mw_gamertag_set_msg", "structmw__gamertag__set__msg.html", [
+      [ "gamertag", "structmw__gamertag__set__msg.html#ac7f7af55e1ee4f6e53516adf6ae3b851", null ],
+      [ "reserved", "structmw__gamertag__set__msg.html#a0f5edfecb4204864737059685cb4606d", null ],
+      [ "slot", "structmw__gamertag__set__msg.html#a1327b2437999c57355cb77db39d4d23a", null ]
+    ] ],
     [ "mw_msg_sys_stat", "unionmw__msg__sys__stat.html", [
       [ "cfg", "unionmw__msg__sys__stat.html#a7e138cc6e2fe2215a86b4bd3d8ca310e", null ],
       [ "cfg_ok", "unionmw__msg__sys__stat.html#aa7bc9b904c23cb360757941dcb51f77b", null ],
@@ -73,6 +86,8 @@ var group__mw_msg =
       [ "fl_id", "unionmw__cmd.html#a75ccad3ec15bd175df4cde2a337123f8", null ],
       [ "fl_range", "unionmw__cmd.html#a300794113e173bf99123a278d663333f", null ],
       [ "fl_sect", "unionmw__cmd.html#a67da39070ac1a93fe2d3773b29faa811", null ],
+      [ "gamertag_get", "unionmw__cmd.html#a7f8212d6672fa2f06bb0ad2c75385de6", null ],
+      [ "gamertag_set", "unionmw__cmd.html#a3812cb8a373035752cf5ba8a55430b87", null ],
       [ "in_addr", "unionmw__cmd.html#a70fa039a39a56cc8f2e8e289271d1b85", null ],
       [ "ip_cfg", "unionmw__cmd.html#abf2f849014b65af32e8707b940109fd1", null ],
       [ "packet", "unionmw__cmd.html#aa0fea1735fa775c1e7582c348a4d9e8a", null ],
@@ -80,8 +95,18 @@ var group__mw_msg =
       [ "sntp_cfg", "unionmw__cmd.html#a4b0e09a0b487849f7f25837782119fba", null ],
       [ "sys_stat", "unionmw__cmd.html#ade0cbf72eabd15805525d02d2089723d", null ]
     ] ],
+    [ "mw_reuse_payload", "structmw__reuse__payload.html", [
+      [ "payload", "structmw__reuse__payload.html#aef43bd437c6d227657201d69d18371ef", null ],
+      [ "remote_ip", "structmw__reuse__payload.html#a2f0cf596cc850b4ba7f9282e1a9ce8d8", null ],
+      [ "remote_port", "structmw__reuse__payload.html#a35426cfde08ca82c18f8b402d1dc7dd1", null ]
+    ] ],
     [ "MW_CMD_HEADLEN", "group__mw-msg.html#ga35ce401b2efd93171bd2a60dc1bee9bb", null ],
     [ "MW_CMD_MAX_BUFLEN", "group__mw-msg.html#ga04d849bdc5bc400fc1b5c9543601a804", null ],
+    [ "MW_GT_AVATAR_HEIGHT", "group__mw-msg.html#ga2b8cfdfcb00a122ee8b6f55a3640151e", null ],
+    [ "MW_GT_AVATAR_WIDTH", "group__mw-msg.html#ga71ebcdbe2287f654e0321fd866c906aa", null ],
+    [ "MW_GT_NICKNAME_MAX", "group__mw-msg.html#gaa4692f86d0549c9526d7c1751b468c4b", null ],
+    [ "MW_GT_SECURITY_MAX", "group__mw-msg.html#ga6062902c950950c930337a5ca802fd52", null ],
+    [ "MW_GT_TAGLINE_MAX", "group__mw-msg.html#ga50277ef01588c04bd12a6a97e5a5fa44", null ],
     [ "MW_MSG_MAX_BUFLEN", "group__mw-msg.html#gae5a8a74375e598d58f1e6d179b417188", null ],
     [ "MW_PASS_MAXLEN", "group__mw-msg.html#ga4624ada68840b53714507bf5037dbd4a", null ],
     [ "MW_SSID_MAXLEN", "group__mw-msg.html#ga76228c565db63e86246b9c3ae65ee8a8", null ],

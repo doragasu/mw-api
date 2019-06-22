@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">0.3</span>
+   &#160;<span id="projectnumber">0.4</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -137,11 +137,19 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__msg__bind.html">mw_msg_bind</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bind message data.  <a href="structmw__msg__bind.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__gamertag.html">mw_gamertag</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag data.  <a href="structmw__gamertag.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__gamertag__set__msg.html">mw_gamertag_set_msg</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag set message data.  <a href="structmw__gamertag__set__msg.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionmw__msg__sys__stat.html">mw_msg_sys_stat</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">System status.  <a href="unionmw__msg__sys__stat.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionmw__cmd.html">mw_cmd</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command sent to system FSM.  <a href="unionmw__cmd.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
@@ -166,6 +174,26 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga4624ada68840b53714507bf5037dbd4a">MW_PASS_MAXLEN</a>&#160;&#160;&#160;64</td></tr>
 <tr class="memdesc:ga4624ada68840b53714507bf5037dbd4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum password length (including '\0'). <br /></td></tr>
 <tr class="separator:ga4624ada68840b53714507bf5037dbd4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa4692f86d0549c9526d7c1751b468c4b"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#gaa4692f86d0549c9526d7c1751b468c4b">MW_GT_NICKNAME_MAX</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:gaa4692f86d0549c9526d7c1751b468c4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag nickname maximum length. <br /></td></tr>
+<tr class="separator:gaa4692f86d0549c9526d7c1751b468c4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6062902c950950c930337a5ca802fd52"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga6062902c950950c930337a5ca802fd52">MW_GT_SECURITY_MAX</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:ga6062902c950950c930337a5ca802fd52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag security maximum length. <br /></td></tr>
+<tr class="separator:ga6062902c950950c930337a5ca802fd52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga50277ef01588c04bd12a6a97e5a5fa44"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga50277ef01588c04bd12a6a97e5a5fa44">MW_GT_TAGLINE_MAX</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:ga50277ef01588c04bd12a6a97e5a5fa44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag tagline maximum length. <br /></td></tr>
+<tr class="separator:ga50277ef01588c04bd12a6a97e5a5fa44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71ebcdbe2287f654e0321fd866c906aa"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga71ebcdbe2287f654e0321fd866c906aa">MW_GT_AVATAR_WIDTH</a>&#160;&#160;&#160;32</td></tr>
+<tr class="memdesc:ga71ebcdbe2287f654e0321fd866c906aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag avatar graphick width in pixels. <br /></td></tr>
+<tr class="separator:ga71ebcdbe2287f654e0321fd866c906aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2b8cfdfcb00a122ee8b6f55a3640151e"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#ga2b8cfdfcb00a122ee8b6f55a3640151e">MW_GT_AVATAR_HEIGHT</a>&#160;&#160;&#160;48</td></tr>
+<tr class="memdesc:ga2b8cfdfcb00a122ee8b6f55a3640151e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamertag avatar graphick height in pixels. <br /></td></tr>
+<tr class="separator:ga2b8cfdfcb00a122ee8b6f55a3640151e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -231,10 +259,6 @@ enum <a class="el" href="group__util.html#ga36d525cf4d116b2fe4ecc00222b256f1">PA
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#ae74a9f3918efbfc59aa46459aa0f93fe">MW_CMD_IP_CURRENT</a> = 6</td></tr>
 <tr class="memdesc:ae74a9f3918efbfc59aa46459aa0f93fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current IPv4 configuration. <br /></td></tr>
 <tr class="separator:ae74a9f3918efbfc59aa46459aa0f93fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f7a919d24533ecad566e49635254a42"><td class="memItemLeft" align="right" valign="top"><a id="a0f7a919d24533ecad566e49635254a42"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a0f7a919d24533ecad566e49635254a42">MW_CMD_RESERVED</a> = 7</td></tr>
-<tr class="memdesc:a0f7a919d24533ecad566e49635254a42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved for future use. <br /></td></tr>
-<tr class="separator:a0f7a919d24533ecad566e49635254a42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26836cd2594f9ee724a7b1b0a6fbafc7"><td class="memItemLeft" align="right" valign="top"><a id="a26836cd2594f9ee724a7b1b0a6fbafc7"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a26836cd2594f9ee724a7b1b0a6fbafc7">MW_CMD_IP_CFG</a> = 8</td></tr>
 <tr class="memdesc:a26836cd2594f9ee724a7b1b0a6fbafc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure IPv4. <br /></td></tr>
@@ -267,22 +291,14 @@ enum <a class="el" href="group__util.html#ga36d525cf4d116b2fe4ecc00222b256f1">PA
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a7e2977d9598eca04448f1d9764f29ecc">MW_CMD_TCP_BIND</a> = 15</td></tr>
 <tr class="memdesc:a7e2977d9598eca04448f1d9764f29ecc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bind TCP socket to port. <br /></td></tr>
 <tr class="separator:a7e2977d9598eca04448f1d9764f29ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c8f358cc67ea347d13f29145b2c6fa2"><td class="memItemLeft" align="right" valign="top"><a id="a3c8f358cc67ea347d13f29145b2c6fa2"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a3c8f358cc67ea347d13f29145b2c6fa2">MW_CMD_TCP_ACCEPT</a> = 16</td></tr>
-<tr class="memdesc:a3c8f358cc67ea347d13f29145b2c6fa2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accept incomint TCP connection. <br /></td></tr>
-<tr class="separator:a3c8f358cc67ea347d13f29145b2c6fa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af426ad71a42fd0c992036937b6754744"><td class="memItemLeft" align="right" valign="top"><a id="af426ad71a42fd0c992036937b6754744"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#af426ad71a42fd0c992036937b6754744">MW_CMD_TCP_DISC</a> = 17</td></tr>
-<tr class="memdesc:af426ad71a42fd0c992036937b6754744"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disconnect and free TCP socket. <br /></td></tr>
-<tr class="separator:af426ad71a42fd0c992036937b6754744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac3f2170f3e5f6b3f3418de24d8ba08c"><td class="memItemLeft" align="right" valign="top"><a id="aac3f2170f3e5f6b3f3418de24d8ba08c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#aac3f2170f3e5f6b3f3418de24d8ba08c">MW_CMD_CLOSE</a> = 17</td></tr>
+<tr class="memdesc:aac3f2170f3e5f6b3f3418de24d8ba08c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disconnect and free TCP/UDP socket. <br /></td></tr>
+<tr class="separator:aac3f2170f3e5f6b3f3418de24d8ba08c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66a84fa6cc3b6a6192c0305b1b5857aa"><td class="memItemLeft" align="right" valign="top"><a id="a66a84fa6cc3b6a6192c0305b1b5857aa"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a66a84fa6cc3b6a6192c0305b1b5857aa">MW_CMD_UDP_SET</a> = 18</td></tr>
 <tr class="memdesc:a66a84fa6cc3b6a6192c0305b1b5857aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure UDP socket. <br /></td></tr>
 <tr class="separator:a66a84fa6cc3b6a6192c0305b1b5857aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab24ee79b0c10061eeb8cdee618a7a467"><td class="memItemLeft" align="right" valign="top"><a id="ab24ee79b0c10061eeb8cdee618a7a467"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#ab24ee79b0c10061eeb8cdee618a7a467">MW_CMD_UDP_CLR</a> = 19</td></tr>
-<tr class="memdesc:ab24ee79b0c10061eeb8cdee618a7a467"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear and free UDP socket. <br /></td></tr>
-<tr class="separator:ab24ee79b0c10061eeb8cdee618a7a467"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99d942598c871a9b6dcee21e2168df4e"><td class="memItemLeft" align="right" valign="top"><a id="a99d942598c871a9b6dcee21e2168df4e"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a99d942598c871a9b6dcee21e2168df4e">MW_CMD_SOCK_STAT</a> = 20</td></tr>
 <tr class="memdesc:a99d942598c871a9b6dcee21e2168df4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get socket status. <br /></td></tr>
@@ -335,6 +351,22 @@ enum <a class="el" href="group__util.html#ga36d525cf4d116b2fe4ecc00222b256f1">PA
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#af3b9f29bc9af4d13b4ad8f692ba41ed6">MW_CMD_HRNG_GET</a> = 32</td></tr>
 <tr class="memdesc:af3b9f29bc9af4d13b4ad8f692ba41ed6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets random numbers. <br /></td></tr>
 <tr class="separator:af3b9f29bc9af4d13b4ad8f692ba41ed6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cd65d838f951ce0a9bd73d6cbe6c749"><td class="memItemLeft" align="right" valign="top"><a id="a5cd65d838f951ce0a9bd73d6cbe6c749"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a5cd65d838f951ce0a9bd73d6cbe6c749">MW_CMD_BSSID_GET</a> = 33</td></tr>
+<tr class="memdesc:a5cd65d838f951ce0a9bd73d6cbe6c749"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the WiFi BSSID. <br /></td></tr>
+<tr class="separator:a5cd65d838f951ce0a9bd73d6cbe6c749"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f00e9117f5ced2e6a4d9d1c90fa35bd"><td class="memItemLeft" align="right" valign="top"><a id="a0f00e9117f5ced2e6a4d9d1c90fa35bd"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a0f00e9117f5ced2e6a4d9d1c90fa35bd">MW_CMD_GAMERTAG_SET</a> = 34</td></tr>
+<tr class="memdesc:a0f00e9117f5ced2e6a4d9d1c90fa35bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures a gamertag. <br /></td></tr>
+<tr class="separator:a0f00e9117f5ced2e6a4d9d1c90fa35bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b30ca71406f7a2d1db51263afb9d2e5"><td class="memItemLeft" align="right" valign="top"><a id="a4b30ca71406f7a2d1db51263afb9d2e5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a4b30ca71406f7a2d1db51263afb9d2e5">MW_CMD_GAMERTAG_GET</a> = 35</td></tr>
+<tr class="memdesc:a4b30ca71406f7a2d1db51263afb9d2e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a stored gamertag. <br /></td></tr>
+<tr class="separator:a4b30ca71406f7a2d1db51263afb9d2e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a544dbd8bb346447da4779f3b530fea68"><td class="memItemLeft" align="right" valign="top"><a id="a544dbd8bb346447da4779f3b530fea68"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mw-msg_8h.html#a544dbd8bb346447da4779f3b530fea68">MW_CMD_LOG</a> = 36</td></tr>
+<tr class="memdesc:a544dbd8bb346447da4779f3b530fea68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a message to log trace. <br /></td></tr>
+<tr class="separator:a544dbd8bb346447da4779f3b530fea68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf5c4180f70d50ae3a29b48ce4671d61b"><td class="memItemLeft" align="right" valign="top">
 enum <a class="el" href="group__util.html#ga36d525cf4d116b2fe4ecc00222b256f1">PACKED</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mw-msg.html#gaf5c4180f70d50ae3a29b48ce4671d61b">mw_security</a></td></tr>
 <tr class="memdesc:gaf5c4180f70d50ae3a29b48ce4671d61b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Supported security protocols. <br /></td></tr>

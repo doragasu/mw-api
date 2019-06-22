@@ -23,5 +23,6 @@ var group__util =
     [ "to_upper", "group__util.html#gac0417a833ac454efa44c61ee8bccd55d", null ],
     [ "uint32_to_hex_str", "group__util.html#gadc2fe63f7c4fde6fd40fdcbd34019d8b", null ],
     [ "uint32_to_ip_str", "group__util.html#gaa604833843bd10f3fedd956bc324a341", null ],
+    [ "uint8_to_hex_str", "group__util.html#gafb94df8994a87fe786b0f62db37f8a15", null ],
     [ "uint8_to_str", "group__util.html#gaa541fa75f7d12a2e2f98530a11d064eb", null ]
 ];

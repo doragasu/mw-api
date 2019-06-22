@@ -1032,7 +1032,7 @@ uint8_t *mw_bssid_get(enum mw_if_type interface_type)
 	return d.cmd->data;
 }
 
-enum mw_err mw_gamertag_set(uint8_t slot, struct mw_gamertag *gamertag)
+enum mw_err mw_gamertag_set(uint8_t slot, const struct mw_gamertag *gamertag)
 {
 	enum mw_err err;
 

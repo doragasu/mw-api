@@ -1,6 +1,5 @@
 var group__loop =
 [
-    [ "loop_runnable", "structloop__runnable.html", null ],
     [ "loop_func", "structloop__func.html", [
       [ "blocked", "structloop__func.html#afb76760ec62e4855a9ac68d194f1df47", null ],
       [ "disabled", "structloop__func.html#aaaa7feba5accc5f8fc011eccebaff005", null ],

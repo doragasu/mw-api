@@ -417,11 +417,12 @@ static inline enum lsd_status mw_udp_reuse_recv(struct mw_reuse_payload *data,
 /************************************************************************//**
  * \brief Send data using a UDP socket in reuse mode.
  *
+ * \param[in] ch      Channel to use for the send operation.
  * \param[in] data    Send buffer including the remote address and the
  *                    data payload.
  * \param[in] len     Length of the receive buffer.
  * \param[in] ctx     Context pointer to pass to the reception callbak.
- * \param[in] recv_cb Callback to run when reception is complete or errors.
+ * \param[in] send_cb Callback to run when sending completes or errors.
  *
  * \return Status of the receive procedure.
  ****************************************************************************/
@@ -598,6 +599,34 @@ uint8_t *mw_flash_read(uint32_t addr, uint16_t data_len);
 #define mw_module_start()	do{uart_clr_bits(MCR, MW__RESET);}while(0)
 
 /************************************************************************//**
+ * \brief Set gamertag information for one slot.
+ *
+ * \param[in] slot     Slot to use (from 0 to 2).
+ * \param[in] gamertag Gamertag information to set on specified slot.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_gamertag_set(uint8_t slot, const struct mw_gamertag *gamertag);
+
+/************************************************************************//**
+ * \brief Get gamertag information for one slot.
+ *
+ * \param[in] slot Slot to get gamertag from.
+ *
+ * \return Gamertag information on success, NULL on error.
+ ****************************************************************************/
+struct mw_gamertag *mw_gamertag_get(uint8_t slot);
+
+/************************************************************************//**
+ * \brief Write a message to the WiFi module log trace.
+ *
+ * \param[in] msg Message to write to the log trace.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_log(const char *msg);
+
+/************************************************************************//**
  * \brief Sleep the specified amount of frames
  *
  * \param[in] frames Number of frames to sleep.
@@ -636,12 +665,6 @@ static inline enum lsd_status mw_cmd_recv(mw_cmd *rep, void *ctx,
 		lsd_recv_cb recv_cb) {
 	return lsd_recv(rep->packet, sizeof(mw_cmd), ctx, recv_cb);
 }
-
-enum mw_err mw_gamertag_set(uint8_t slot, struct mw_gamertag *gamertag);
-
-struct mw_gamertag *mw_gamertag_get(uint8_t slot);
-
-enum mw_err mw_log(const char *msg);
 
 #endif /*_MEGAWIFI_H_*/
 

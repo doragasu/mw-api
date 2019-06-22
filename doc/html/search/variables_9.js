@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['online',['online',['../unionmw__msg__sys__stat.html#a443191b138ba52359617a9320b627702',1,'mw_msg_sys_stat']]]
+  ['nickname',['nickname',['../structmw__gamertag.html#ad126e84a77ac1dc74d03b94d1c3f402c',1,'mw_gamertag']]]
 ];

@@ -5,5 +5,7 @@ var searchData=
   ['array_5fcols',['ARRAY_COLS',['../group__util.html#gaa7a57d09012902371bd2bd1e11acd8eb',1,'util.h']]],
   ['array_5frows',['ARRAY_ROWS',['../group__util.html#ga99a6ec1962e1ef318bfa41303d3973f1',1,'util.h']]],
   ['auth',['auth',['../structmw__ap__data.html#ab05b0728560f1a1d095f2bb090e0d207',1,'mw_ap_data']]],
-  ['auto_5freload',['auto_reload',['../structloop__timer.html#a2d9211147e2d34d23e6af93102746189',1,'loop_timer']]]
+  ['auto_5freload',['auto_reload',['../structloop__timer.html#a2d9211147e2d34d23e6af93102746189',1,'loop_timer']]],
+  ['avatar_5fpal',['avatar_pal',['../structmw__gamertag.html#a1a9217a4a3b3b122a31a0e43020561e0',1,'mw_gamertag']]],
+  ['avatar_5ftiles',['avatar_tiles',['../structmw__gamertag.html#afc74b8dd7f4225e5dca76268ca58abd7',1,'mw_gamertag']]]
 ];

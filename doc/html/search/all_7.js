@@ -14,7 +14,6 @@ var searchData=
   ['loop_5finit',['loop_init',['../group__loop.html#ga40d4c3a2cbefafdbb454f68cdaf9129d',1,'loop.h']]],
   ['loop_5fpend',['loop_pend',['../group__loop.html#ga3fc77f30d1e96e3c6a535cb34fbc5e51',1,'loop.h']]],
   ['loop_5fpost',['loop_post',['../group__loop.html#ga68b578220b5354b83cd9ecca21c251ca',1,'loop.h']]],
-  ['loop_5frunnable',['loop_runnable',['../structloop__runnable.html',1,'']]],
   ['loop_5ftimer',['loop_timer',['../structloop__timer.html',1,'']]],
   ['loop_5ftimer_5fadd',['loop_timer_add',['../group__loop.html#ga6d6f6f4f4f9ac838b05f02517098f414',1,'loop.h']]],
   ['loop_5ftimer_5fcb',['loop_timer_cb',['../group__loop.html#gab12de3fc7408181eb2546c7a0b7809b7',1,'loop.h']]],

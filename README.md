@@ -447,11 +447,9 @@ You can receive data once a connection has been established. The easiest way is 
 
 	err = mw_recv_sync(1, data, &buf_length, 30 * fps);
 	if (MW_ERR_NONE == err) {
-		// Data sent
+		// Data received
 	} else {
-		// Timeout, data was not sent
-	} else {
-		// Data will be sent by mw_process()
+		// Failed to receive data
 	}
 ```
 
@@ -509,6 +507,57 @@ Once date and time is synchronized, you can get it, both in human readable forma
 	uint32_t date_time_bin[2];
 
 	date_time_string = mw_date_time_get(date_time_bin);
+```
+
+### Setting and getting gamertag information
+
+MegaWiFi API allows to store and retrieve up to 3 gamertags. The gamertag information is contained in the *mw_gamertag* structure. This structure holds the gamertag unique identifier, nickname, security credentials (password) and a 32x48 avatar (tile information and palette). This example shows how to set a gamertag (excepting the graphics data):
+
+```C
+void gamertag_set(int slot, int id, const char *name,
+		const char *security, const char *tagline)
+{
+	struct mw_gamertag gamertag = {};
+	struct mw_err err;
+
+	gamertag.id = id;
+	strcpy(gamertag.nickname, name);
+	strcpy(gamertag.security, security);
+	strcpy(gamertag.tagline, tagline);
+
+	err = mw_gamertag_set(slot, &gamertag);
+	if (MW_ERR_NONE == err) {
+		// Gamertag set successfully
+	} else {
+		// Setting gamertag failed
+	}
+}
+```
+
+To read the gamertag, just call `mw_gamertag_get()` function, and the information corresponding to the requested slot will be returned:
+
+```C
+	struct mw_gamertag *gamertag = mw_gamertag_get(slot);
+
+	if (!gamertag) {
+		// Something went wrong
+	} else {
+		// Success!
+	}
+```
+
+### Reading the module BSSIDs
+
+The module has two network interfaces, each one with its unique BSSID (MAC address). One interface is used for the station mode, while the other is for the AP mode. Each BSSID is 6-byte long. Currently the API does not allow using the AP mode, so to get the station mode BSSID you can do as follows:
+
+```C
+	uint8_t *bssid = mw_bssid_get(MW_IF_STATION);
+
+	if (!bssid) {
+		// Something went wrong
+	} else {
+		// Success! You can use bssid[0] through bssid[5]
+	}
 ```
 
 ### Reading and writing to non-volatile Flash

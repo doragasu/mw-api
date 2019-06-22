@@ -12,6 +12,8 @@ var unionmw__cmd =
     [ "fl_id", "unionmw__cmd.html#a75ccad3ec15bd175df4cde2a337123f8", null ],
     [ "fl_range", "unionmw__cmd.html#a300794113e173bf99123a278d663333f", null ],
     [ "fl_sect", "unionmw__cmd.html#a67da39070ac1a93fe2d3773b29faa811", null ],
+    [ "gamertag_get", "unionmw__cmd.html#a7f8212d6672fa2f06bb0ad2c75385de6", null ],
+    [ "gamertag_set", "unionmw__cmd.html#a3812cb8a373035752cf5ba8a55430b87", null ],
     [ "in_addr", "unionmw__cmd.html#a70fa039a39a56cc8f2e8e289271d1b85", null ],
     [ "ip_cfg", "unionmw__cmd.html#abf2f849014b65af32e8707b940109fd1", null ],
     [ "packet", "unionmw__cmd.html#aa0fea1735fa775c1e7582c348a4d9e8a", null ],

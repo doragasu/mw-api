@@ -2,6 +2,8 @@ var searchData=
 [
   ['mw_5fap_5fdata',['mw_ap_data',['../structmw__ap__data.html',1,'']]],
   ['mw_5fcmd',['mw_cmd',['../unionmw__cmd.html',1,'']]],
+  ['mw_5fgamertag',['mw_gamertag',['../structmw__gamertag.html',1,'']]],
+  ['mw_5fgamertag_5fset_5fmsg',['mw_gamertag_set_msg',['../structmw__gamertag__set__msg.html',1,'']]],
   ['mw_5fip_5fcfg',['mw_ip_cfg',['../structmw__ip__cfg.html',1,'']]],
   ['mw_5fmsg_5fap_5fcfg',['mw_msg_ap_cfg',['../structmw__msg__ap__cfg.html',1,'']]],
   ['mw_5fmsg_5fbind',['mw_msg_bind',['../structmw__msg__bind.html',1,'']]],
@@ -11,5 +13,6 @@ var searchData=
   ['mw_5fmsg_5fin_5faddr',['mw_msg_in_addr',['../structmw__msg__in__addr.html',1,'']]],
   ['mw_5fmsg_5fip_5fcfg',['mw_msg_ip_cfg',['../structmw__msg__ip__cfg.html',1,'']]],
   ['mw_5fmsg_5fsntp_5fcfg',['mw_msg_sntp_cfg',['../structmw__msg__sntp__cfg.html',1,'']]],
-  ['mw_5fmsg_5fsys_5fstat',['mw_msg_sys_stat',['../unionmw__msg__sys__stat.html',1,'']]]
+  ['mw_5fmsg_5fsys_5fstat',['mw_msg_sys_stat',['../unionmw__msg__sys__stat.html',1,'']]],
+  ['mw_5freuse_5fpayload',['mw_reuse_payload',['../structmw__reuse__payload.html',1,'']]]
 ];
