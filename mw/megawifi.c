@@ -595,12 +595,15 @@ static int fill_addr(const char *dst_addr, const char *dst_port,
 		const char *src_port, struct mw_msg_in_addr *in_addr)
 {
 	// Zero structure data
-	memset(in_addr->dst_port, 0, d.cmd->data_len);
+	memset(in_addr, 0, sizeof(struct mw_msg_in_addr));
 	strcpy(in_addr->dst_port, dst_port);
 	if (src_port) {
 		strcpy(in_addr->src_port, src_port);
 	}
-	strcpy(in_addr->dst_addr, dst_addr);
+	if (dst_addr && dst_port) {
+		strcpy(in_addr->dst_addr, dst_addr);
+		strcpy(in_addr->dst_port, dst_port);
+	}
 
 	// Length is the length of both ports, the channel and the address.
 	return 6 + 6 + 1 + strlen(dst_addr);
@@ -697,7 +700,7 @@ enum mw_err mw_udp_set(uint8_t ch, const char *dst_addr, const char *dst_port,
 	// Configure UDP socket
 	d.cmd->cmd = MW_CMD_UDP_SET;
 	d.cmd->data_len = fill_addr(dst_addr, dst_port, src_port,
-			&d.cmd->udp_set.addr) + 1;
+			&d.cmd->in_addr);
 	d.cmd->in_addr.channel = ch;
 	err = mw_command(MW_COMMAND_TOUT);
 	if (err) {
@@ -810,11 +813,11 @@ enum mw_sock_stat mw_sock_stat_get(uint8_t ch)
 }
 
 // TODO Check for overflows when copying server data.
-enum mw_err mw_sntp_cfg_set(const char *servers[3], uint8_t up_delay,
+enum mw_err mw_sntp_cfg_set(const char *server[3], uint16_t up_delay,
 		int8_t timezone, int8_t dst)
 {
 	enum mw_err err;
-	uint8_t offset;
+	int offset;
 
 	if (!d.mw_ready) {
 		return MW_ERR_NOT_READY;
@@ -824,21 +827,63 @@ enum mw_err mw_sntp_cfg_set(const char *servers[3], uint8_t up_delay,
 	d.cmd->sntp_cfg.up_delay = up_delay;
 	d.cmd->sntp_cfg.tz = timezone;
 	d.cmd->sntp_cfg.dst = dst;
-	strcpy(d.cmd->sntp_cfg.servers, servers[0]);
+	strcpy(d.cmd->sntp_cfg.servers, server[0]);
 	// Offset: server length + 1 ('\0')
-	offset  = strlen(servers[0]) + 1;
-	strcpy(d.cmd->sntp_cfg.servers + offset, servers[1]);
-	offset += strlen(servers[1]) + 1;
-	strcpy(d.cmd->sntp_cfg.servers + offset, servers[2]);
-	offset += strlen(servers[2]) + 1;
+	offset  = strlen(server[0]) + 1;
+	strcpy(d.cmd->sntp_cfg.servers + offset, server[1]);
+	offset += strlen(server[1]) + 1;
+	strcpy(d.cmd->sntp_cfg.servers + offset, server[2]);
+	offset += strlen(server[2]) + 1;
 	// Mark the end of the list with two adjacent '\0'
 	d.cmd->sntp_cfg.servers[offset] = '\0';
-	d.cmd->data_len = offset + 1;
+	d.cmd->data_len = offset + 1 + 4;
 	err = mw_command(MW_COMMAND_TOUT);
 	if (err) {
 		return MW_ERR;
 	}
 
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_sntp_cfg_get(char *server[3], uint16_t *up_delay,
+		int8_t *timezone, int8_t *dst)
+{
+	enum mw_err err;
+	int offset;
+	int i;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_SNTP_CFG_GET;
+	d.cmd->data_len = 0;
+
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	if (up_delay) {
+		*up_delay = d.cmd->sntp_cfg.up_delay;
+	}
+	if (timezone) {
+		*timezone = d.cmd->sntp_cfg.tz;
+	}
+	if (dst) {
+		*dst = d.cmd->sntp_cfg.dst;
+	}
+
+	server[0] = server[1] = server[2] = NULL;
+
+	for (i = 0, offset = 0; i < 3; i++) {
+		if (!d.cmd->sntp_cfg.servers[offset]) {
+			goto out;
+		}
+		server[i] = d.cmd->sntp_cfg.servers + offset;
+		offset += strlen(server[i]) + 1;
+	}
+out:
 	return MW_ERR_NONE;
 }
 

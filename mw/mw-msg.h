@@ -111,12 +111,6 @@ struct mw_msg_in_addr {
 	char dst_addr[];
 };
 
-/// Message used to configure a UDP socket
-struct mw_msg_udp_set {
-	uint8_t reuse_mode;		///< Enables reuse mode
-	struct mw_msg_in_addr addr;	///< Socket address
-};
-
 /// IP configuration parameters
 struct mw_ip_cfg {
 	union ip_addr addr;	///< Host IP address in binary format
@@ -251,7 +245,6 @@ typedef union mw_cmd {
 			/// RAW data in uint32_t format
 			uint32_t dw_data[MW_CMD_MAX_BUFLEN / sizeof(uint32_t)];
 			struct mw_msg_in_addr in_addr;		///< Internet address
-			struct mw_msg_udp_set udp_set;		///< UDP configuration
 			struct mw_msg_ap_cfg ap_cfg;		///< Access Point configuration
 			struct mw_msg_ip_cfg ip_cfg;		///< IP configuration
 			struct mw_msg_sntp_cfg sntp_cfg;	///< SNTP client configuration
