@@ -83,6 +83,7 @@ enum PACKED mw_command {
 	MW_CMD_BSSID_GET	=  33,	///< Gets the WiFi BSSID
 	MW_CMD_GAMERTAG_SET	=  34,	///< Configures a gamertag
 	MW_CMD_GAMERTAG_GET	=  35,	///< Gets a stored gamertag
+	MW_CMD_LOG		=  36,	///< Write a message to log trace
 	MW_CMD_ERROR		= 255	///< Error command reply
 };
 

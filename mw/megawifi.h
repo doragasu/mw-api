@@ -510,7 +510,7 @@ enum mw_sock_stat mw_sock_stat_get(uint8_t ch);
 /************************************************************************//**
  * \brief Configure SNTP parameters and timezone.
  *
- * \param[in] servers  Array of up to three NTP servers. If less than three
+ * \param[in] server   Array of up to three NTP servers. If less than three
  *                     servers are desired, unused entries must be empty.
  * \param[in] up_delay Update delay in seconds. Minimum value is 15.
  * \param[in] timezone Time zone information (from -11 to 13).
@@ -520,6 +520,20 @@ enum mw_sock_stat mw_sock_stat_get(uint8_t ch);
  ****************************************************************************/
 enum mw_err mw_sntp_cfg_set(const char *server[3], uint16_t up_delay,
 		int8_t timezone, int8_t dst);
+
+/************************************************************************//**
+ * \brief Get SNTP parameters and timezone configuration.
+ *
+ * \param[out] server   Array of three NTP server pointers. If less than 3
+ *                      servers are configured, unused ones will be NULL.
+ * \param[out] up_delay Update delay in seconds.
+ * \param[out] timezone Time zone information (from -11 to 13).
+ * \param[out] dst      Daylight saving. When 1, 1 hour offset is applied.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_sntp_cfg_get(char *server[3], uint16_t *up_delay,
+		int8_t *timezone, int8_t *dst);
 
 /************************************************************************//**
  * \brief Get date and time.
@@ -626,6 +640,8 @@ static inline enum lsd_status mw_cmd_recv(mw_cmd *rep, void *ctx,
 enum mw_err mw_gamertag_set(uint8_t slot, struct mw_gamertag *gamertag);
 
 struct mw_gamertag *mw_gamertag_get(uint8_t slot);
+
+enum mw_err mw_log(const char *msg);
 
 #endif /*_MEGAWIFI_H_*/
 

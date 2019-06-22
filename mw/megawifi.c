@@ -1075,6 +1075,26 @@ struct mw_gamertag *mw_gamertag_get(uint8_t slot)
 	return &d.cmd->gamertag_get;
 }
 
+enum mw_err mw_log(const char *msg)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_LOG;
+	d.cmd->data_len = strlen(msg) + 1;
+	memcpy(d.cmd->data, msg, d.cmd->data_len);
+
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
 void mw_sleep(uint16_t frames)
 {
 	loop_timer_start(&d.timer, frames);
