@@ -82,7 +82,8 @@ static struct lsd_data d = {};
 
 static void recv_error(enum lsd_status stat)
 {
-	d.rx.stat = LSD_RECV_ERROR;
+//	d.rx.stat = LSD_RECV_ERROR;
+	d.rx.stat = LSD_RECV_IDLE;
 	if (d.rx.cb) {
 		d.rx.cb(stat, 0, NULL, 0, d.rx.ctx);
 	}
@@ -163,6 +164,7 @@ static void process_recv(void)
 	default:
 		// Code should never reach here!
 		recv_error(LSD_STAT_ERROR);
+		break;
 	}
 }
 
@@ -234,6 +236,7 @@ void lsd_init(void)
 {
 	uart_init();
 	memset(&d, 0, sizeof(struct lsd_data));
+	lsd_line_sync();
 }
 
 int lsd_ch_enable(uint8_t ch)
@@ -360,6 +363,15 @@ enum lsd_status lsd_recv_sync(char *buf, uint16_t *len, uint8_t *ch)
 		return LSD_STAT_COMPLETE;
 	} else {
 		return LSD_STAT_ERROR;
+	}
+}
+
+void lsd_line_sync(void)
+{
+	for (int i = 0; i < 256; i++) {
+		if (uart_tx_ready()) {
+			uart_putc(0x55);
+		}
 	}
 }
 

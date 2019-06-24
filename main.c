@@ -26,6 +26,9 @@
 /// Command buffer
 static char cmd_buf[MW_BUFLEN];
 
+void udp_recv_cb(enum lsd_status stat, uint8_t ch,
+		char *data, uint16_t len, void *ctx);
+
 static void println(const char *str, int color)
 {
 	static unsigned int line = 2;
@@ -42,6 +45,17 @@ static void idle_cb(struct loop_func *f)
 	mw_process();
 }
 
+void udp_send_complete_cb(enum lsd_status stat, void *ctx)
+{
+	struct mw_reuse_payload *pkt =
+		(struct mw_reuse_payload * const)cmd_buf;
+	UNUSED_PARAM(ctx);
+	UNUSED_PARAM(stat);
+
+	// Trigger reception of another UDP packet
+	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
+}
+
 void udp_recv_cb(enum lsd_status stat, uint8_t ch,
 		char *data, uint16_t len, void *ctx)
 {
@@ -50,22 +64,15 @@ void udp_recv_cb(enum lsd_status stat, uint8_t ch,
 	UNUSED_PARAM(ctx);
 
 	if (LSD_STAT_COMPLETE == stat) {
-		mw_udp_reuse_send(ch, udp, len, NULL, NULL);
+		mw_udp_reuse_send(ch, udp, len, NULL, udp_send_complete_cb);
 	}
-}
-
-static void udp_echo(struct loop_timer *t)
-{
-	struct mw_reuse_payload *pkt =
-		(struct mw_reuse_payload * const)cmd_buf;
-	UNUSED_PARAM(t);
-
-	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
 }
 
 static void run_test(struct loop_timer *t)
 {
 	enum mw_err err;
+	struct mw_reuse_payload *pkt =
+		(struct mw_reuse_payload * const)cmd_buf;
 
 	// Join AP
 	println("Associating to AP", VDP_TXT_COL_WHITE);
@@ -97,13 +104,14 @@ static void run_test(struct loop_timer *t)
 
 	// Start UDP echo task
 	mw_udp_set(1, NULL, NULL, "7");
-	t->timer_cb = udp_echo;
+	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
 	goto out;
 
 err:
 	println("ERROR!", VDP_TXT_COL_MAGENTA);
 
 out:
+	loop_timer_del(t);
 	mw_ap_disassoc();
 }
 
