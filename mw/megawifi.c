@@ -596,6 +596,7 @@ static int fill_addr(const char *dst_addr, const char *dst_port,
 {
 	// Zero structure data
 	memset(in_addr, 0, sizeof(struct mw_msg_in_addr));
+	in_addr->dst_addr[0] = '\0';
 	strcpy(in_addr->dst_port, dst_port);
 	if (src_port) {
 		strcpy(in_addr->src_port, src_port);
@@ -606,7 +607,7 @@ static int fill_addr(const char *dst_addr, const char *dst_port,
 	}
 
 	// Length is the length of both ports, the channel and the address.
-	return 6 + 6 + 1 + strlen(dst_addr);
+	return 6 + 6 + 1 + strlen(in_addr->dst_addr) + 1;
 }
 
 enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr,

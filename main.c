@@ -109,10 +109,10 @@ static void run_test(struct loop_timer *t)
 
 err:
 	println("ERROR!", VDP_TXT_COL_MAGENTA);
+	mw_ap_disassoc();
 
 out:
 	loop_timer_del(t);
-	mw_ap_disassoc();
 }
 
 /// MegaWiFi initialization
