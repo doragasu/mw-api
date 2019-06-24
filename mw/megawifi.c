@@ -1095,6 +1095,25 @@ enum mw_err mw_log(const char *msg)
 	return MW_ERR_NONE;
 }
 
+enum mw_err mw_factory_settings(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_FACTORY_RESET;
+	d.cmd->data_len = 0;
+
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
 void mw_sleep(uint16_t frames)
 {
 	loop_timer_start(&d.timer, frames);

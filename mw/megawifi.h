@@ -627,6 +627,14 @@ struct mw_gamertag *mw_gamertag_get(uint8_t slot);
 enum mw_err mw_log(const char *msg);
 
 /************************************************************************//**
+ * \brief Set factory default configuration.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ * \note It is recommended to reboot the module after this command.
+ ****************************************************************************/
+enum mw_err mw_factory_settings(void);
+
+/************************************************************************//**
  * \brief Sleep the specified amount of frames
  *
  * \param[in] frames Number of frames to sleep.
