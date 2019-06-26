@@ -26,7 +26,7 @@
 /// Command buffer
 static char cmd_buf[MW_BUFLEN];
 
-void udp_recv_cb(enum lsd_status stat, uint8_t ch,
+static void udp_recv_cb(enum lsd_status stat, uint8_t ch,
 		char *data, uint16_t len, void *ctx);
 
 static void println(const char *str, int color)
@@ -45,7 +45,7 @@ static void idle_cb(struct loop_func *f)
 	mw_process();
 }
 
-void udp_send_complete_cb(enum lsd_status stat, void *ctx)
+static void udp_send_complete_cb(enum lsd_status stat, void *ctx)
 {
 	struct mw_reuse_payload *pkt =
 		(struct mw_reuse_payload * const)cmd_buf;
@@ -56,7 +56,7 @@ void udp_send_complete_cb(enum lsd_status stat, void *ctx)
 	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
 }
 
-void udp_recv_cb(enum lsd_status stat, uint8_t ch,
+static void udp_recv_cb(enum lsd_status stat, uint8_t ch,
 		char *data, uint16_t len, void *ctx)
 {
 	const struct mw_reuse_payload *udp =
@@ -68,11 +68,37 @@ void udp_recv_cb(enum lsd_status stat, uint8_t ch,
 	}
 }
 
+static void udp_normal_test(void)
+{
+	char line[40];
+	int16_t len = sizeof(line);
+	uint8_t ch = 1;
+
+	// Send UDP data to peer and wait for reply
+	mw_udp_set(ch, "192.168.1.10", "12345", NULL);
+	mw_send_sync(ch, "MegaWiFi UDP test!", 19, 0);
+	mw_recv_sync(&ch, line, &len, 5 * 60);
+	line[39] = '\0';
+	if (1 == ch) {
+		println("Got UDP reply:", VDP_TXT_COL_CYAN);
+		println(line, VDP_TXT_COL_WHITE);
+	}
+	mw_udp_unset(ch);
+}
+
+static void udp_reuse_test(void)
+{
+	struct mw_reuse_payload *pkt =
+		(struct mw_reuse_payload * const)cmd_buf;
+
+	// Start UDP echo task
+	mw_udp_set(1, NULL, NULL, "7");
+	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
+}
+
 static void run_test(struct loop_timer *t)
 {
 	enum mw_err err;
-	struct mw_reuse_payload *pkt =
-		(struct mw_reuse_payload * const)cmd_buf;
 
 	// Join AP
 	println("Associating to AP", VDP_TXT_COL_WHITE);
@@ -99,12 +125,15 @@ static void run_test(struct loop_timer *t)
 	println(NULL, 0);
 
 	println("Test finished, all OK!", VDP_TXT_COL_WHITE);
-	
+
 	mw_tcp_disconnect(1);
 
-	// Start UDP echo task
-	mw_udp_set(1, NULL, NULL, "7");
-	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
+	// Test UDP in normal mode
+	udp_normal_test();
+
+	// Test UDP in reuse mode
+	udp_reuse_test();
+
 	goto out;
 
 err:
