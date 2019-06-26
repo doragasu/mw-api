@@ -1,5 +1,7 @@
 tmp
 boot/rom_head.o
+boot/rom_head.bin
+boot/boot.o
 hello-wifi
 hello-wifi.bin
 hello-wifi.elf
