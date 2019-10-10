@@ -5,170 +5,40 @@
  * \defgroup 1985ch main
  * \{
  ****************************************************************************/
+#include <stdio.h>
 #include "vdp.h"
 #include "mw/util.h"
 #include "mw/mpool.h"
-#include "mw/megawifi.h"
 #include "mw/loop.h"
-
-/// Length of the wflash buffer
-#define MW_BUFLEN	1440
-
-/// TCP port to use (set to Megadrive release year ;-)
-#define MW_CH_PORT 	1985
+#include "mw/megawifi.h"
 
 /// Maximum number of loop functions
 #define MW_MAX_LOOP_FUNCS	2
 
 /// Maximun number of loop timers
-#define MW_MAX_LOOP_TIMERS	4
+#define MW_MAX_LOOP_TIMERS	2
 
-/// Command buffer
-static char cmd_buf[MW_BUFLEN];
+static uint32_t bg = 0;
+static uint32_t timed = 0;
 
-static void udp_recv_cb(enum lsd_status stat, uint8_t ch,
-		char *data, uint16_t len, void *ctx);
+char buf[1440];
 
-static void println(const char *str, int color)
+static void test_cb(struct loop_timer *t)
 {
-	static unsigned int line = 2;
+	UNUSED_PARAM(t);
+	char num[9];
 
-	if (str) {
-		VdpDrawText(VDP_PLANEA_ADDR, 2, line, color, 36, str, 0);
-	}
-	line++;
+	uint32_to_hex_str(bg, num, 0);
+	VdpDrawText(VDP_PLANEA_ADDR, 2, 3, VDP_TXT_COL_WHITE, 12, num, 0);
+	uint32_to_hex_str(timed++, num, 0);
+	VdpDrawText(VDP_PLANEA_ADDR, 2, 2, VDP_TXT_COL_WHITE, 12, num, 0);
 }
 
-static void idle_cb(struct loop_func *f)
+static void background_func_cb(struct loop_func *f)
 {
 	UNUSED_PARAM(f);
-	mw_process();
-}
-
-static void udp_send_complete_cb(enum lsd_status stat, void *ctx)
-{
-	struct mw_reuse_payload *pkt =
-		(struct mw_reuse_payload * const)cmd_buf;
-	UNUSED_PARAM(ctx);
-	UNUSED_PARAM(stat);
-
-	// Trigger reception of another UDP packet
-	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
-}
-
-static void udp_recv_cb(enum lsd_status stat, uint8_t ch,
-		char *data, uint16_t len, void *ctx)
-{
-	const struct mw_reuse_payload *udp =
-		(const struct mw_reuse_payload*)data;
-	UNUSED_PARAM(ctx);
-
-	if (LSD_STAT_COMPLETE == stat) {
-		mw_udp_reuse_send(ch, udp, len, NULL, udp_send_complete_cb);
-	}
-}
-
-static void udp_normal_test(void)
-{
-	char line[40];
-	int16_t len = sizeof(line);
-	uint8_t ch = 1;
-
-	// Send UDP data to peer and wait for reply
-	mw_udp_set(ch, "192.168.1.10", "12345", NULL);
-	mw_send_sync(ch, "MegaWiFi UDP test!", 19, 0);
-	mw_recv_sync(&ch, line, &len, 5 * 60);
-	line[39] = '\0';
-	if (1 == ch) {
-		println("Got UDP reply:", VDP_TXT_COL_CYAN);
-		println(line, VDP_TXT_COL_WHITE);
-	}
-	mw_udp_unset(ch);
-}
-
-static void udp_reuse_test(void)
-{
-	struct mw_reuse_payload *pkt =
-		(struct mw_reuse_payload * const)cmd_buf;
-
-	// Start UDP echo task
-	mw_udp_set(1, NULL, NULL, "7");
-	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
-}
-
-static void run_test(struct loop_timer *t)
-{
-	enum mw_err err;
-
-	// Join AP
-	println("Associating to AP", VDP_TXT_COL_WHITE);
-	err = mw_ap_assoc(0);
-	if (err != MW_ERR_NONE) {
-		goto err;
-	}
-	err = mw_ap_assoc_wait(MS_TO_FRAMES(30000));
-	if (err != MW_ERR_NONE) {
-		goto err;
-	}
-	// Wait an additional second to ensure DNS service is up
-	mw_sleep(MS_TO_FRAMES(1000));
-	println("DONE!", VDP_TXT_COL_CYAN);
-	println(NULL, 0);
-
-	// Connect to www.duck.com on port 443
-	println("Connecting to www.duck.com", VDP_TXT_COL_WHITE);
-	err = mw_tcp_connect(1, "www.duck.com", "443", NULL);
-	if (err != MW_ERR_NONE) {
-		goto err;
-	}
-	println("DONE!", VDP_TXT_COL_CYAN);
-	println(NULL, 0);
-
-	println("Test finished, all OK!", VDP_TXT_COL_WHITE);
-
-	mw_tcp_disconnect(1);
-
-	// Test UDP in normal mode
-	udp_normal_test();
-
-	// Test UDP in reuse mode
-	udp_reuse_test();
-
-	goto out;
-
-err:
-	println("ERROR!", VDP_TXT_COL_MAGENTA);
-	mw_ap_disassoc();
-
-out:
-	loop_timer_del(t);
-}
-
-/// MegaWiFi initialization
-static void megawifi_init_cb(struct loop_timer  *t)
-{
-	uint8_t ver_major = 0, ver_minor = 0;
-	char *variant = NULL;
-	enum mw_err err;
-	char line[] = "MegaWiFi version X.Y";
-
-	// Try detecting the module
-	err = mw_detect(&ver_major, &ver_minor, &variant);
-
-	if (MW_ERR_NONE != err) {
-		// Megawifi not found
-		println("MegaWiFi not found!", VDP_TXT_COL_MAGENTA);
-	} else {
-		// Megawifi found
-		line[17] = ver_major + '0';
-		line[19] = ver_minor + '0';
-		println(line, VDP_TXT_COL_WHITE);
-		println(NULL, 0);
-		// Configuration complete, run test function next frame
-		t->timer_cb = run_test;
-		loop_timer_start(t, 1);
-
-	}
+	mw_sleep(1);
+	bg++;
 }
 
 /// Loop run while idle
@@ -176,16 +46,18 @@ static void main_loop_init(void)
 {
 	// Run next frame, do not auto-reload
 	static struct loop_timer frame_timer = {
-		.timer_cb = megawifi_init_cb,
-		.frames = 1
+		.timer_cb = test_cb,
+		.frames = 1,
+		.auto_reload = 1
 	};
-	static struct loop_func megawifi_loop = {
-		.func_cb = idle_cb
+
+	static struct loop_func background_func = {
+		.func_cb = background_func_cb
 	};
 
 	loop_init(MW_MAX_LOOP_FUNCS, MW_MAX_LOOP_TIMERS);
 	loop_timer_add(&frame_timer);
-	loop_func_add(&megawifi_loop);
+	loop_func_add(&background_func);
 }
 
 /// Global initialization
@@ -197,8 +69,7 @@ static void init(void)
 	VdpInit();
 	// Initialize game loop
 	main_loop_init();
-	// Initialize MegaWiFi
-	mw_init(cmd_buf, MW_BUFLEN);
+	mw_init(buf, 1440);
 }
 
 /// Entry point

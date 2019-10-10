@@ -3,7 +3,7 @@
 TARGET  = hello-wifi
 PREFIX ?= m68k-elf-
 ifdef DEBUG
-	CFLAGS  = -Og -g -Wall -Wextra -m68000 -ffast-math -ffunction-sections
+	CFLAGS  = -O0 -g -Wall -Wextra -m68000 -ffast-math -ffunction-sections
 else
 	CFLAGS  = -Os -Wall -Wextra -m68000 -fomit-frame-pointer -ffast-math -ffunction-sections -flto -ffat-lto-objects
 endif
