@@ -34,6 +34,8 @@
 
 /// Timeout for standard commands in milliseconds
 #define MW_COMMAND_TOUT_MS	1000
+/// Timeout for HTTP open command in milliseconds
+#define MW_HTTP_OPEN_TOUT_MS	10000
 /// Timeout for the AP scan command in milliseconds
 #define MW_SCAN_TOUT_MS		10000
 /// Timeout for the AP associate command in milliseconds
@@ -50,6 +52,21 @@ enum mw_err {
 	MW_ERR_PARAM,			///< Input parameter out of range
 	MW_ERR_SEND,			///< Error sending data
 	MW_ERR_RECV			///< Error receiving data
+};
+
+/// Supported HTTP methods
+enum mw_http_method {
+    MW_HTTP_METHOD_GET = 0,    ///< HTTP GET Method
+    MW_HTTP_METHOD_POST,       ///< HTTP POST Method
+    MW_HTTP_METHOD_PUT,        ///< HTTP PUT Method
+    MW_HTTP_METHOD_PATCH,      ///< HTTP PATCH Method
+    MW_HTTP_METHOD_DELETE,     ///< HTTP DELETE Method
+    MW_HTTP_METHOD_HEAD,       ///< HTTP HEAD Method
+    MW_HTTP_METHOD_NOTIFY,     ///< HTTP NOTIFY Method
+    MW_HTTP_METHOD_SUBSCRIBE,  ///< HTTP SUBSCRIBE Method
+    MW_HTTP_METHOD_UNSUBSCRIBE,///< HTTP UNSUBSCRIBE
+    MW_HTTP_METHOD_OPTIONS,    ///< HTTP OPTIONS
+    MW_HTTP_METHOD_MAX,
 };
 
 /** \addtogroup mw_ctrl_pins mw_ctrl_pins
@@ -77,6 +94,8 @@ enum mw_err {
 #define MW_MAX_SOCK			3
 /// Control channel used for LSD protocol
 #define MW_CTRL_CH			0
+/// Channel used for HTTP requests and cert sets
+#define MW_HTTP_CH			LSD_MAX_CH - 1
 
 /// Minimum command buffer length to be able to send all available commands
 /// with minimum data payload. This length might not guarantee that commands
@@ -489,7 +508,7 @@ enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
  * \warning Do not use more than one syncrhonous call at once. You must wait
  * until a syncrhonous call ends to issue another one.
  ****************************************************************************/
-enum mw_err mw_send_sync(uint8_t ch, const char *data, int16_t len,
+enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len,
 		uint16_t tout_frames);
 
 /************************************************************************//**
@@ -635,11 +654,124 @@ enum mw_err mw_log(const char *msg);
 enum mw_err mw_factory_settings(void);
 
 /************************************************************************//**
+ * \brief Powers off the WiFi module.
+ *
+ * The module will be put in deep sleep mode. To wake it up, the RESET pin
+ * must be toggled.
+ ****************************************************************************/
+void mw_power_off(void);
+
+/************************************************************************//**
  * \brief Sleep the specified amount of frames
  *
  * \param[in] frames Number of frames to sleep.
  ****************************************************************************/
 void mw_sleep(uint16_t frames);
+
+/************************************************************************//**
+ * \brief Set URL for HTTP requests.
+ *
+ * \param[in] url URL to set.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_http_url_set(const char *url);
+
+/************************************************************************//**
+ * \brief Set method for HTTP requests.
+ *
+ * \param[in] method Method to set.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_http_method_set(enum mw_http_method method);
+
+/************************************************************************//**
+ * \brief Add an HTTP header.
+ *
+ * \param[in] key   Header key.
+ * \param[in] value Value to set for the key.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_http_header_add(const char *key, const char *value);
+
+/************************************************************************//**
+ * \brief Delete a previously added HTTP header.
+ *
+ * \param[in] key Key of the header to delete.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_http_header_del(const char *key);
+
+/************************************************************************//**
+ * \brief Open HTTP connection.
+ *
+ * This functions opens the HTTP connection, sends the HTTP headers, and
+ * prepares the module to send the specified content_len if (if any) with
+ * a successive mw_send() or mw_send_sync(), using MW_HTTP_CH channel.
+ *
+ * \param[in] content_len Length of the content to write in HTTP request,
+ *            after a successfull call to this function.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_http_open(uint32_t content_len);
+
+/************************************************************************//**
+ * \brief Finish an opened HTTP request.
+ *
+ * After a successful call to mw_http_open(), and sending the content (if
+ * any), call this function to receive the HTTP response headers, and obtain
+ * the length of the body to receive with a further call to mw_recv() or
+ * mw_recv_sync(), using MW_HTTP_CH.
+ *
+ * \param[out] content_len Length of the response content to receive after a
+ *             successfull call to this function.
+ *
+ * \return The HTTP status code if the request was completed, or an error
+ * code (lower than 100) if the HTTP request did not complete.
+ * \note Even if the HTTP request is completed, that does not mean there are
+ * no errors, if the returned status code is 4xx or 5xx, there is a client
+ * side or server side error.
+ ****************************************************************************/
+int mw_http_finish(uint32_t *content_len);
+
+/************************************************************************//**
+ * Query the X.509 hash of the installed PEM certificate.
+ *
+ * \return 0xFFFFFFFF if certificate is not installed or error occurs, or
+ * the installed X.509 certificate hash on success.
+ ****************************************************************************/
+uint32_t mw_http_cert_query(void);
+
+/************************************************************************//**
+ * \brief Set the PEM certificate to use on HTTPS requests.
+ *
+ * The certificate is stored on the non volatile memory of the module, and
+ * when present will be used in HTTPS requestes. This function can also be
+ * used to delete a previously saved certificate using a NULL input value.
+ *
+ * \param[in] cert_hash X.509 hash of the certificate to set, ignored if
+ *                      cert_len set to 0.
+ * \param[in] cert      PEM certificate in plain text. Ignored if cert_len
+ *                      set to 0.
+ *                      previously stored certificate.
+ * \param[in] cert_len  Certificate length in bytes. Set to 0 to delete a
+ *                      previously stored certificate.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_http_cert_set(uint32_t cert_hash, const char *cert,
+		uint16_t cert_len);
+
+/************************************************************************//**
+ * \brief Clean-up an HTTP request, freeing associated resources.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+int mw_http_cleanup(void);
 
 /****** THE FOLLOWING COMMANDS ARE LOWER LEVEL AND USUALLY NOT NEEDED ******/
 

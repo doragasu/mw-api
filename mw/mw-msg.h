@@ -85,6 +85,16 @@ enum PACKED mw_command {
 	MW_CMD_GAMERTAG_GET	=  35,	///< Gets a stored gamertag
 	MW_CMD_LOG		=  36,	///< Write a message to log trace
 	MW_CMD_FACTORY_RESET	=  37,	///< Set default configuratioSet default configuration
+	MW_CMD_SLEEP		=  38,	///< Set the module to sleep mode
+	MW_CMD_HTTP_URL_SET	=  39,	///< Set HTTP URL for request
+	MW_CMD_HTTP_METHOD_SET	=  40,	///< Set HTTP request method
+	MW_CMD_HTTP_CERT_QUERY  =  41,	///< Query the X.509 hash of cert
+	MW_CMD_HTTP_CERT_SET	=  42,	///< Set HTTPS certificate
+	MW_CMD_HTTP_HDR_ADD	=  43,	///< Add HTTP request header
+	MW_CMD_HTTP_HDR_DEL	=  44,	///< Delete HTTP request header
+	MW_CMD_HTTP_OPEN	=  45,	///< Open HTTP request
+	MW_CMD_HTTP_FINISH	=  46,	///< Finish HTTP request
+	MW_CMD_HTTP_CLEANUP	=  47,	///< Clean request data
 	MW_CMD_ERROR		= 255	///< Error command reply
 };
 
@@ -244,6 +254,8 @@ typedef union mw_cmd {
 			uint8_t ch;		///< Channel number for channel related requests
 			/// RAW data in uint8_t format
 			uint8_t data[MW_CMD_MAX_BUFLEN];
+			/// RAW data in uint16_t format
+			uint16_t w_data[MW_CMD_MAX_BUFLEN / sizeof(uint16_t)];
 			/// RAW data in uint32_t format
 			uint32_t dw_data[MW_CMD_MAX_BUFLEN / sizeof(uint32_t)];
 			struct mw_msg_in_addr in_addr;		///< Internet address

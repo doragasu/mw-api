@@ -36,9 +36,11 @@ cart: $(TARGET)
 
 .PHONY: emu debug
 emu: $(TARGET).bin
+	rm -f $(HOME)/.local/share/blastem/$(TARGET)/save.nor
 	@$(EMU) $< 2>/dev/null &
 
 debug: $(TARGET).bin
+	rm -f $(HOME)/.local/share/blastem/$(TARGET)/save.nor
 	$(GDB) $(TARGET).elf -x gdbinit
 
 $(TARGET): $(TARGET).bin

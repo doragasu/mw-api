@@ -19,7 +19,7 @@
 #define MW_SCAN_TOUT		MS_TO_FRAMES(MW_SCAN_TOUT_MS)
 #define MW_ASSOC_TOUT		MS_TO_FRAMES(MW_ASSOC_TOUT_MS)
 #define MW_STAT_POLL_TOUT	MS_TO_FRAMES(MW_STAT_POLL_MS)
-
+#define MW_HTTP_OPEN_TOUT	MS_TO_FRAMES(MW_HTTP_OPEN_TOUT_MS)
 /*
  * The module assumes that once started, sending always succeeds, but uses
  * timers (when defined) for data reception.
@@ -40,8 +40,7 @@ struct mw_data {
 	mw_cmd *cmd;
 	lsd_recv_cb cmd_data_cb;
 	struct loop_timer timer;
-	int16_t buf_len;
-	int16_t recvd;
+	uint16_t buf_len;
 	int16_t tout_frames;
 	union {
 		uint8_t flags;
@@ -181,16 +180,25 @@ enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
 	return MW_ERR_NONE;
 }
 
-enum mw_err mw_send_sync(uint8_t ch, const char *data, int16_t len,
+enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len,
 		uint16_t tout_frames)
 {
+	uint16_t to_send;
 	int stat;
+	uint16_t sent = 0;
 
-	lsd_send(ch, data, len, NULL, cmd_send_cb);
-	loop_timer_start(&d.timer, tout_frames);
-	stat = loop_pend();
-	if (CMD_OK != stat) {
-		return MW_ERR_SEND;
+	while (sent < len) {
+		to_send = MIN(len - sent, d.buf_len);
+//		to_send = MIN(len - sent, 1024);
+		lsd_send(ch, data + sent, to_send, NULL, cmd_send_cb);
+		if (tout_frames) {
+			loop_timer_start(&d.timer, tout_frames);
+		}
+		stat = loop_pend();
+		if (CMD_OK != stat) {
+			return MW_ERR_SEND;
+		}
+		sent += to_send;
 	}
 
 	return MW_ERR_NONE;
@@ -1076,6 +1084,216 @@ struct mw_gamertag *mw_gamertag_get(uint8_t slot)
 	return &d.cmd->gamertag_get;
 }
 
+enum mw_err mw_http_url_set(const char *url)
+{
+	enum mw_err err;
+	size_t len;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (!url || !(len = strlen(url))) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->cmd = MW_CMD_HTTP_URL_SET;
+	d.cmd->data_len = len + 1;
+	memcpy(d.cmd->data, url, len + 1);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_http_method_set(enum mw_http_method method)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (method >= MW_HTTP_METHOD_MAX) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->cmd = MW_CMD_HTTP_METHOD_SET;
+	d.cmd->data_len = 1;
+	d.cmd->data[0] = method;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_http_header_add(const char *key, const char *value)
+{
+	size_t key_len;
+	size_t value_len;
+
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (!key || !value || !(key_len = strlen(key)) ||
+			!(value_len = strlen(value))) {
+		return MW_ERR_PARAM;
+	}
+
+	key_len++;
+	value_len++;
+	d.cmd->cmd = MW_CMD_HTTP_HDR_ADD;
+	d.cmd->data_len = key_len + value_len;
+	memcpy(d.cmd->data, key, key_len);
+	memcpy(d.cmd->data + key_len, value, value_len);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_http_header_del(const char *key)
+{
+	enum mw_err err;
+	size_t len;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (!key || !(len = strlen(key))) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->cmd = MW_CMD_HTTP_HDR_DEL;
+	d.cmd->data_len = len + 1;
+	memcpy(d.cmd->data, key, len + 1);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_http_open(uint32_t content_len)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_HTTP_OPEN;
+	d.cmd->data_len = 4;
+	d.cmd->dw_data[0] = content_len;
+	err = mw_command(MW_HTTP_OPEN_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	lsd_ch_enable(MW_HTTP_CH);
+	return MW_ERR_NONE;
+}
+
+int mw_http_finish(uint32_t *content_len)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (!content_len) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->cmd = MW_CMD_HTTP_FINISH;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	*content_len = d.cmd->dw_data[0];
+	return d.cmd->w_data[2];
+}
+
+uint32_t mw_http_cert_query(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return 0xFFFFFFFF;
+	}
+
+	d.cmd->cmd = MW_CMD_HTTP_CERT_QUERY;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return 0xFFFFFFF;
+	}
+
+	return d.cmd->dw_data[0];
+}
+
+enum mw_err mw_http_cert_set(uint32_t cert_hash, const char *cert,
+		uint16_t cert_len)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (cert_len && !cert) {
+		return MW_ERR_PARAM;
+	}
+	d.cmd->cmd = MW_CMD_HTTP_CERT_SET;
+	d.cmd->data_len = 6;
+	d.cmd->dw_data[0] = cert_hash;
+	d.cmd->w_data[2] = cert_len;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	lsd_ch_enable(MW_HTTP_CH);
+	// Command succeeded, now send the certificate using MW_CH_HTTP
+	err = mw_send_sync(MW_HTTP_CH, cert, cert_len, 0);
+	lsd_ch_disable(MW_HTTP_CH);
+
+	return MW_ERR_NONE;
+}
+
+int mw_http_cleanup(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_HTTP_FINISH;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	lsd_ch_disable(MW_HTTP_CH);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
 enum mw_err mw_log(const char *msg)
 {
 	enum mw_err err;
@@ -1113,6 +1331,14 @@ enum mw_err mw_factory_settings(void)
 	}
 
 	return MW_ERR_NONE;
+}
+
+void mw_power_off(void)
+{
+	d.cmd->cmd = MW_CMD_SLEEP;
+	d.cmd->data_len = 0;
+
+	mw_cmd_send(d.cmd, NULL, NULL);
 }
 
 void mw_sleep(uint16_t frames)
