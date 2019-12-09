@@ -1,6 +1,8 @@
 var annotated_dup =
 [
     [ "ip_addr", "unionip__addr.html", "unionip__addr" ],
+    [ "jsmn_parser", "structjsmn__parser.html", "structjsmn__parser" ],
+    [ "jsmntok_t", "structjsmntok__t.html", "structjsmntok__t" ],
     [ "loop_func", "structloop__func.html", "structloop__func" ],
     [ "loop_timer", "structloop__timer.html", "structloop__timer" ],
     [ "mw_ap_data", "structmw__ap__data.html", "structmw__ap__data" ],

@@ -19,5 +19,6 @@ var unionmw__cmd =
     [ "packet", "unionmw__cmd.html#aa0fea1735fa775c1e7582c348a4d9e8a", null ],
     [ "rnd_len", "unionmw__cmd.html#a5b0e9cac82b4aeebec64188fe4743930", null ],
     [ "sntp_cfg", "unionmw__cmd.html#a4b0e09a0b487849f7f25837782119fba", null ],
-    [ "sys_stat", "unionmw__cmd.html#ade0cbf72eabd15805525d02d2089723d", null ]
+    [ "sys_stat", "unionmw__cmd.html#ade0cbf72eabd15805525d02d2089723d", null ],
+    [ "w_data", "unionmw__cmd.html#a7bcdd624bf58b31fade68e20b47aaf08", null ]
 ];

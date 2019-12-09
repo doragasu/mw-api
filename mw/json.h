@@ -3,7 +3,7 @@
  *
  * \brief JSON implementation, based on jsmn by Serge Zaitsev.
  *
- * \defgroup megawifi megawifi
+ * \defgroup json json
  * \{
  *
  * \brief JSON implementation, based on jsmn by Serge Zaitsev.
@@ -85,6 +85,7 @@ int json_key_next(const jsmntok_t *json_tok, int obj_idx, int parent_idx,
  * \brief Search for a given key in the current JSON level.
  *
  * \param[in] key        key string to search.
+ * \param[in] json_str   JSON string.
  * \param[in] json_tok   JSON token array.
  * \param[in] obj_idx    Index of the token to analyse.
  * \param[in] parent_idx Index of the parent object or array token.
@@ -111,4 +112,6 @@ int json_key_search(const char *key, const char *json_str,
 int json_bool_get(const char *json_str, const jsmntok_t *json_tok, int obj_idx);
 
 #endif /*_JSON_H_*/
+
+ /** \} */
 

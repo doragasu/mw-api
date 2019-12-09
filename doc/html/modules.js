@@ -1,5 +1,6 @@
 var modules =
 [
+    [ "json", "group__json.html", "group__json" ],
     [ "loop", "group__loop.html", "group__loop" ],
     [ "megawifi", "group__megawifi.html", "group__megawifi" ],
     [ "mpool", "group__mpool.html", "group__mpool" ],
