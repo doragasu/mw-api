@@ -729,6 +729,7 @@ enum mw_err mw_http_open(uint32_t content_len);
  *
  * \param[out] content_len Length of the response content to receive after a
  *             successfull call to this function.
+ * \param[in]  tout_frames Maximun number of frames to wait for reply.
  *
  * \return The HTTP status code if the request was completed, or an error
  * code (lower than 100) if the HTTP request did not complete.
@@ -736,7 +737,7 @@ enum mw_err mw_http_open(uint32_t content_len);
  * no errors, if the returned status code is 4xx or 5xx, there is a client
  * side or server side error.
  ****************************************************************************/
-int mw_http_finish(uint32_t *content_len);
+int mw_http_finish(uint32_t *content_len, int tout_frames);
 
 /************************************************************************//**
  * Query the X.509 hash of the installed PEM certificate.

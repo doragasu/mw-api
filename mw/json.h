@@ -26,6 +26,11 @@
 #define JSMN_STATIC
 #include "jsmn.h"
 
+/// Macro to extract the item (as string) from a token. Requires the json_str
+/// to have the null terminations added by json_null_terminate().
+#define json_item(json_str, obj_tok, idx) (idx) < 0 ? NULL : \
+	&((json_str)[(obj_tok)[idx].start])
+
 /************************************************************************//**
  * \brief Add null-terminators to the input JSON string. Useful to further
  * extract token values as null-terminated strings.

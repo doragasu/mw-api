@@ -102,13 +102,14 @@ $(document).ready(function(){initNavTree('index.html','');});
 <p>The MegaWiFi API consists of the following modules:</p><ul>
 <li>loop: Loop handling for single threaded Megadrive programs.</li>
 <li>mpool: Simple memory pool implementation.</li>
-<li>megawifi: Communications with the WiFi module and the Internet.</li>
+<li>megawifi: Communications with the WiFi module and the Internet, including sockets and HTTP/HTTPS.</li>
 <li>mw-msg: MegaWiFi command message definitions.</li>
 <li>util: General purpose utility functions and macros.</li>
 </ul>
 <p>The <code>mw-msg</code> module contains the message definitions for the different MegaWiFi commands and command replies. Fear not because usually you do not need to use this module, unless you are doing something pretty advanced not covered by the <code>megawifi</code> module API.</p>
 <p>The <code>util</code> module contains general purpose functions and macros not fitting in the other modules, such as <code><a class="el" href="group__util.html#ga851ec0ef4a4c9ca0cf855fe0925946b5" title="This function evaluates the data entered on the input Menu structure, to guess if it corresponds to a...">ip_validate()</a></code> to check if a string is a valid IP address, <code><a class="el" href="group__util.html#ga1592ef63a7bfa19eed825eb2a90e80d0" title="Converts a character string representing an 8-bit unsigned number, to its binary (uint8_t) representa...">str_to_uint8()</a></code> to convert a string to an 8-bit number, etc.</p>
 <p>The other modules (<code>loop</code>, <code>mpool</code>, <code>megawifi</code>) are covered in depth below.</p>
+<p>There is also a <code>json</code> module wich includes <code>jsmn</code> library along with some helper functions to parse JSON formatted strings. Please read <code>jsmn</code> documentation to learn how its tokenizer works.</p>
 <h2>Loop module</h2>
 <p>This module implements the main loop of the program. It allows easily adding and removing functions to be run on the main loop, as well as timers based on the frame counter. It also provides a hacky interface to perform pseudo syncrhonous calls (through the <code><a class="el" href="group__loop.html#ga3fc77f30d1e96e3c6a535cb34fbc5e51" title="This function does not return until a loop_post() is executed.">loop_pend()</a></code> and <code><a class="el" href="group__loop.html#ga68b578220b5354b83cd9ecca21c251ca" title="Causes a previously invoked loop_pend() function to return.">loop_post()</a></code> semantics) without disturbing the loop execution.</p>
 <p>A typical Megadrive game contains a main loop with a structure similar to this:</p>
@@ -226,6 +227,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 <ul>
 <li>Scanning APs, associating and disassociating to/from them.</li>
 <li>Creating both client and server network sockets.</li>
+<li>Performing HTTP/HTTPS client requests.</li>
 <li>Reading and writing from/to the non-volatile flash memory in the WiFi module.</li>
 <li>Keeping the time and day, accurately synchronized to NTP servers.</li>
 <li>Generating large amounts of random numbers blazingly fast.</li>
@@ -396,7 +398,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 <div class="line">} <span class="keywordflow">else</span> {</div>
 <div class="line">    <span class="comment">// Connection failed</span></div>
 <div class="line">}</div>
-</div><!-- fragment --><p>Once connected, you can start sending and receiving data. When no longer needed, remember to close the connection with <code><a class="el" href="group__megawifi.html#ga1fba45bbaeb37503895f2261ea23a954" title="Closes a TCP socket. This is an alias of mw_close().">mw_tcp_disconnect()</a></code>. The channel number must be from 1 to <code>LSD_MAX_CH</code> (usually 4). The used channel number will be passed to all the calls relative to the connected socket (think about it like a socket number).</p>
+</div><!-- fragment --><p>Once connected, you can start sending and receiving data. When no longer needed, remember to close the connection with <code><a class="el" href="group__megawifi.html#ga1fba45bbaeb37503895f2261ea23a954" title="Closes a TCP socket. This is an alias of mw_close().">mw_tcp_disconnect()</a></code>. The channel number must be from 1 to <code>LSD_MAX_CH - 1</code> (usually 2). The used channel number will be passed to all the calls relative to the connected socket (think about it like a socket number).</p>
 <h2>Creating a TCP server socket</h2>
 <p>Creating a TCP server socket requires binding it to a port, using <code><a class="el" href="group__megawifi.html#ga82f774de9f50b730de578cb0e7512d16" title="Binds a socket to a port, and listens to connections on the port. If a connection request is received...">mw_tcp_bind()</a></code>. After this, MegaWiFi will automatically accept any incoming connection on this port. You can check when the connection has been established by calling <code><a class="el" href="group__megawifi.html#ga0f4fd1409dc625d7506960f09ddccef5" title="Polls a socket until it is ready to transfer data. Typical use of this function is after a successful...">mw_sock_conn_wait()</a></code>:</p>
 <div class="fragment"><div class="line"><span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
@@ -478,7 +480,124 @@ $(document).ready(function(){initNavTree('index.html','');});
 <div class="line">        <span class="comment">// Data will be received by mw_process()</span></div>
 <div class="line">    }</div>
 <div class="line">}</div>
+</div><!-- fragment --><h2>Performing an HTTP/HTTPS request</h2>
+<p><code>megawifi</code> module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that setting an SSL certificate is required only if you want to use HTTPS. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.</p>
+<ol type="1">
+<li>(<b>Optional</b>) Set the SSL certificate. This is only required when using HTTPS. You can retrieve the x509 hash of the currently stored certificate by calling <code><a class="el" href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7">mw_http_cert_query()</a></code>. To set a different certificate, call <code><a class="el" href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904" title="Set the PEM certificate to use on HTTPS requests.">mw_http_cert_set()</a></code>. Once set, the certificate is stored on the non volatile memory, and will remain until replaced with a new one. Only one certificate can be stored at a time. Note you should not use this function unless required, because as it writes to Flash memory, it can wear the storage if used too often.</li>
+<li>Set the URL (e.g. <a href="https://www.example.com">https://www.example.com</a>). Use <code><a class="el" href="group__megawifi.html#ga8f58b6f745739c2b58279c616fe8645e" title="Set URL for HTTP requests.">mw_http_url_set()</a></code> for this purpose.</li>
+<li>Set the HTTP method. Most commonly used ones are <code>MW_HTTP_METHOD_GET</code> and <code>MW_HTTP_METHOD_POST</code>. Use <code><a class="el" href="group__megawifi.html#ga5c6bfb81f8fe1c6c6a294f36765b3936" title="Set method for HTTP requests.">mw_http_method_set()</a></code> to set it.</li>
+<li>(<b>Optional</b>) add HTTP headers to the request. Many aspects of the requests can be controlled via headers. E.g. you can define the formatting of the data you are posting by adding the header "Content-type" with the mime type "text/html", "application/json", etc.</li>
+<li>Open the connection. In this step, the HTTP or HTTPS connection is opened, and the request (included any headers added) is sent to the server. If the request contains a data payload, in this step the payload length is specified. The function <code><a class="el" href="group__megawifi.html#ga79ec1a09ac1748e40b4adfdaf6194ed8" title="Open HTTP connection.">mw_http_open()</a></code> does this.</li>
+<li>(<b>Optional</b>) send the request data payload (if any). This must be performed only if a payload length (greater than 0) was specified in the previous step. This is done the same way as sending data through sockets, with the <code><a class="el" href="group__megawifi.html#gab99864c90151e2bffe5d685cd6e1b241" title="Sends data through a socket, using a previously allocated channel. Asynchronous interface.">mw_send()</a></code> or <code><a class="el" href="group__megawifi.html#gad8a3660c1dda462ca37ac3cb1a61e347" title="Sends data through a socket, using a previously allocated channel. Synchronous interface.">mw_send_sync()</a></code> functions, using the HTTP reserved channel (<code>MW_CH_HTTP</code>).</li>
+<li>Finish the transaction. Call <code><a class="el" href="group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d" title="Finish an opened HTTP request.">mw_http_finish()</a></code> for the HTTP client to obtain the response to the request, along with its associated headers. If a response includes a data payload, its length is obtained in this step.</li>
+<li>(<b>Optional</b>) if the previous step returned a reply payload length greater than 0, it must be received in this step by calling <code><a class="el" href="group__megawifi.html#ga8227c5ef923c4eee7f978ccf80cff9af" title="Receive data, asyncrhonous interface.">mw_recv()</a></code> or <code><a class="el" href="group__megawifi.html#ga8eae5109b67bbc7d238fc17e9ad02ee7" title="Receive data, syncrhonous interface.">mw_recv_sync()</a></code> using the HTTP reserved channel (<code>MW_CH_HTTP</code>).</li>
+</ol>
+<p>By looking to this list of steps, it might look complicated to perform an HTTP request, but the steps are relatively simple, and can be easily added to some functions. E.g., this code allows performing arbritrary GET (without payload) and POST (with JSON payload) requests:</p>
+<div class="fragment"><div class="line"><span class="comment">// Performs initial steps of an HTTP request</span></div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">int</span> http_begin(<span class="keyword">enum</span> <a class="code" href="group__megawifi.html#gaa4508878ae9a945610bbe5109a2ac233">mw_http_method</a> type, <span class="keyword">const</span> <span class="keywordtype">char</span> *url,</div>
+<div class="line">        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> len) {</div>
+<div class="line">    <span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
+<div class="line"> </div>
+<div class="line">    err = <a class="code" href="group__megawifi.html#ga8f58b6f745739c2b58279c616fe8645e">mw_http_url_set</a>(url);</div>
+<div class="line">    <span class="keywordflow">if</span> (!err) {</div>
+<div class="line">        err = <a class="code" href="group__megawifi.html#ga5c6bfb81f8fe1c6c6a294f36765b3936">mw_http_method_set</a>(type);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">if</span> (!err) {</div>
+<div class="line">        err = <a class="code" href="group__megawifi.html#ga79ec1a09ac1748e40b4adfdaf6194ed8">mw_http_open</a>(len);</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> err;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Tries to synchronously receive exactly the indicated data length</span></div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">int</span> sync_recv(uint8_t ch, <span class="keywordtype">char</span> *buf, <span class="keywordtype">int</span> len, uint16_t tout_frames)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordtype">int</span> recvd = 0;</div>
+<div class="line">    <span class="keywordtype">int</span> err = 0;</div>
+<div class="line">    uint8_t get_ch = ch;</div>
+<div class="line">    int16_t get_len;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">while</span> (err == 0 &amp;&amp; recvd &lt; len) {</div>
+<div class="line">        get_len = len - recvd;</div>
+<div class="line">        err = <a class="code" href="group__megawifi.html#ga8eae5109b67bbc7d238fc17e9ad02ee7">mw_recv_sync</a>(&amp;get_ch, buf + recvd, &amp;get_len, tout_frames);</div>
+<div class="line">        <span class="keywordflow">if</span> (!err) {</div>
+<div class="line">            <span class="keywordflow">if</span> (get_ch != ch) {</div>
+<div class="line">                err = -1;</div>
+<div class="line">            } <span class="keywordflow">else</span> {</div>
+<div class="line">                recvd += get_len;</div>
+<div class="line">            }</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> err;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Performs final steps of an HTTP request</span></div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">int</span> http_finish(<span class="keywordtype">char</span> *recv_buf, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *len)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
+<div class="line">    uint32_t content_len = 0;</div>
+<div class="line"> </div>
+<div class="line">    err = <a class="code" href="group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d">mw_http_finish</a>(&amp;content_len, <a class="code" href="group__loop.html#ga604f92993b6bdd4d21fedbc88b1293d3">MS_TO_FRAMES</a>(60000));</div>
+<div class="line">    err = err &gt;= 200 &amp;&amp; err &lt;= 300 ? 0 : err;</div>
+<div class="line">    <span class="keywordflow">if</span> (content_len &gt; b.msg_buf_len) {</div>
+<div class="line">        err = -1;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">if</span> (!err &amp;&amp; content_len) {</div>
+<div class="line">        err = sync_recv(<a class="code" href="group__megawifi.html#ga44e2e02e52dc70019bd6b13a16386e9f">MW_HTTP_CH</a>, recv_buf, content_len, 0);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">if</span> (!err &amp;&amp; len) {</div>
+<div class="line">        *len = content_len;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> err;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">/************************************************************************/</span></div>
+<div class="line"><span class="keywordtype">int</span> http_get(<span class="keyword">const</span> <span class="keywordtype">char</span> *url, <span class="keywordtype">char</span> *recv_buf, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *len)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
+<div class="line"> </div>
+<div class="line">    err = http_begin(<a class="code" href="group__megawifi.html#ggaa4508878ae9a945610bbe5109a2ac233a155303c76672f6a53899b78394ab361a">MW_HTTP_METHOD_GET</a>, url, 0);</div>
+<div class="line">    <span class="keywordflow">if</span> (!err) {</div>
+<div class="line">        err = http_finish(recv_buf, len);</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> err;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">/************************************************************************/</span></div>
+<div class="line"><span class="keywordtype">int</span> http_post(<span class="keyword">const</span> <span class="keywordtype">char</span> *url, <span class="keyword">const</span> <span class="keywordtype">char</span> *data, <span class="keywordtype">int</span> length,</div>
+<div class="line">        <span class="keyword">const</span> <span class="keywordtype">char</span> *content_type, <span class="keywordtype">char</span> *recv_buf,</div>
+<div class="line">        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *recv_len)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// If this function fails, it is not critical</span></div>
+<div class="line">    <a class="code" href="group__megawifi.html#ga588168f2a7af5ec48b0ac0749f2c4587">mw_http_header_add</a>(<span class="stringliteral">&quot;Content-Type&quot;</span>, content_type);</div>
+<div class="line"> </div>
+<div class="line">    err = http_begin(<a class="code" href="group__megawifi.html#ggaa4508878ae9a945610bbe5109a2ac233a68abd299b9e0c5094cca464d26f1436a">MW_HTTP_METHOD_POST</a>, url, length);</div>
+<div class="line">    <span class="keywordflow">if</span> (!err) {</div>
+<div class="line">        err = <a class="code" href="group__megawifi.html#gad8a3660c1dda462ca37ac3cb1a61e347">mw_send_sync</a>(<a class="code" href="group__megawifi.html#ga44e2e02e52dc70019bd6b13a16386e9f">MW_HTTP_CH</a>, data, length, 0);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">if</span> (!err) {</div>
+<div class="line">        err = http_finish(recv_buf, recv_len);</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> err;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>In case you want HTTPS, you can set a PEM formatted certificate as follows:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> http_cert_set(<span class="keyword">const</span> <span class="keywordtype">char</span> *cert, <span class="keywordtype">int</span> cert_len, uint32_t cert_hash)</div>
+<div class="line">{</div>
+<div class="line">    uint32_t hash = <a class="code" href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7">mw_http_cert_query</a>();</div>
+<div class="line">    <span class="keywordflow">if</span> (hash != cert_hash) {</div>
+<div class="line">        <a class="code" href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904">mw_http_cert_set</a>(cert_hash, cert, cert_len);</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>This function only sets the certificate if it has not been previously stored, avoiding to innecesarily wear the Flash memory. To obtain a correct certificate hash, you can use openssl:</p>
+<div class="fragment"><div class="line">$ openssl x509 -hash in &lt;cert_file_name&gt; -noout</div>
 </div><!-- fragment --><h2>Getting the date and time</h2>
+<p>NOTE: As of version 0.8 of the API, this function is not supported.</p>
 <p>MegaWiFi allows to synchronize the date and time to NTP servers. It is important to note that on console power up, the module date and time will be incorrect and should not be used. For the date and time to be synchronized, the module must be associated to an AP with Internet connectivity. Once associated, the date and time is automatically synchronized. The synchronization procedure usually takes only a few seconds, and once completed, date/time should be usable until the console is powered off.</p>
 <p>To know if the date and time is in sync, you can use the <code><a class="el" href="group__megawifi.html#gaef95cf26f3656a8ac958475c618569b0" title="Get system status.">mw_sys_stat_get()</a></code> command:</p>
 <div class="fragment"><div class="line"><span class="keyword">union </span><a class="code" href="unionmw__msg__sys__stat.html">mw_msg_sys_stat</a> *<a class="code" href="unionmw__msg__sys__stat.html#a1e0225d35341fd30ae96f0c799233df4">sys_stat</a>;</div>
@@ -552,11 +671,15 @@ $(document).ready(function(){initNavTree('index.html','');});
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 </div><!-- doc-content -->
+<div class="ttc" id="agroup__megawifi_html_ga588168f2a7af5ec48b0ac0749f2c4587"><div class="ttname"><a href="group__megawifi.html#ga588168f2a7af5ec48b0ac0749f2c4587">mw_http_header_add</a></div><div class="ttdeci">enum mw_err mw_http_header_add(const char *key, const char *value)</div><div class="ttdoc">Add an HTTP header.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gad8a3660c1dda462ca37ac3cb1a61e347"><div class="ttname"><a href="group__megawifi.html#gad8a3660c1dda462ca37ac3cb1a61e347">mw_send_sync</a></div><div class="ttdeci">enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len, uint16_t tout_frames)</div><div class="ttdoc">Sends data through a socket, using a previously allocated channel. Synchronous interface.</div></div>
 <div class="ttc" id="agroup__loop_html_ga6d6f6f4f4f9ac838b05f02517098f414"><div class="ttname"><a href="group__loop.html#ga6d6f6f4f4f9ac838b05f02517098f414">loop_timer_add</a></div><div class="ttdeci">int loop_timer_add(struct loop_timer *timer)</div><div class="ttdoc">Add a timer to the loop.</div></div>
 <div class="ttc" id="aunionmw__msg__sys__stat_html"><div class="ttname"><a href="unionmw__msg__sys__stat.html">mw_msg_sys_stat</a></div><div class="ttdoc">System status.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00232">mw-msg.h:232</a></div></div>
+<div class="ttc" id="agroup__megawifi_html_ga4d2998fcca3b6cae16f090b902327904"><div class="ttname"><a href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904">mw_http_cert_set</a></div><div class="ttdeci">enum mw_err mw_http_cert_set(uint32_t cert_hash, const char *cert, uint16_t cert_len)</div><div class="ttdoc">Set the PEM certificate to use on HTTPS requests.</div></div>
+<div class="ttc" id="agroup__megawifi_html_ga44e2e02e52dc70019bd6b13a16386e9f"><div class="ttname"><a href="group__megawifi.html#ga44e2e02e52dc70019bd6b13a16386e9f">MW_HTTP_CH</a></div><div class="ttdeci">#define MW_HTTP_CH</div><div class="ttdoc">Channel used for HTTP requests and cert sets.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00098">megawifi.h:98</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga9ab26dbe9fc804915a4f8b5db4e194ed"><div class="ttname"><a href="group__megawifi.html#ga9ab26dbe9fc804915a4f8b5db4e194ed">mw_gamertag_set</a></div><div class="ttdeci">enum mw_err mw_gamertag_set(uint8_t slot, const struct mw_gamertag *gamertag)</div><div class="ttdoc">Set gamertag information for one slot.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga2a3299d2d6e2480b714ba880024ab59e"><div class="ttname"><a href="group__megawifi.html#ga2a3299d2d6e2480b714ba880024ab59e">mw_ap_assoc</a></div><div class="ttdeci">enum mw_err mw_ap_assoc(uint8_t slot)</div><div class="ttdoc">Tries associating to an AP. If successful, also configures IPv4.</div></div>
+<div class="ttc" id="agroup__megawifi_html_ga5c6bfb81f8fe1c6c6a294f36765b3936"><div class="ttname"><a href="group__megawifi.html#ga5c6bfb81f8fe1c6c6a294f36765b3936">mw_http_method_set</a></div><div class="ttdeci">enum mw_err mw_http_method_set(enum mw_http_method method)</div><div class="ttdoc">Set method for HTTP requests.</div></div>
 <div class="ttc" id="agroup__util_html_ga070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdoc">NULL Pointer.</div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00029">util.h:29</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga9eb5082f2dc47b0c802ba6dc233ada4e"><div class="ttname"><a href="group__megawifi.html#ga9eb5082f2dc47b0c802ba6dc233ada4e">mw_date_time_get</a></div><div class="ttdeci">char * mw_date_time_get(uint32_t dt_bin[2])</div><div class="ttdoc">Get date and time.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gab99864c90151e2bffe5d685cd6e1b241"><div class="ttname"><a href="group__megawifi.html#gab99864c90151e2bffe5d685cd6e1b241">mw_send</a></div><div class="ttdeci">static enum lsd_status mw_send(uint8_t ch, const char *data, int16_t len, void *ctx, lsd_send_cb send_cb)</div><div class="ttdoc">Sends data through a socket, using a previously allocated channel. Asynchronous interface.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00473">megawifi.h:473</a></div></div>
@@ -568,20 +691,26 @@ $(document).ready(function(){initNavTree('index.html','');});
 <div class="ttc" id="agroup__megawifi_html_gabcab943ad7996de14e41a669a369d2b6"><div class="ttname"><a href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6">mw_bssid_get</a></div><div class="ttdeci">uint8_t * mw_bssid_get(enum mw_if_type interface_type)</div><div class="ttdoc">Gets the module BSSID (the MAC address) for the specified interface.</div></div>
 <div class="ttc" id="astructmw__gamertag_html_aef2019230d62535a3035a02853790e0d"><div class="ttname"><a href="structmw__gamertag.html#aef2019230d62535a3035a02853790e0d">mw_gamertag::tagline</a></div><div class="ttdeci">char tagline[MW_GT_TAGLINE_MAX]</div><div class="ttdoc">User defined text tag.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00198">mw-msg.h:198</a></div></div>
 <div class="ttc" id="astructloop__timer_html_a49d20719ecda1051ce798021bd1d5c12"><div class="ttname"><a href="structloop__timer.html#a49d20719ecda1051ce798021bd1d5c12">loop_timer::timer_cb</a></div><div class="ttdeci">loop_timer_cb timer_cb</div><div class="ttdoc">Timer callback function.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00060">loop.h:60</a></div></div>
+<div class="ttc" id="agroup__megawifi_html_ga79ec1a09ac1748e40b4adfdaf6194ed8"><div class="ttname"><a href="group__megawifi.html#ga79ec1a09ac1748e40b4adfdaf6194ed8">mw_http_open</a></div><div class="ttdeci">enum mw_err mw_http_open(uint32_t content_len)</div><div class="ttdoc">Open HTTP connection.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga8eae5109b67bbc7d238fc17e9ad02ee7"><div class="ttname"><a href="group__megawifi.html#ga8eae5109b67bbc7d238fc17e9ad02ee7">mw_recv_sync</a></div><div class="ttdeci">enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len, uint16_t tout_frames)</div><div class="ttdoc">Receive data, syncrhonous interface.</div></div>
 <div class="ttc" id="aunionmw__msg__sys__stat_html_a1e0225d35341fd30ae96f0c799233df4"><div class="ttname"><a href="unionmw__msg__sys__stat.html#a1e0225d35341fd30ae96f0c799233df4">mw_msg_sys_stat::sys_stat</a></div><div class="ttdeci">enum mw_state sys_stat</div><div class="ttdoc">System status.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00235">mw-msg.h:235</a></div></div>
 <div class="ttc" id="astructmw__gamertag_html"><div class="ttname"><a href="structmw__gamertag.html">mw_gamertag</a></div><div class="ttdoc">Gamertag data.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00190">mw-msg.h:190</a></div></div>
 <div class="ttc" id="astructmw__gamertag_html_ab0931be9019b21951e3fe40f86d52243"><div class="ttname"><a href="structmw__gamertag.html#ab0931be9019b21951e3fe40f86d52243">mw_gamertag::security</a></div><div class="ttdeci">char security[MW_GT_SECURITY_MAX]</div><div class="ttdoc">User security string.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00196">mw-msg.h:196</a></div></div>
+<div class="ttc" id="agroup__megawifi_html_ggaa4508878ae9a945610bbe5109a2ac233a68abd299b9e0c5094cca464d26f1436a"><div class="ttname"><a href="group__megawifi.html#ggaa4508878ae9a945610bbe5109a2ac233a68abd299b9e0c5094cca464d26f1436a">MW_HTTP_METHOD_POST</a></div><div class="ttdoc">HTTP POST Method.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00060">megawifi.h:60</a></div></div>
 <div class="ttc" id="astructmw__gamertag_html_ad126e84a77ac1dc74d03b94d1c3f402c"><div class="ttname"><a href="structmw__gamertag.html#ad126e84a77ac1dc74d03b94d1c3f402c">mw_gamertag::nickname</a></div><div class="ttdeci">char nickname[MW_GT_NICKNAME_MAX]</div><div class="ttdoc">User nickname.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00194">mw-msg.h:194</a></div></div>
 <div class="ttc" id="agroup__mpool_html_gae1b6b14b314e5aedcb6dadcc889c4cec"><div class="ttname"><a href="group__mpool.html#gae1b6b14b314e5aedcb6dadcc889c4cec">mp_init</a></div><div class="ttdeci">void mp_init(int force_init)</div><div class="ttdoc">Pool initialization.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gaaf6aaaa928b6085b6ecf7012e2c6aa1b"><div class="ttname"><a href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">mw_tcp_connect</a></div><div class="ttdeci">enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr, const char *dst_port, const char *src_port)</div><div class="ttdoc">Tries establishing a TCP connection with specified server.</div></div>
+<div class="ttc" id="agroup__loop_html_ga604f92993b6bdd4d21fedbc88b1293d3"><div class="ttname"><a href="group__loop.html#ga604f92993b6bdd4d21fedbc88b1293d3">MS_TO_FRAMES</a></div><div class="ttdeci">#define MS_TO_FRAMES(ms)</div><div class="ttdoc">Converts milliseconds to frames, rounding to the nearest.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00034">loop.h:34</a></div></div>
 <div class="ttc" id="agroup__loop_html_ga40d4c3a2cbefafdbb454f68cdaf9129d"><div class="ttname"><a href="group__loop.html#ga40d4c3a2cbefafdbb454f68cdaf9129d">loop_init</a></div><div class="ttdeci">int loop_init(uint8_t max_func, uint8_t max_timer)</div><div class="ttdoc">Initialize loop.</div></div>
+<div class="ttc" id="agroup__megawifi_html_ga8f58b6f745739c2b58279c616fe8645e"><div class="ttname"><a href="group__megawifi.html#ga8f58b6f745739c2b58279c616fe8645e">mw_http_url_set</a></div><div class="ttdeci">enum mw_err mw_http_url_set(const char *url)</div><div class="ttdoc">Set URL for HTTP requests.</div></div>
 <div class="ttc" id="agroup__mpool_html_gaa587236f548e1a16c90a7981cba57e85"><div class="ttname"><a href="group__mpool.html#gaa587236f548e1a16c90a7981cba57e85">mp_free_to</a></div><div class="ttdeci">void mp_free_to(void *pos)</div><div class="ttdoc">Free memory up to the one pointed by pos.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga0f4fd1409dc625d7506960f09ddccef5"><div class="ttname"><a href="group__megawifi.html#ga0f4fd1409dc625d7506960f09ddccef5">mw_sock_conn_wait</a></div><div class="ttdeci">enum mw_err mw_sock_conn_wait(uint8_t ch, int tout_frames)</div><div class="ttdoc">Polls a socket until it is ready to transfer data. Typical use of this function is after a successful...</div></div>
+<div class="ttc" id="agroup__megawifi_html_ga6cffe37fa4e2b2ae0e177a021fab3aa7"><div class="ttname"><a href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7">mw_http_cert_query</a></div><div class="ttdeci">uint32_t mw_http_cert_query(void)</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga50526e0ea48208cd7ce658408e6777ab"><div class="ttname"><a href="group__megawifi.html#ga50526e0ea48208cd7ce658408e6777ab">mw_init</a></div><div class="ttdeci">int mw_init(char *cmd_buf, uint16_t buf_len)</div><div class="ttdoc">Module initialization. Must be called once before using any other function. It also initializes de UA...</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga777c2b3caa535d405278734b0f5aad2e"><div class="ttname"><a href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a></div><div class="ttdeci">mw_err</div><div class="ttdoc">Error codes for MegaWiFi API functions.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00047">megawifi.h:47</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga8227c5ef923c4eee7f978ccf80cff9af"><div class="ttname"><a href="group__megawifi.html#ga8227c5ef923c4eee7f978ccf80cff9af">mw_recv</a></div><div class="ttdeci">static enum lsd_status mw_recv(char *buf, int16_t len, void *ctx, lsd_recv_cb recv_cb)</div><div class="ttdoc">Receive data, asyncrhonous interface.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00413">megawifi.h:413</a></div></div>
 <div class="ttc" id="ampool_8h_html"><div class="ttname"><a href="mpool_8h.html">mpool.h</a></div><div class="ttdoc">Memory Pool.</div></div>
+<div class="ttc" id="agroup__megawifi_html_ggaa4508878ae9a945610bbe5109a2ac233a155303c76672f6a53899b78394ab361a"><div class="ttname"><a href="group__megawifi.html#ggaa4508878ae9a945610bbe5109a2ac233a155303c76672f6a53899b78394ab361a">MW_HTTP_METHOD_GET</a></div><div class="ttdoc">HTTP GET Method.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00059">megawifi.h:59</a></div></div>
 <div class="ttc" id="agroup__loop_html_ga4c3a8dbc5064a8e7d9baffbe604216f1"><div class="ttname"><a href="group__loop.html#ga4c3a8dbc5064a8e7d9baffbe604216f1">loop</a></div><div class="ttdeci">int loop(void)</div><div class="ttdoc">Loop function.</div></div>
 <div class="ttc" id="agroup__mpool_html_ga6cd611d9987a2d9dacfdf2b0dce737ad"><div class="ttname"><a href="group__mpool.html#ga6cd611d9987a2d9dacfdf2b0dce737ad">mp_alloc</a></div><div class="ttdeci">void * mp_alloc(uint16_t length) __attribute__((malloc))</div><div class="ttdoc">Allocates data from the pool.</div></div>
 <div class="ttc" id="astructloop__timer_html"><div class="ttname"><a href="structloop__timer.html">loop_timer</a></div><div class="ttdoc">Loop timer data structure.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00059">loop.h:59</a></div></div>
@@ -589,9 +718,11 @@ $(document).ready(function(){initNavTree('index.html','');});
 <div class="ttc" id="astructloop__func_html_a53af751bd25418cdb0791f0068959844"><div class="ttname"><a href="structloop__func.html#a53af751bd25418cdb0791f0068959844">loop_func::func_cb</a></div><div class="ttdeci">loop_func_cb func_cb</div><div class="ttdoc">Function callback to run on the loop.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00044">loop.h:44</a></div></div>
 <div class="ttc" id="aloop_8h_html"><div class="ttname"><a href="loop_8h.html">loop.h</a></div><div class="ttdoc">Loop handling for single threaded Megadrive programs.</div></div>
 <div class="ttc" id="agroup__loop_html_ga063359b6f53ca8e491c41807cd4d5760"><div class="ttname"><a href="group__loop.html#ga063359b6f53ca8e491c41807cd4d5760">loop_func_add</a></div><div class="ttdeci">int loop_func_add(struct loop_func *func)</div><div class="ttdoc">Add a function to the loop.</div></div>
+<div class="ttc" id="agroup__megawifi_html_gaa4508878ae9a945610bbe5109a2ac233"><div class="ttname"><a href="group__megawifi.html#gaa4508878ae9a945610bbe5109a2ac233">mw_http_method</a></div><div class="ttdeci">mw_http_method</div><div class="ttdoc">Supported HTTP methods.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00058">megawifi.h:58</a></div></div>
 <div class="ttc" id="agroup__util_html_gaa8cecfc5c5c054d2875c03e77b7be15d"><div class="ttname"><a href="group__util.html#gaa8cecfc5c5c054d2875c03e77b7be15d">TRUE</a></div><div class="ttdeci">#define TRUE</div><div class="ttdoc">TRUE value for boolean comparisons.</div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00020">util.h:20</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga635b2e45820d9872badae382a7730153"><div class="ttname"><a href="group__megawifi.html#ga635b2e45820d9872badae382a7730153">mw_gamertag_get</a></div><div class="ttdeci">struct mw_gamertag * mw_gamertag_get(uint8_t slot)</div><div class="ttdoc">Get gamertag information for one slot.</div></div>
 <div class="ttc" id="astructmw__gamertag_html_a4d1622737aa1ef49b5cda6c93e3d1036"><div class="ttname"><a href="structmw__gamertag.html#a4d1622737aa1ef49b5cda6c93e3d1036">mw_gamertag::id</a></div><div class="ttdeci">int id</div><div class="ttdoc">Unique gamertag id.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00192">mw-msg.h:192</a></div></div>
+<div class="ttc" id="agroup__megawifi_html_ga027dd5a50045b0d5d33b5fd6d124df2d"><div class="ttname"><a href="group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d">mw_http_finish</a></div><div class="ttdeci">int mw_http_finish(uint32_t *content_len, int tout_frames)</div><div class="ttdoc">Finish an opened HTTP request.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga82f774de9f50b730de578cb0e7512d16"><div class="ttname"><a href="group__megawifi.html#ga82f774de9f50b730de578cb0e7512d16">mw_tcp_bind</a></div><div class="ttdeci">enum mw_err mw_tcp_bind(uint8_t ch, uint16_t port)</div><div class="ttdoc">Binds a socket to a port, and listens to connections on the port. If a connection request is received...</div></div>
 <div class="ttc" id="autil_8h_html"><div class="ttname"><a href="util_8h.html">util.h</a></div><div class="ttdoc">General purpose utilities.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gga777c2b3caa535d405278734b0f5aad2ea469b336990144c39297268eca750af7f"><div class="ttname"><a href="group__megawifi.html#gga777c2b3caa535d405278734b0f5aad2ea469b336990144c39297268eca750af7f">MW_ERR_NONE</a></div><div class="ttdoc">No error (success)</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00048">megawifi.h:48</a></div></div>

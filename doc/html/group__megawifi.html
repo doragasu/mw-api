@@ -378,9 +378,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga79ec1a09ac1748e40b4adfdaf6194ed8"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga79ec1a09ac1748e40b4adfdaf6194ed8">mw_http_open</a> (uint32_t content_len)</td></tr>
 <tr class="memdesc:ga79ec1a09ac1748e40b4adfdaf6194ed8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open HTTP connection.  <a href="group__megawifi.html#ga79ec1a09ac1748e40b4adfdaf6194ed8">More...</a><br /></td></tr>
 <tr class="separator:ga79ec1a09ac1748e40b4adfdaf6194ed8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0d6d7803da9c56e504d938d3361683a2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga0d6d7803da9c56e504d938d3361683a2">mw_http_finish</a> (uint32_t *content_len)</td></tr>
-<tr class="memdesc:ga0d6d7803da9c56e504d938d3361683a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finish an opened HTTP request.  <a href="group__megawifi.html#ga0d6d7803da9c56e504d938d3361683a2">More...</a><br /></td></tr>
-<tr class="separator:ga0d6d7803da9c56e504d938d3361683a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga027dd5a50045b0d5d33b5fd6d124df2d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d">mw_http_finish</a> (uint32_t *content_len, int tout_frames)</td></tr>
+<tr class="memdesc:ga027dd5a50045b0d5d33b5fd6d124df2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finish an opened HTTP request.  <a href="group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d">More...</a><br /></td></tr>
+<tr class="separator:ga027dd5a50045b0d5d33b5fd6d124df2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6cffe37fa4e2b2ae0e177a021fab3aa7"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7">mw_http_cert_query</a> (void)</td></tr>
 <tr class="separator:ga6cffe37fa4e2b2ae0e177a021fab3aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4d2998fcca3b6cae16f090b902327904"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904">mw_http_cert_set</a> (uint32_t cert_hash, const char *cert, uint16_t cert_len)</td></tr>
@@ -956,7 +956,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the reception procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00804">804</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00805">805</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1011,7 +1011,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the send procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00787">787</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00788">788</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1466,8 +1466,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga0d6d7803da9c56e504d938d3361683a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga0d6d7803da9c56e504d938d3361683a2">&#9670;&nbsp;</a></span>mw_http_finish()</h2>
+<a id="ga027dd5a50045b0d5d33b5fd6d124df2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga027dd5a50045b0d5d33b5fd6d124df2d">&#9670;&nbsp;</a></span>mw_http_finish()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1476,8 +1476,18 @@ Functions</h2></td></tr>
           <td class="memname">int mw_http_finish </td>
           <td>(</td>
           <td class="paramtype">uint32_t *&#160;</td>
-          <td class="paramname"><em>content_len</em></td><td>)</td>
+          <td class="paramname"><em>content_len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>tout_frames</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1486,7 +1496,8 @@ Functions</h2></td></tr>
 <p>After a successful call to <a class="el" href="group__megawifi.html#ga79ec1a09ac1748e40b4adfdaf6194ed8" title="Open HTTP connection.">mw_http_open()</a>, and sending the content (if any), call this function to receive the HTTP response headers, and obtain the length of the body to receive with a further call to <a class="el" href="group__megawifi.html#ga8227c5ef923c4eee7f978ccf80cff9af" title="Receive data, asyncrhonous interface.">mw_recv()</a> or <a class="el" href="group__megawifi.html#ga8eae5109b67bbc7d238fc17e9ad02ee7" title="Receive data, syncrhonous interface.">mw_recv_sync()</a>, using MW_HTTP_CH.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">content_len</td><td>Length of the response content to receive after a successfull call to this function.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">content_len</td><td>Length of the response content to receive after a successfull call to this function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tout_frames</td><td>Maximun number of frames to wait for reply.</td></tr>
   </table>
   </dd>
 </dl>

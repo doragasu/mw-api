@@ -19,7 +19,7 @@ To build the files, you can use the provided Makefile, suiting it to your needs,
 The MegaWiFi API consists of the following modules:
 * loop: Loop handling for single threaded Megadrive programs.
 * mpool: Simple memory pool implementation.
-* megawifi: Communications with the WiFi module and the Internet.
+* megawifi: Communications with the WiFi module and the Internet, including sockets and HTTP/HTTPS.
 * mw-msg: MegaWiFi command message definitions.
 * util: General purpose utility functions and macros.
 
@@ -28,6 +28,8 @@ The `mw-msg` module contains the message definitions for the different MegaWiFi 
 The `util` module contains general purpose functions and macros not fitting in the other modules, such as `ip_validate()` to check if a string is a valid IP address, `str_to_uint8()` to convert a string to an 8-bit number, etc.
 
 The other modules (`loop`, `mpool`, `megawifi`) are covered in depth below.
+
+There is also a `json` module wich includes `jsmn` library along with some helper functions to parse JSON formatted strings. Please read `jsmn` documentation to learn how its tokenizer works.
 
 ### Loop module
 
@@ -176,6 +178,7 @@ And we finally arrive to the `megawifi` module API. This API allows of course se
 
 * Scanning APs, associating and disassociating to/from them.
 * Creating both client and server network sockets.
+* Performing HTTP/HTTPS client requests.
 * Reading and writing from/to the non-volatile flash memory in the WiFi module.
 * Keeping the time and day, accurately synchronized to NTP servers.
 * Generating large amounts of random numbers blazingly fast.
@@ -375,7 +378,7 @@ Connecting to a server is straightforward: just call `mw_tcp_connect()` with the
 	}
 ```
 
-Once connected, you can start sending and receiving data. When no longer needed, remember to close the connection with `mw_tcp_disconnect()`. The channel number must be from 1 to `LSD_MAX_CH` (usually 4). The used channel number will be passed to all the calls relative to the connected socket (think about it like a socket number).
+Once connected, you can start sending and receiving data. When no longer needed, remember to close the connection with `mw_tcp_disconnect()`. The channel number must be from 1 to `LSD_MAX_CH - 1` (usually 2). The used channel number will be passed to all the calls relative to the connected socket (think about it like a socket number).
 
 ### Creating a TCP server socket
 
@@ -483,9 +486,161 @@ void recv_example(void)
 }
 ```
 
+### Performing an HTTP/HTTPS request
+
+`megawifi` module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that setting an SSL certificate is required only if you want to use HTTPS. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.
+
+1. (**Optional**) Set the SSL certificate. This is only required when using HTTPS. You can retrieve the x509 hash of the currently stored certificate by calling `mw_http_cert_query()`. To set a different certificate, call `mw_http_cert_set()`. Once set, the certificate is stored on the non volatile memory, and will remain until replaced with a new one. Only one certificate can be stored at a time. Note you should not use this function unless required, because as it writes to Flash memory, it can wear the storage if used too often.
+2. Set the URL (e.g. https://www.example.com). Use `mw_http_url_set()` for this purpose.
+3. Set the HTTP method. Most commonly used ones are `MW_HTTP_METHOD_GET` and `MW_HTTP_METHOD_POST`. Use `mw_http_method_set()` to set it.
+4. (**Optional**) add HTTP headers to the request. Many aspects of the requests can be controlled via headers. E.g. you can define the formatting of the data you are posting by adding the header "Content-type" with the mime type "text/html", "application/json", etc.
+5. Open the connection. In this step, the HTTP or HTTPS connection is opened, and the request (including any headers added) is sent to the server. If the request contains a data payload, in this step the payload length is specified. The function `mw_http_open()` does this.
+6. (**Optional**) send the request data payload (if any). This must be performed only if a payload length (greater than 0) was specified in the previous step. This is done the same way as sending data through sockets, with the `mw_send()` or `mw_send_sync()` functions, using the HTTP reserved channel (`MW_CH_HTTP`).
+7. Finish the transaction. Call `mw_http_finish()` for the HTTP client to obtain the response to the request, along with its associated headers. If a response includes a data payload, its length is obtained in this step.
+8. (**Optional**) if the previous step returned a reply payload length greater than 0, it must be received in this step by calling `mw_recv()` or `mw_recv_sync()` using the HTTP reserved channel (`MW_CH_HTTP`).
+
+By looking to this list of steps, it might look complicated to perform an HTTP request, but the steps are relatively simple, and can be easily added to some functions. E.g., this code allows performing arbritrary GET (without payload) and POST (with JSON payload) requests:
+
+```C
+// Performs initial steps of an HTTP request
+static int http_begin(enum mw_http_method type, const char *url,
+		unsigned int len) {
+	enum mw_err err;
+
+	err = mw_http_url_set(url);
+	if (!err) {
+		err = mw_http_method_set(type);
+	}
+	if (!err) {
+		err = mw_http_open(len);
+	}
+
+	return err;
+}
+
+// Tries to synchronously receive exactly the indicated data length
+static int sync_recv(uint8_t ch, char *buf, int len, uint16_t tout_frames)
+{
+	int recvd = 0;
+	int err = 0;
+	uint8_t get_ch = ch;
+	int16_t get_len;
+
+	while (err == 0 && recvd < len) {
+		get_len = len - recvd;
+		err = mw_recv_sync(&get_ch, buf + recvd, &get_len, tout_frames);
+		if (!err) {
+			if (get_ch != ch) {
+				err = -1;
+			} else {
+				recvd += get_len;
+			}
+		}
+	}
+
+	return err;
+}
+
+// Performs final steps of an HTTP request
+static int http_finish(char *recv_buf, unsigned int *len)
+{
+	enum mw_err err;
+	uint32_t content_len = 0;
+
+	err = mw_http_finish(&content_len, MS_TO_FRAMES(60000));
+	err = err >= 200 && err <= 300 ? 0 : err;
+	if (content_len > b.msg_buf_len) {
+		err = -1;
+	}
+	if (!err && content_len) {
+		err = sync_recv(MW_HTTP_CH, recv_buf, content_len, 0);
+	}
+	if (!err && len) {
+		*len = content_len;
+	}
+
+	return err;
+}
+
+/************************************************************************//**
+ * \brief Generic HTTP GET request without data payload.
+ *
+ * \param[in]  url      URL for the request.
+ * \param[out] recv_buf Buffer used for HTTP response data.
+ * \param[out] len      Length of the response.
+ *
+ * \return HTTP status code, or -1 if request was not completed.
+ ****************************************************************************/
+int http_get(const char *url, char *recv_buf, unsigned int *len)
+{
+	enum mw_err err;
+
+	err = http_begin(MW_HTTP_METHOD_GET, url, 0);
+	if (!err) {
+		err = http_finish(recv_buf, len);
+	}
+
+	return err;
+}
+
+/************************************************************************//**
+ * \brief Generic POST request with JSON data payload.
+ *
+ * \param[in]    url          URL for the request.
+ * \param[in]    data         Data to send in the POST data payload.
+ * \param[in]    length       Length of the data to send.
+ * \param[in]    content_type Content-Type HTTP header for the data payload.
+ * \param[out]   recv_buf     Buffer used to receive reply data.
+ * \param[inout] recv_len     On input, length of recv_buf. On output, length
+ *                            of the received reply data.
+ *
+ * \return HTTP status code or -1 if the request was not completed.
+ ****************************************************************************/
+int http_post(const char *url, const char *data, int length,
+		const char *content_type, char *recv_buf,
+		unsigned int *recv_len)
+{
+	enum mw_err err;
+
+	// If this function fails, it is not critical
+	mw_http_header_add("Content-Type", content_type);
+
+	err = http_begin(MW_HTTP_METHOD_POST, url, length);
+	if (!err) {
+		err = mw_send_sync(MW_HTTP_CH, data, length, 0);
+	}
+	if (!err) {
+		err = http_finish(recv_buf, recv_len);
+	}
+
+	return err;
+}
+```
+
+In case you want HTTPS, you can set a PEM formatted certificate as follows:
+
+```C
+void http_cert_set(const char *cert, int cert_len, uint32_t cert_hash)
+{
+	uint32_t hash = mw_http_cert_query();
+	if (hash != cert_hash) {
+		mw_http_cert_set(cert_hash, cert, cert_len);
+	}
+}
+```
+
+This function only sets the certificate if it has not been previously stored, avoiding to innecesarily wear the Flash memory. To obtain a correct certificate hash, you can use openssl:
+
+```
+$ openssl x509 -hash in <cert_file_name> -noout
+```
+
 ### Getting the date and time
 
+NOTE: As of version 0.8 of the API, this function is not supported.
+
 MegaWiFi allows to synchronize the date and time to NTP servers. It is important to note that on console power up, the module date and time will be incorrect and should not be used. For the date and time to be synchronized, the module must be associated to an AP with Internet connectivity. Once associated, the date and time is automatically synchronized. The synchronization procedure usually takes only a few seconds, and once completed, date/time should be usable until the console is powered off.
+
 
 To know if the date and time is in sync, you can use the `mw_sys_stat_get()` command:
 

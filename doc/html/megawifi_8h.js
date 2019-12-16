@@ -77,7 +77,7 @@ var megawifi_8h =
     [ "mw_http_cert_query", "group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7", null ],
     [ "mw_http_cert_set", "group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904", null ],
     [ "mw_http_cleanup", "group__megawifi.html#ga118134bd7e87a99a5f40f6c6aed69c12", null ],
-    [ "mw_http_finish", "group__megawifi.html#ga0d6d7803da9c56e504d938d3361683a2", null ],
+    [ "mw_http_finish", "group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d", null ],
     [ "mw_http_header_add", "group__megawifi.html#ga588168f2a7af5ec48b0ac0749f2c4587", null ],
     [ "mw_http_header_del", "group__megawifi.html#gab3112ee9aeea7839c27a1bd14a214742", null ],
     [ "mw_http_method_set", "group__megawifi.html#ga5c6bfb81f8fe1c6c6a294f36765b3936", null ],

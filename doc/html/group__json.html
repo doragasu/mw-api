@@ -104,6 +104,8 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__json.html#ga76714f234ff3b80999b2d1df6cb21968">JSMN_STATIC</a></td></tr>
 <tr class="memdesc:ga76714f234ff3b80999b2d1df6cb21968"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hides jsmn API definitions to avoid linking errors. <br /></td></tr>
 <tr class="separator:ga76714f234ff3b80999b2d1df6cb21968"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa094843b8d68db0f452befb42550a610"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__json.html#gaa094843b8d68db0f452befb42550a610">json_item</a>(json_str,  obj_tok,  idx)</td></tr>
+<tr class="separator:gaa094843b8d68db0f452befb42550a610"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -132,6 +134,46 @@ Functions</h2></td></tr>
 <dl class="section author"><dt>Author</dt><dd>Jesus Alonso (doragasu) </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>2019</dd></dl>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Add more functions to extract data.</dd></dl>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="gaa094843b8d68db0f452befb42550a610"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa094843b8d68db0f452befb42550a610">&#9670;&nbsp;</a></span>json_item</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define json_item</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">json_str, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">obj_tok, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">idx&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(idx) &lt; 0 ? <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a> : \</div>
+<div class="line">    &amp;((json_str)[(obj_tok)[idx].start])</div>
+</div><!-- fragment --><p>Macro to extract the item (as string) from a token. Requires the json_str to have the null terminations added by <a class="el" href="group__json.html#ga063223d002548fae2554d262ab07e141" title="Add null-terminators to the input JSON string. Useful to further extract token values as null-termina...">json_null_terminate()</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="json_8h_source.html#l00031">31</a> of file <a class="el" href="json_8h_source.html">json.h</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="gadaa675b6f8a88b4e42513d6733a58b7c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gadaa675b6f8a88b4e42513d6733a58b7c">&#9670;&nbsp;</a></span>json_bool_get()</h2>
@@ -442,6 +484,7 @@ Functions</h2></td></tr>
 </div>
 </div><!-- contents -->
 </div><!-- doc-content -->
+<div class="ttc" id="agroup__util_html_ga070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdoc">NULL Pointer.</div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00029">util.h:29</a></div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>

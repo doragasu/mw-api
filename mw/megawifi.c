@@ -168,7 +168,9 @@ enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
 	int stat;
 
 	lsd_recv(buf, *buf_len, &md, cmd_recv_cb);
-	loop_timer_start(&d.timer, tout_frames);
+	if (tout_frames) {
+		loop_timer_start(&d.timer, tout_frames);
+	}
 	stat = loop_pend();
 	if (CMD_OK != stat) {
 		return MW_ERR_RECV;
@@ -189,7 +191,6 @@ enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len,
 
 	while (sent < len) {
 		to_send = MIN(len - sent, d.buf_len);
-//		to_send = MIN(len - sent, 1024);
 		lsd_send(ch, data + sent, to_send, NULL, cmd_send_cb);
 		if (tout_frames) {
 			loop_timer_start(&d.timer, tout_frames);
@@ -1205,7 +1206,7 @@ enum mw_err mw_http_open(uint32_t content_len)
 	return MW_ERR_NONE;
 }
 
-int mw_http_finish(uint32_t *content_len)
+int mw_http_finish(uint32_t *content_len, int tout_frames)
 {
 	enum mw_err err;
 
@@ -1219,7 +1220,7 @@ int mw_http_finish(uint32_t *content_len)
 
 	d.cmd->cmd = MW_CMD_HTTP_FINISH;
 	d.cmd->data_len = 0;
-	err = mw_command(MW_COMMAND_TOUT);
+	err = mw_command(tout_frames);
 	if (err) {
 		return MW_ERR;
 	}

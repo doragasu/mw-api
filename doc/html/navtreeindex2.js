@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"structmw__gamertag.html#afc74b8dd7f4225e5dca76268ca58abd7":[2,4,10,1],
+"structmw__gamertag__set__msg.html":[2,4,11],
 "structmw__gamertag__set__msg.html#a0f5edfecb4204864737059685cb4606d":[2,4,11,1],
 "structmw__gamertag__set__msg.html#a1327b2437999c57355cb77db39d4d23a":[2,4,11,2],
 "structmw__gamertag__set__msg.html#ac7f7af55e1ee4f6e53516adf6ae3b851":[2,4,11,0],
