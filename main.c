@@ -163,7 +163,7 @@ static void http_test(void)
 	if (mw_http_url_set("https://www.example.com")) goto err_out;
 	if (mw_http_method_set(MW_HTTP_METHOD_GET)) goto err_out;
 	if (mw_http_open(0)) goto err_out;
-	if (mw_http_finish(&len) < 100) goto err_out;
+	if (mw_http_finish(&len, MS_TO_FRAMES(20000)) < 100) goto err_out;
 	if (len) {
 		if (http_recv(len)) goto err_out;
 	}
