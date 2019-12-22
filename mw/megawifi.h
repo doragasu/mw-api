@@ -100,7 +100,7 @@ enum mw_http_method {
 /// Minimum command buffer length to be able to send all available commands
 /// with minimum data payload. This length might not guarantee that commands
 /// like mw_sntp_cfg_set() can be sent if payload length is big enough).
-#define MW_CMD_MIN_BUFLEN	104
+#define MW_CMD_MIN_BUFLEN	168
 
 /// Access Point data.
 struct mw_ap_data {
@@ -530,30 +530,24 @@ enum mw_sock_stat mw_sock_stat_get(uint8_t ch);
 /************************************************************************//**
  * \brief Configure SNTP parameters and timezone.
  *
- * \param[in] server   Array of up to three NTP servers. If less than three
- *                     servers are desired, unused entries must be empty.
- * \param[in] up_delay Update delay in seconds. Minimum value is 15.
- * \param[in] timezone Time zone information (from -11 to 13).
- * \param[in] dst      Daylight saving. Set to 1 to apply 1 hour offset.
+ * \param[in] tz_str Timezone string (e.g. "CET"). See tzset(3) for details.
+ * \param[in] server Array of up to three NTP servers. If less than three
+ *                   servers are desired, unused entries must be empty.
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
-enum mw_err mw_sntp_cfg_set(const char *server[3], uint16_t up_delay,
-		int8_t timezone, int8_t dst);
+enum mw_err mw_sntp_cfg_set(const char *tz_str, const char *server[3]);
 
 /************************************************************************//**
  * \brief Get SNTP parameters and timezone configuration.
  *
- * \param[out] server   Array of three NTP server pointers. If less than 3
- *                      servers are configured, unused ones will be NULL.
- * \param[out] up_delay Update delay in seconds.
- * \param[out] timezone Time zone information (from -11 to 13).
- * \param[out] dst      Daylight saving. When 1, 1 hour offset is applied.
+ * \param[out] tz_str Timezone string (e.g. "CET"). See tzset(3) for details.
+ * \param[out] server Array of three NTP server pointers. If less than 3
+ *                    servers are configured, unused ones will be NULL.
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
-enum mw_err mw_sntp_cfg_get(char *server[3], uint16_t *up_delay,
-		int8_t *timezone, int8_t *dst);
+enum mw_err mw_sntp_cfg_get(char **tz_str, char *server[3]);
 
 /************************************************************************//**
  * \brief Get date and time.

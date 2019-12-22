@@ -44,6 +44,8 @@
 #define MW_GT_AVATAR_WIDTH		32
 /// Gamertag avatar graphick height in pixels
 #define MW_GT_AVATAR_HEIGHT		48
+/// Telegram token maximum length
+#define MW_GT_TG_TOKEN_MAX		64
 
 /// Supported commands.
 enum PACKED mw_command {
@@ -196,6 +198,8 @@ struct mw_gamertag {
 	char security[MW_GT_SECURITY_MAX];
 	/// User defined text tag
 	char tagline[MW_GT_TAGLINE_MAX];
+	/// Telegram token
+	char tg_token[MW_GT_TG_TOKEN_MAX];
 	/// Avatar image tiles
 	uint8_t avatar_tiles[MW_GT_AVATAR_WIDTH * MW_GT_AVATAR_HEIGHT / 2];
 	/// Avatar image palette

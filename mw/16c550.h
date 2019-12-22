@@ -167,7 +167,7 @@ void uart_init(void);
  * \param[in] reg Register to modify (IER, FCR, LCR or MCR).
  * \param[in] val Bits set in val, will be cleared in reg register.
  ****************************************************************************/
-#define uart_clr_bits(reg, val)	do{sh.reg &= ~(val);						\
+#define uart_clr_bits(reg, val)	do{sh.reg &= ~(val);			\
 	UART_##reg = sh.reg;}while(0)
 
 /************************************************************************//**

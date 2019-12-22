@@ -195,6 +195,19 @@ static void tcp_test(void)
 	mw_tcp_disconnect(1);
 }
 
+static void datetime_test(void)
+{
+	const char *datetime;
+	uint32_t dt_bin[2] = {};
+
+	// Wait until date/time is set
+	do {
+		mw_sleep(60);
+		datetime = mw_date_time_get(dt_bin);
+	} while (dt_bin[1] < 1577030004);
+	println(datetime, VDP_TXT_COL_WHITE);
+}
+
 static void run_test(struct loop_timer *t)
 {
 	enum mw_err err;
@@ -216,6 +229,7 @@ static void run_test(struct loop_timer *t)
 
 	tcp_test();
 	http_test();
+	datetime_test();
 
 	// Test UDP in normal mode
 	udp_normal_test();
