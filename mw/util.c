@@ -88,6 +88,41 @@ int uint32_to_ip_str(uint32_t ip_u32, char *ip_str)
 	return pos;
 }
 
+uint8_t uint16_to_str(uint16_t num, char *str)
+{
+	int8_t i, j;
+	char digit[5] = {0};
+
+	// Maximum is 65535
+	for (i = 4; i > 0 && num; i--) {
+		digit[i] = num % 10;
+		num /= 10;
+	}
+	digit[0] = num;
+
+	// Skip leading zeros
+	for (i = 0; i < 4 && !digit[i]; i++);
+
+	// Convert digits to characters
+	for (j = 0; i < 5; i++, j++) {
+		str[j] = digit[i] + '0';
+	}
+	str[j] = '\0';
+
+	return j;
+}
+
+uint8_t int16_to_str(int16_t num, char *str) {
+	uint8_t off = 0;
+
+	if (num < 0) {
+		*str++ = '-';
+		off++;
+	}
+
+	return uint16_to_str(num, str) + off;
+}
+
 uint8_t uint8_to_str(uint8_t num, char *str)
 {
 	uint8_t i = 0;

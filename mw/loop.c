@@ -101,8 +101,16 @@ int loop_timer_add(struct loop_timer *timer)
 {
 	int i;
 
-	for (i = 0; i < d->timer_max && d->t[i]; i++);
-	if (i == d->timer_max) return 1;
+	for (i = 0; i < d->timer_max && d->t[i]; i++) {
+		// If timer was marked to be deleted, just remove the flag
+		if (d->t[i] == timer && timer->to_delete) {
+			timer->to_delete = 0;
+			return 0;
+		}
+	}
+	if (i == d->timer_max) {
+		return 1;
+	}
 
 	d->t[i] = timer;
 	return 0;

@@ -29,6 +29,11 @@
 #define NULL ((void*)0)
 #endif
 
+/// Stringify helper macro (do not use directly)
+#define _STR(item)	#item
+/// Stringify macro
+#define STR(item)	_STR(item)
+
 /// Returns TRUE if number is in the specified range
 #define IN_RANGE(num, lower, upper)					\
 	(((number) >= (lower)) && ((number) <= (upper)))
@@ -45,6 +50,11 @@
 /// - int a SECTION(data);
 /// - void foo(void) SECTION(text);
 #define SECTION(name)	__attribute__((section(#name)))
+
+/// Put next symbol in named section .text.ro_text.symbol
+#define ROM_TEXT(name)	SECTION(.text.ro_text.name)
+/// Put next symbol in named section .text.ro_data.symbol
+#define ROM_DATA(name)	SECTION(.text.ro_data.name)
 
 /// Get number of rows of a 2D array
 #define ARRAY_ROWS(array_2d)		(sizeof(array_2d) / sizeof(array_2d[0]) / sizeof(array_2d[0][0]))
@@ -153,6 +163,30 @@ uint8_t uint8_to_str(uint8_t num, char *str);
 int8_t int8_to_str(int8_t num, char *str);
 
 /************************************************************************//**
+ * \brief Converts an unsigned 16-bit number to its character
+ * string representation.
+ *
+ * \param[in]  num Input number to convert.
+ * \param[out] str String representing the input number.
+ *
+ * \return Resulting str length (not including null termination).
+ * \note str buffer length shall be at least 6 bytes.
+ ****************************************************************************/
+uint8_t uint16_to_str(uint16_t num, char *str);
+
+/************************************************************************//**
+ * \brief Converts an signed 16-bit number to its character
+ * string representation.
+ *
+ * \param[in]  num Input number to convert.
+ * \param[out] str String representing the input number.
+ *
+ * \return Resulting str length (not including null termination).
+ * \note str buffer length shall be at least 7 bytes.
+ ****************************************************************************/
+uint8_t int16_to_str(int16_t num, char *str);
+
+/************************************************************************//**
  * \brief Converts a character string representing an 8-bit unsigned number,
  * to its binary (uint8_t) representation.
  *
@@ -205,6 +239,14 @@ void uint8_to_hex_str(uint8_t num, char *str);
  *         including the null termination.
  ****************************************************************************/
 int uint32_to_hex_str(uint32_t num, char *str, int pad);
+
+#ifndef TRUE
+/// TRUE value for logic comparisons
+#define TRUE 1
+/// FALSE value for logic comparisons
+#define TRUE 1
+#define FALSE 0
+#endif
 
 #endif //_UTIL_H_
 

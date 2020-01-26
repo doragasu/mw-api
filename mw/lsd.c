@@ -218,11 +218,11 @@ void lsd_process(void)
 		active = FALSE;
 		if (d.rx.stat > LSD_RECV_IDLE && uart_rx_ready()) {
 			active = TRUE;
-			while (uart_rx_ready() && d.rx.stat > LSD_RECV_IDLE) {
+			while (d.rx.stat > LSD_RECV_IDLE && uart_rx_ready()) {
 				process_recv();
 			}
 		}
-		if (uart_tx_ready() && d.tx.stat > LSD_SEND_IDLE) {
+		if (d.tx.stat > LSD_SEND_IDLE && uart_tx_ready()) {
 			active = TRUE;
 			for (int i = 0; i < UART_TX_FIFO_LEN &&
 					d.tx.stat > LSD_SEND_IDLE; i++) {
