@@ -1299,6 +1299,48 @@ int mw_http_cleanup(void)
 	return MW_ERR_NONE;
 }
 
+char *mw_def_server_get(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return NULL;
+	}
+
+	d.cmd->cmd = MW_CMD_SERVER_URL_GET;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+
+	return (char*)d.cmd->data;
+}
+
+enum mw_err mw_def_server_set(const char *server_url)
+{
+	enum mw_err err;
+	size_t len;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (!server_url || !(len = strlen(server_url))) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->cmd = MW_CMD_SERVER_URL_SET;
+	d.cmd->data_len = len + 1;
+	memcpy(d.cmd->data, server_url, len + 1);
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
 enum mw_err mw_log(const char *msg)
 {
 	enum mw_err err;

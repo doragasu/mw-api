@@ -97,6 +97,8 @@ enum PACKED mw_command {
 	MW_CMD_HTTP_OPEN	=  45,	///< Open HTTP request
 	MW_CMD_HTTP_FINISH	=  46,	///< Finish HTTP request
 	MW_CMD_HTTP_CLEANUP	=  47,	///< Clean request data
+	MW_CMD_SERVER_URL_GET	=  48,	///< Get the main server URL
+	MW_CMD_SERVER_URL_SET	=  49,	///< Set the main server URL
 	MW_CMD_ERROR		= 255	///< Error command reply
 };
 

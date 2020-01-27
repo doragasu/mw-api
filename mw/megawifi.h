@@ -768,6 +768,22 @@ enum mw_err mw_http_cert_set(uint32_t cert_hash, const char *cert,
  ****************************************************************************/
 int mw_http_cleanup(void);
 
+/************************************************************************//**
+ * \brief Get the default server used for MegaWiFi connections.
+ *
+ * \return The server URL string, or NULL on error.
+ ****************************************************************************/
+char *mw_def_server_get(void);
+
+/************************************************************************//**
+ * \brief Set the default server used for MegaWiFi connections.
+ *
+ * \param[in] server_url The server URL to set.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_def_server_set(const char *server_url);
+
 /****** THE FOLLOWING COMMANDS ARE LOWER LEVEL AND USUALLY NOT NEEDED ******/
 
 /************************************************************************//**

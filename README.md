@@ -37,7 +37,7 @@ This module implements the main loop of the program. It allows easily adding and
 
 A typical Megadrive game contains a main loop with a structure similar to this:
 
- ```C
+```C
 void main(void)
 {
 	// Perform initialization
