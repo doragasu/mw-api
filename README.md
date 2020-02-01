@@ -637,31 +637,27 @@ $ openssl x509 -hash in <cert_file_name> -noout
 
 ### Getting the date and time
 
-NOTE: As of version 0.8 of the API, this function is not supported.
-
-MegaWiFi allows to synchronize the date and time to NTP servers. It is important to note that on console power up, the module date and time will be incorrect and should not be used. For the date and time to be synchronized, the module must be associated to an AP with Internet connectivity. Once associated, the date and time is automatically synchronized. The synchronization procedure usually takes only a few seconds, and once completed, date/time should be usable until the console is powered off.
-
-
-To know if the date and time is in sync, you can use the `mw_sys_stat_get()` command:
-
-```C
-	union mw_msg_sys_stat *sys_stat;
-
-	sys_stat = mw_sys_stat_get();
-	if (sys_stat && sys_stat->dt_ok) {
-		// Date and time syncrhonized
-	} else {
-		// Date and time **not** synchronized, or other error
-	}
-```
-
-Once date and time is synchronized, you can get it, both in human readable format, and in the number of seconds elapsed since the epoch, with a single call to `mw_date_time_get()`:
+MegaWiFi allows to synchronize the date and time to NTP servers. It is important to note that on console power up, the module date and time will be incorrect and should not be used. For the date and time to be synchronized, the module must be associated to an AP with Internet connectivity. Once associated, the date and time is automatically synchronized. The synchronization procedure usually takes only a few seconds, and once completed, date/time should be usable until the console is powered off. To get date and time both in number of seconds since the epoch, and in human readable form, call `mw_date_time_get()`:
 
 ```C
 	char *date_time_string;
 	uint32_t date_time_bin[2];
 
 	date_time_string = mw_date_time_get(date_time_bin);
+```
+
+For the date/time to work properly, the timezone and NTP servers must be properly set. This is done calling `mw_sntp_cfg_set()`, and configuration is stored in non volatile flash to survive power cycles, so you should do this only once. As an example, you can set the time configuration for the eastern Europe timezone (UTC+1) as follows:
+
+```C
+	enum mw_err err;
+	const char *timezone = "UTC+1";
+	const char *ntp_serv[] = {
+		"0.pool.ntp.org",
+		"1.pool.ntp.org",
+		"2.pool.ntp.org"
+	};
+
+	err = mw_sntp_cfg_set(timezone, ntp_serv);
 ```
 
 ### Setting and getting gamertag information

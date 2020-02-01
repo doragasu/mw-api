@@ -56,7 +56,8 @@ var group__mw_msg =
       [ "id", "structmw__gamertag.html#a4d1622737aa1ef49b5cda6c93e3d1036", null ],
       [ "nickname", "structmw__gamertag.html#ad126e84a77ac1dc74d03b94d1c3f402c", null ],
       [ "security", "structmw__gamertag.html#ab0931be9019b21951e3fe40f86d52243", null ],
-      [ "tagline", "structmw__gamertag.html#aef2019230d62535a3035a02853790e0d", null ]
+      [ "tagline", "structmw__gamertag.html#aef2019230d62535a3035a02853790e0d", null ],
+      [ "tg_token", "structmw__gamertag.html#a59b9124833d029be5e6acf78c5c36ce1", null ]
     ] ],
     [ "mw_gamertag_set_msg", "structmw__gamertag__set__msg.html", [
       [ "gamertag", "structmw__gamertag__set__msg.html#ac7f7af55e1ee4f6e53516adf6ae3b851", null ],
@@ -108,10 +109,11 @@ var group__mw_msg =
     [ "MW_GT_NICKNAME_MAX", "group__mw-msg.html#gaa4692f86d0549c9526d7c1751b468c4b", null ],
     [ "MW_GT_SECURITY_MAX", "group__mw-msg.html#ga6062902c950950c930337a5ca802fd52", null ],
     [ "MW_GT_TAGLINE_MAX", "group__mw-msg.html#ga50277ef01588c04bd12a6a97e5a5fa44", null ],
+    [ "MW_GT_TG_TOKEN_MAX", "group__mw-msg.html#gac6b68a54ef6906716d0a8da58724c365", null ],
     [ "MW_MSG_MAX_BUFLEN", "group__mw-msg.html#gae5a8a74375e598d58f1e6d179b417188", null ],
     [ "MW_PASS_MAXLEN", "group__mw-msg.html#ga4624ada68840b53714507bf5037dbd4a", null ],
     [ "MW_SSID_MAXLEN", "group__mw-msg.html#ga76228c565db63e86246b9c3ae65ee8a8", null ],
-    [ "mw_cmd", "group__mw-msg.html#gaf531833df0e261a264414ce80bfa5a79", null ],
+    [ "mw_cmd", "group__mw-msg.html#ga4a8ec7133ac6ff328fe648526292e439", null ],
     [ "mw_sock_stat", "group__mw-msg.html#ga03b1792dd84b65e0e291cb4cdb58b6b3", [
       [ "MW_SOCK_NONE", "group__mw-msg.html#gga03b1792dd84b65e0e291cb4cdb58b6b3a20596fcbf2590d6a5bc620ec3a27a73c", null ],
       [ "MW_SOCK_TCP_LISTEN", "group__mw-msg.html#gga03b1792dd84b65e0e291cb4cdb58b6b3a93de2af755d0f62c4182339b3ea8fed4", null ],

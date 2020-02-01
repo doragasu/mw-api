@@ -1,11 +1,11 @@
 var searchData=
 [
-  ['uint32_5fto_5fhex_5fstr_328',['uint32_to_hex_str',['../group__util.html#gadc2fe63f7c4fde6fd40fdcbd34019d8b',1,'util.h']]],
-  ['uint32_5fto_5fip_5fstr_329',['uint32_to_ip_str',['../group__util.html#gaa604833843bd10f3fedd956bc324a341',1,'util.h']]],
-  ['uint8_5fto_5fhex_5fstr_330',['uint8_to_hex_str',['../group__util.html#gafb94df8994a87fe786b0f62db37f8a15',1,'util.h']]],
-  ['uint8_5fto_5fstr_331',['uint8_to_str',['../group__util.html#gaa541fa75f7d12a2e2f98530a11d064eb',1,'util.h']]],
-  ['unused_5fparam_332',['UNUSED_PARAM',['../group__util.html#ga6c7ba74ad57863d1342878d2c703e660',1,'util.h']]],
-  ['up_5fdelay_333',['up_delay',['../structmw__msg__sntp__cfg.html#a1abae2d6a07bea3e604cc3638a66a117',1,'mw_msg_sntp_cfg']]],
-  ['util_334',['util',['../group__util.html',1,'']]],
-  ['util_2eh_335',['util.h',['../util_8h.html',1,'']]]
+  ['tagline_331',['tagline',['../structmw__gamertag.html#aef2019230d62535a3035a02853790e0d',1,'mw_gamertag']]],
+  ['tg_5ftoken_332',['tg_token',['../structmw__gamertag.html#a59b9124833d029be5e6acf78c5c36ce1',1,'mw_gamertag']]],
+  ['timer_5fcb_333',['timer_cb',['../structloop__timer.html#a49d20719ecda1051ce798021bd1d5c12',1,'loop_timer']]],
+  ['to_5fdelete_334',['to_delete',['../structloop__func.html#a24216e713368e20bd4f570fce9392497',1,'loop_func::to_delete()'],['../structloop__timer.html#a666fda5001236b06e0c14100a0b2e3b4',1,'loop_timer::to_delete()']]],
+  ['to_5fupper_335',['to_upper',['../group__util.html#gac0417a833ac454efa44c61ee8bccd55d',1,'util.h']]],
+  ['todo_20list_336',['Todo List',['../todo.html',1,'']]],
+  ['true_337',['TRUE',['../group__util.html#gaa8cecfc5c5c054d2875c03e77b7be15d',1,'util.h']]],
+  ['tz_338',['tz',['../structmw__msg__sntp__cfg.html#a50b8abd73fcc8e08df3a6a65e6c55111',1,'mw_msg_sntp_cfg']]]
 ];

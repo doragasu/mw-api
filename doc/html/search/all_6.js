@@ -1,12 +1,7 @@
 var searchData=
 [
-  ['id_48',['id',['../structmw__gamertag.html#a4d1622737aa1ef49b5cda6c93e3d1036',1,'mw_gamertag']]],
-  ['in_5faddr_49',['in_addr',['../unionmw__cmd.html#a70fa039a39a56cc8f2e8e289271d1b85',1,'mw_cmd']]],
-  ['in_5frange_50',['IN_RANGE',['../group__util.html#ga65456fb559f877950c5a880781cc04ee',1,'util.h']]],
-  ['int8_5fto_5fstr_51',['int8_to_str',['../group__util.html#ga648437f7d7b44a714f95c6a80f9a2a04',1,'util.h']]],
-  ['ip_52',['ip',['../structmw__msg__ip__cfg.html#ab4df13858cfbdeaa4537a62e67289540',1,'mw_msg_ip_cfg']]],
-  ['ip_5faddr_53',['ip_addr',['../unionip__addr.html',1,'']]],
-  ['ip_5fcfg_54',['ip_cfg',['../unionmw__cmd.html#abf2f849014b65af32e8707b940109fd1',1,'mw_cmd']]],
-  ['ip_5fstr_5fto_5fuint32_55',['ip_str_to_uint32',['../group__util.html#gadeb908ba34661b2397003fe6bf969111',1,'util.h']]],
-  ['ip_5fvalidate_56',['ip_validate',['../group__util.html#ga851ec0ef4a4c9ca0cf855fe0925946b5',1,'util.h']]]
+  ['gamertag_45',['gamertag',['../structmw__gamertag__set__msg.html#ac7f7af55e1ee4f6e53516adf6ae3b851',1,'mw_gamertag_set_msg']]],
+  ['gamertag_5fget_46',['gamertag_get',['../unionmw__cmd.html#a7f8212d6672fa2f06bb0ad2c75385de6',1,'mw_cmd']]],
+  ['gamertag_5fset_47',['gamertag_set',['../unionmw__cmd.html#a3812cb8a373035752cf5ba8a55430b87',1,'mw_cmd']]],
+  ['gateway_48',['gateway',['../structmw__ip__cfg.html#a438550afd98599c477dcdfafe5862503',1,'mw_ip_cfg']]]
 ];
