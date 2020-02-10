@@ -637,7 +637,23 @@ $ openssl x509 -hash in <cert_file_name> -noout
 
 ### Getting the date and time
 
-MegaWiFi allows to synchronize the date and time to NTP servers. It is important to note that on console power up, the module date and time will be incorrect and should not be used. For the date and time to be synchronized, the module must be associated to an AP with Internet connectivity. Once associated, the date and time is automatically synchronized. The synchronization procedure usually takes only a few seconds, and once completed, date/time should be usable until the console is powered off. To get date and time both in number of seconds since the epoch, and in human readable form, call `mw_date_time_get()`:
+MegaWiFi allows to synchronize the date and time to NTP servers. It is important to note that on console power up, the module date and time will be incorrect and should not be used. For the date and time to be synchronized, the module must be associated to an AP with Internet connectivity. Once associated, the date and time is automatically synchronized. The synchronization procedure usually takes only a few seconds, and once completed, date/time should be usable until the console is powered off.
+
+
+To guess if the date and time is in sync, you can check the `dt_ok` field of `mw_msg_sys_stat` union, by calling `mw_sys_stat_get()`:
+
+```C
+	union mw_msg_sys_stat *sys_stat;
+
+	sys_stat = mw_sys_stat_get();
+	if (sys_stat && sys_stat->dt_ok) {
+		// Date and time syncrhonized
+	} else {
+		// Date and time **not** synchronized, or other error
+	}
+```
+
+Once date and time is synchronized, you can get it, both in human readable format, and in the number of seconds elapsed since the epoch, with a single call to `mw_date_time_get()`:
 
 ```C
 	char *date_time_string;
