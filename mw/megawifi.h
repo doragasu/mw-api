@@ -199,13 +199,15 @@ enum mw_err mw_default_cfg_set(void);
  * \param[in] slot Configuration slot to use.
  * \param[in] ssid String with the AP SSID to set.
  * \param[in] pass String with the AP SSID to set.
+ * \param[in] phy_type Bitmask with the PHY type configuration.
  *
  * \return MW_ERR_NONE on success, other code on failure.
  *
  * \note Strings must be NULL terminated. Maximum SSID length is 32 bytes,
  *       maximum pass length is 64 bytes.
  ****************************************************************************/
-enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass);
+enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass,
+		 enum mw_phy_type phy_type);
 
 /************************************************************************//**
  * \brief Gets access point configuration (SSID and password).
@@ -213,6 +215,7 @@ enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass);
  * \param[in]  slot Configuration slot to use.
  * \param[out] ssid String with the AP SSID got.
  * \param[out] pass String with the AP SSID got.
+ * \param[out] phy_type Bitmask with the PHY type configuration.
  *
  * \return MW_ERR_NONE on success, other code on failure.
  *
@@ -220,7 +223,8 @@ enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass);
  *          to 64 bytes. If ssid is 32 bytes, it will NOT be NULL terminated.
  *          Also if pass is 64 bytes, it will NOT be NULL terminated.
  ****************************************************************************/
-enum mw_err mw_ap_cfg_get(uint8_t slot, char **ssid, char **pass);
+enum mw_err mw_ap_cfg_get(uint8_t slot, char **ssid, char **pass,
+		enum mw_phy_type *phy_type);
 
 /************************************************************************//**
  * \brief Set IPv4 configuration.
@@ -257,6 +261,7 @@ enum mw_err mw_ip_current(struct mw_ip_cfg **ip);
 /************************************************************************//**
  * \brief Scan for access points.
  *
+ * \param[in]  phy_type Bitmask with the PHY type configuration.
  * \param[out] ap_data Data of the found access points. Each entry has the
  *             format specified on the mw_ap_data structure.
  * \param[out] aps     Number of found access points.
@@ -264,7 +269,7 @@ enum mw_err mw_ip_current(struct mw_ip_cfg **ip);
  * \return Length in bytes of the output data if operation completes
  *         successfully, or -1 if scan fails.
  ****************************************************************************/
-int mw_ap_scan(char **ap_data, uint8_t *aps);
+int mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps);
 
 /************************************************************************//**
  * \brief Parses received AP data and fills information of the AP at "pos".
@@ -557,7 +562,7 @@ enum mw_err mw_sntp_cfg_get(char **tz_str, char *server[3]);
  *                    be properly set).
  *
  * \return A string with the date and time in textual format, e.g.: "Thu Mar
- *         3 12:26:51 2016”, or NULL if error.
+ *         3 12:26:51 2016", or NULL if error.
  ****************************************************************************/
 char *mw_date_time_get(uint32_t dt_bin[2]);
 
@@ -783,6 +788,16 @@ char *mw_def_server_get(void);
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
 enum mw_err mw_def_server_set(const char *server_url);
+
+/************************************************************************//**
+ * \brief Get random numbers.
+ *
+ * \param[in] rnd_len Number of bytes of resulting random array.
+ *
+ * \return The buffer with the requested random numbers on success, or NULL
+ * when error.
+ ****************************************************************************/
+uint8_t *mw_hrng_get(uint16_t rnd_len);
 
 /****** THE FOLLOWING COMMANDS ARE LOWER LEVEL AND USUALLY NOT NEEDED ******/
 

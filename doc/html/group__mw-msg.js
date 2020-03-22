@@ -20,6 +20,7 @@ var group__mw_msg =
     [ "mw_msg_ap_cfg", "structmw__msg__ap__cfg.html", [
       [ "cfg_num", "structmw__msg__ap__cfg.html#a4680aa7b00e0743ad90e1bae2a2b8649", null ],
       [ "pass", "structmw__msg__ap__cfg.html#affe7219af9856ad393a2c72f37c55c39", null ],
+      [ "phy_type", "structmw__msg__ap__cfg.html#a429a403ad2e4ecff4d1eee06b263261c", null ],
       [ "ssid", "structmw__msg__ap__cfg.html#a7f2972a3e758b0700cfd478173415c90", null ]
     ] ],
     [ "mw_msg_ip_cfg", "structmw__msg__ip__cfg.html", [
@@ -130,5 +131,6 @@ var group__mw_msg =
       [ "MW_ST_MAX", "group__mw-msg.html#ggaf53835e2cd96d02aac928c20a6e99547a5daf125099ce4afd940eff8926622e91", null ]
     ] ],
     [ "mw_command", "group__mw-msg.html#ga2b7b381630bfc0d9ec4184dff849a223", null ],
+    [ "mw_phy_type", "group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4", null ],
     [ "mw_security", "group__mw-msg.html#gaf5c4180f70d50ae3a29b48ce4671d61b", null ]
 ];

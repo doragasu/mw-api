@@ -112,6 +112,13 @@ enum PACKED mw_security {
 	MW_SEC_UNKNOWN		///< Unknown security
 };
 
+/// WiFi PHY configuration for the connection to the AP
+enum PACKED mw_phy_type {
+	MW_PHY_11B = 1,		///< Legacy, do not use unless necessary
+	MW_PHY_11BG = 3,	///< No 802.11n compatibility
+	MW_PHY_11BGN = 7	///< 802.11bgn compatible
+};
+
 /// IPv4 address
 union ip_addr {
 	uint32_t addr;		///< IP address in 32 bit form
@@ -142,6 +149,7 @@ struct mw_ip_cfg {
 //           string will not be NULL terminated.
 struct mw_msg_ap_cfg {
 	uint8_t cfg_num;		///< Configuration number
+	enum mw_phy_type phy_type;	///< PHY type bitmask
 	char ssid[MW_SSID_MAXLEN];	///< SSID string
 	char pass[MW_PASS_MAXLEN];	///< Password string
 };

@@ -303,7 +303,8 @@ enum mw_err mw_default_cfg_set(void)
 	return MW_ERR_NONE;
 }
 
-enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass)
+enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass,
+		 enum mw_phy_type phy_type)
 {
 	enum mw_err err;
 
@@ -323,6 +324,7 @@ enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass)
 
 	memset(&d.cmd->ap_cfg, 0, sizeof(struct mw_msg_ap_cfg));
 	d.cmd->ap_cfg.cfg_num = slot;
+	d.cmd->ap_cfg.phy_type = phy_type;
 	// Note: *NOT* NULL terminated strings are allowed on cmd.ap_cfg.ssid
 	// and cmd.ap_cfg.pass
 	memcpy(d.cmd->ap_cfg.ssid, ssid, strnlen(ssid, MW_SSID_MAXLEN));
@@ -338,7 +340,8 @@ enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass)
 	return MW_ERR_NONE;
 }
 
-enum mw_err mw_ap_cfg_get(uint8_t slot, char **ssid, char **pass)
+enum mw_err mw_ap_cfg_get(uint8_t slot, char **ssid, char **pass,
+		enum mw_phy_type *phy_type)
 {
 	enum mw_err err;
 
@@ -362,6 +365,9 @@ enum mw_err mw_ap_cfg_get(uint8_t slot, char **ssid, char **pass)
 	}
 	if (pass) {
 		*pass = d.cmd->ap_cfg.pass;
+	}
+	if (phy_type) {
+		*phy_type = d.cmd->ap_cfg.phy_type;
 	}
 
 	return MW_ERR_NONE;
@@ -434,7 +440,7 @@ enum mw_err mw_ip_current(struct mw_ip_cfg **ip)
 	return MW_ERR_NONE;
 }
 
-int mw_ap_scan(char **ap_data, uint8_t *aps)
+int mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps)
 {
 	enum mw_err err;
 
@@ -443,7 +449,8 @@ int mw_ap_scan(char **ap_data, uint8_t *aps)
 	}
 
 	d.cmd->cmd = MW_CMD_AP_SCAN;
-	d.cmd->data_len = 0;
+	d.cmd->data[0] = phy_type;
+	d.cmd->data_len = 1;
 	err = mw_command(MW_SCAN_TOUT);
 	if (err) {
 		return -1;
@@ -659,7 +666,6 @@ enum mw_err mw_close(uint8_t ch)
 		return MW_ERR_NOT_READY;
 	}
 
-	// TODO Check if used channel/socket
 	d.cmd->cmd = MW_CMD_CLOSE;
 	d.cmd->data_len = 1;
 	d.cmd->data[0] = ch;
@@ -682,7 +688,6 @@ enum mw_err mw_tcp_bind(uint8_t ch, uint16_t port)
 		return MW_ERR_NOT_READY;
 	}
 
-	// TODO Check if used channel/socket
 	d.cmd->cmd = MW_CMD_TCP_BIND;
 	d.cmd->data_len = 7;
 	d.cmd->bind.reserved = 0;
@@ -693,7 +698,6 @@ enum mw_err mw_tcp_bind(uint8_t ch, uint16_t port)
 		return MW_ERR;
 	}
 
-	// TODO This should maybe be done later.
 	lsd_ch_enable(ch);
 
 	return MW_ERR_NONE;

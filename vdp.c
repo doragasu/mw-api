@@ -1,9 +1,11 @@
+#include <string.h>
 #include "vdp.h"
 #include "font.h"
 #include "mw/util.h"
 
 /// VDP shadow register values.
 static uint8_t vdpRegShadow[VDP_REG_MAX];
+static uint16_t palShadow[4][16];
 
 /// Mask used to build control port data for VDP RAM writes.
 /// Bits 15 and 14: CD1 and CD0.
@@ -91,28 +93,33 @@ void VdpInit(void) {
 	for (i = 0; i < sizeof(vdpRegDefaults); i++)
 		VdpRegWrite(i, vdpRegDefaults[i]);
 
-    // Clear CRAM
+	memset(palShadow, 0, sizeof(palShadow));
+	// Clear CRAM
 	VdpRamRwPrep(VDP_CRAM_WR, 0);
 	for (i = 64; i > 0; i--) VDP_DATA_PORT_W = 0;
-    // Clear VRAM
+	// Clear VRAM
 	/// \bug I do not know why, but VRam Fill does not work. I suspect it
 	/// has something to do with transfer length.
 //	VdpDmaVRamFill(0, 0, 0);
 //	VdpDmaWait();
-    VdpRamRwPrep(VDP_VRAM_WR, 0);
+	VdpRamRwPrep(VDP_VRAM_WR, 0);
 	for (i = 32768; i > 0; i--) VDP_DATA_PORT_W = 0;
 
 	// Load font three times, to be able to use three different colors
-	VdpFontLoad(font, fontChars, 0, 1, 0);
-	VdpFontLoad(font, fontChars, fontChars * 32, 2, 0);
-	VdpFontLoad(font, fontChars, 2 * fontChars * 32, 3, 0);
+	VdpFontLoad(font, FONT_NCHARS, 0, 1, 0);
+	VdpFontLoad(font, FONT_NCHARS, FONT_NCHARS * 32, 2, 0);
+	VdpFontLoad(font, FONT_NCHARS, 2 * FONT_NCHARS * 32, 3, 0);
 
 	// Set background and font colors
 	VdpRamRwPrep(VDP_CRAM_WR, 0);
-	VDP_DATA_PORT_W = VDP_COLOR_BLACK;
-	VDP_DATA_PORT_W = VDP_COLOR_WHITE;
-	VDP_DATA_PORT_W = VDP_COLOR_CYAN;
-	VDP_DATA_PORT_W = VDP_COLOR_MAGENTA;
+	VDP_DATA_PORT_W = VDP_COLOR_BLACK;	// Background color
+	palShadow[0][0] = VDP_COLOR_BLACK;
+	VDP_DATA_PORT_W = VDP_COLOR_WHITE;	// Text color 1
+	palShadow[0][1] = VDP_COLOR_BLACK;
+	VDP_DATA_PORT_W = VDP_COLOR_CYAN;	// Text color 2
+	palShadow[0][2] = VDP_COLOR_BLACK;
+	VDP_DATA_PORT_W = VDP_COLOR_MAGENTA;	// Text color 3
+	palShadow[0][3] = VDP_COLOR_BLACK;
 
 	// Set  scroll to 0
 	VDP_DATA_PORT_W = 0;
@@ -207,12 +214,28 @@ void VdpDrawU32(uint16_t planeAddr, uint8_t x, uint8_t y, uint8_t txtColor,
 
 }
 
+void VdpMapLoad(const uint16_t *map, const uint16_t vram_addr, uint8_t map_width,
+		uint8_t map_height, uint8_t plane_width,
+		uint16_t tile_offset, uint8_t pal_num)
+{
+	uint8_t i, j;
+
+
+	for (i = 0; i < map_height; i++) {
+		VdpRamRwPrep(VDP_VRAM_WR, vram_addr + i * plane_width * 2);
+		for (j = 0; j < map_width; j++) {
+			VDP_DATA_PORT_W = map[i * map_width + j] +
+				tile_offset + (pal_num<<13);
+		}
+	}
+}
+
 void VdpFontLoad(const uint32_t *font, uint8_t chars, uint16_t addr,
 		uint8_t fgcol, uint8_t bgcol) {
 	uint32_t line;
 	uint32_t scratch;
 	int16_t i;
-    int8_t j, k;
+	int8_t j, k;
 
 	// Set auto increment
 	VdpRegWrite(VDP_REG_INCR, 0x02);
@@ -245,9 +268,9 @@ void VdpDma(uint32_t src, uint16_t dst, uint16_t wLen, uint16_t mem) {
 	VdpRegWrite(VDP_REG_DMALEN1, wLen);
 	VdpRegWrite(VDP_REG_DMALEN2, wLen>>8);
 	// Write source
-	VdpRegWrite(VDP_REG_DMASRC1, src);
-	VdpRegWrite(VDP_REG_DMASRC2, src>>8);
-	VdpRegWrite(VDP_REG_DMASRC3, src>>16);
+	VdpRegWrite(VDP_REG_DMASRC1, src>>1);
+	VdpRegWrite(VDP_REG_DMASRC2, src>>9);
+	VdpRegWrite(VDP_REG_DMASRC3, src>>17);
 	// Write command and start DMA
 	cmd = (dst>>14) | (mem & 0xFF) | (((dst & 0x3FFF) | (mem & 0xFF00))<<16);
 	VDP_CTRL_PORT_DW = cmd;
@@ -303,5 +326,40 @@ void VdpVBlankWait(void) {
 
 void VdpFramesWait(uint16_t frames) {
 	while (frames--) VdpVBlankWait();
+}
+
+void VdpDisable(void)
+{
+	VdpRegWrite(VDP_REG_MODE2, vdpRegShadow[VDP_REG_MODE2] & (~0x40));
+}
+
+void VdpEnable(void)
+{
+	VdpRegWrite(VDP_REG_MODE2, vdpRegShadow[VDP_REG_MODE2] | 0x40);
+}
+
+void VdpPalLoad(const uint16_t *pal, uint8_t pal_no)
+{
+	VdpDma((uint32_t)pal, pal_no * 32, 16, VDP_DMA_MEM_CRAM);
+	memcpy(palShadow[pal_no], pal, 16 * sizeof(uint16_t));
+}
+
+const uint16_t *VdpPalGet(uint8_t pal_no)
+{
+	return palShadow[pal_no];
+}
+
+void VdpPalFadeOut(uint8_t pal_no)
+{
+	uint16_t r, g, b;
+
+	for (int i = 15; i >= 0; i--) {
+		VdpToRGB(palShadow[pal_no][i], r, g, b);
+		if (r) r--;
+		if (g) g--;
+		if (b) b--;
+		palShadow[pal_no][i] = VdpColor(r, g, b);
+	}
+	VdpDma((uint32_t)palShadow[pal_no], pal_no * 32, 16, VDP_DMA_MEM_CRAM);
 }
 

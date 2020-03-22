@@ -26,7 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">1.0</span>
+   &#160;<span id="projectnumber">1.1</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -247,12 +247,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga603dad869097a4f978f2dbb6fc882f73"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga603dad869097a4f978f2dbb6fc882f73">mw_default_cfg_set</a> (void)</td></tr>
 <tr class="memdesc:ga603dad869097a4f978f2dbb6fc882f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set default module configuration.  <a href="group__megawifi.html#ga603dad869097a4f978f2dbb6fc882f73">More...</a><br /></td></tr>
 <tr class="separator:ga603dad869097a4f978f2dbb6fc882f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga358c077f1c80fd5ee497208b5d691115"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga358c077f1c80fd5ee497208b5d691115">mw_ap_cfg_set</a> (uint8_t slot, const char *ssid, const char *pass)</td></tr>
-<tr class="memdesc:ga358c077f1c80fd5ee497208b5d691115"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set access point configuration (SSID and password).  <a href="group__megawifi.html#ga358c077f1c80fd5ee497208b5d691115">More...</a><br /></td></tr>
-<tr class="separator:ga358c077f1c80fd5ee497208b5d691115"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7b1f13b73f1f2c2cd70f387eb397ae6e"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga7b1f13b73f1f2c2cd70f387eb397ae6e">mw_ap_cfg_get</a> (uint8_t slot, char **ssid, char **pass)</td></tr>
-<tr class="memdesc:ga7b1f13b73f1f2c2cd70f387eb397ae6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets access point configuration (SSID and password).  <a href="group__megawifi.html#ga7b1f13b73f1f2c2cd70f387eb397ae6e">More...</a><br /></td></tr>
-<tr class="separator:ga7b1f13b73f1f2c2cd70f387eb397ae6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3730b846dfb49135e536a2d21cebe351"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga3730b846dfb49135e536a2d21cebe351">mw_ap_cfg_set</a> (uint8_t slot, const char *ssid, const char *pass, enum <a class="el" href="group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4">mw_phy_type</a> phy_type)</td></tr>
+<tr class="memdesc:ga3730b846dfb49135e536a2d21cebe351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set access point configuration (SSID and password).  <a href="group__megawifi.html#ga3730b846dfb49135e536a2d21cebe351">More...</a><br /></td></tr>
+<tr class="separator:ga3730b846dfb49135e536a2d21cebe351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga43a33083f6989eb16339377c33365a77"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga43a33083f6989eb16339377c33365a77">mw_ap_cfg_get</a> (uint8_t slot, char **ssid, char **pass, enum <a class="el" href="group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4">mw_phy_type</a> *phy_type)</td></tr>
+<tr class="memdesc:ga43a33083f6989eb16339377c33365a77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets access point configuration (SSID and password).  <a href="group__megawifi.html#ga43a33083f6989eb16339377c33365a77">More...</a><br /></td></tr>
+<tr class="separator:ga43a33083f6989eb16339377c33365a77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1880676a5f5fdc3119e4e00867cabb4b"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga1880676a5f5fdc3119e4e00867cabb4b">mw_ip_cfg_set</a> (uint8_t slot, const struct <a class="el" href="structmw__ip__cfg.html">mw_ip_cfg</a> *ip)</td></tr>
 <tr class="memdesc:ga1880676a5f5fdc3119e4e00867cabb4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set IPv4 configuration.  <a href="group__megawifi.html#ga1880676a5f5fdc3119e4e00867cabb4b">More...</a><br /></td></tr>
 <tr class="separator:ga1880676a5f5fdc3119e4e00867cabb4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -262,11 +262,11 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa9d6fc1f8168ba5519e1186067e8199e"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaa9d6fc1f8168ba5519e1186067e8199e">mw_ip_current</a> (struct <a class="el" href="structmw__ip__cfg.html">mw_ip_cfg</a> **ip)</td></tr>
 <tr class="memdesc:gaa9d6fc1f8168ba5519e1186067e8199e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current IP configuration, of the joined AP.  <a href="group__megawifi.html#gaa9d6fc1f8168ba5519e1186067e8199e">More...</a><br /></td></tr>
 <tr class="separator:gaa9d6fc1f8168ba5519e1186067e8199e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf961d3319d6218008b48450d658c733b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaf961d3319d6218008b48450d658c733b">mw_ap_scan</a> (char **ap_data, uint8_t *aps)</td></tr>
-<tr class="memdesc:gaf961d3319d6218008b48450d658c733b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scan for access points.  <a href="group__megawifi.html#gaf961d3319d6218008b48450d658c733b">More...</a><br /></td></tr>
-<tr class="separator:gaf961d3319d6218008b48450d658c733b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga99c8dfc15220091883b5e3a2c5744fa5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga99c8dfc15220091883b5e3a2c5744fa5">mw_ap_scan</a> (enum <a class="el" href="group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4">mw_phy_type</a> phy_type, char **ap_data, uint8_t *aps)</td></tr>
+<tr class="memdesc:ga99c8dfc15220091883b5e3a2c5744fa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scan for access points.  <a href="group__megawifi.html#ga99c8dfc15220091883b5e3a2c5744fa5">More...</a><br /></td></tr>
+<tr class="separator:ga99c8dfc15220091883b5e3a2c5744fa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2cd98705a48c59d7710b29223ce2b917"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga2cd98705a48c59d7710b29223ce2b917">mw_ap_fill_next</a> (const char *ap_data, uint16_t pos, struct <a class="el" href="structmw__ap__data.html">mw_ap_data</a> *apd, uint16_t data_len)</td></tr>
-<tr class="memdesc:ga2cd98705a48c59d7710b29223ce2b917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses received AP data and fills information of the AP at "pos". Useful to extract AP information from the data obtained by calling <a class="el" href="group__megawifi.html#gaf961d3319d6218008b48450d658c733b" title="Scan for access points.">mw_ap_scan()</a> function.  <a href="group__megawifi.html#ga2cd98705a48c59d7710b29223ce2b917">More...</a><br /></td></tr>
+<tr class="memdesc:ga2cd98705a48c59d7710b29223ce2b917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses received AP data and fills information of the AP at "pos". Useful to extract AP information from the data obtained by calling <a class="el" href="group__megawifi.html#ga99c8dfc15220091883b5e3a2c5744fa5" title="Scan for access points.">mw_ap_scan()</a> function.  <a href="group__megawifi.html#ga2cd98705a48c59d7710b29223ce2b917">More...</a><br /></td></tr>
 <tr class="separator:ga2cd98705a48c59d7710b29223ce2b917"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2a3299d2d6e2480b714ba880024ab59e"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga2a3299d2d6e2480b714ba880024ab59e">mw_ap_assoc</a> (uint8_t slot)</td></tr>
 <tr class="memdesc:ga2a3299d2d6e2480b714ba880024ab59e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries associating to an AP. If successful, also configures IPv4.  <a href="group__megawifi.html#ga2a3299d2d6e2480b714ba880024ab59e">More...</a><br /></td></tr>
@@ -391,6 +391,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga302e1eb3291b0ab9edbf55c70111a2aa"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga302e1eb3291b0ab9edbf55c70111a2aa">mw_def_server_set</a> (const char *server_url)</td></tr>
 <tr class="memdesc:ga302e1eb3291b0ab9edbf55c70111a2aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the default server used for MegaWiFi connections.  <a href="group__megawifi.html#ga302e1eb3291b0ab9edbf55c70111a2aa">More...</a><br /></td></tr>
 <tr class="separator:ga302e1eb3291b0ab9edbf55c70111a2aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1ba162b634a00f22057575e92a8f4973"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga1ba162b634a00f22057575e92a8f4973">mw_hrng_get</a> (uint16_t rnd_len)</td></tr>
+<tr class="memdesc:ga1ba162b634a00f22057575e92a8f4973"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get random numbers.  <a href="group__megawifi.html#ga1ba162b634a00f22057575e92a8f4973">More...</a><br /></td></tr>
+<tr class="separator:ga1ba162b634a00f22057575e92a8f4973"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga79e05a128d08dce3df5f444a3b9af88b"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga79e05a128d08dce3df5f444a3b9af88b">mw_cmd_send</a> (<a class="el" href="unionmw__cmd.html">mw_cmd</a> *cmd, void *ctx, lsd_send_cb send_cb)</td></tr>
 <tr class="memdesc:ga79e05a128d08dce3df5f444a3b9af88b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a command to the WiFi module.  <a href="group__megawifi.html#ga79e05a128d08dce3df5f444a3b9af88b">More...</a><br /></td></tr>
 <tr class="separator:ga79e05a128d08dce3df5f444a3b9af88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -440,7 +443,7 @@ Functions</h2></td></tr>
 
 <p>Puts the WiFi module in reset state. </p>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00607">607</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00612">612</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -461,7 +464,7 @@ Functions</h2></td></tr>
 
 <p>Releases the module from reset state. </p>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00612">612</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00617">617</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -621,8 +624,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga7b1f13b73f1f2c2cd70f387eb397ae6e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga7b1f13b73f1f2c2cd70f387eb397ae6e">&#9670;&nbsp;</a></span>mw_ap_cfg_get()</h2>
+<a id="ga43a33083f6989eb16339377c33365a77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga43a33083f6989eb16339377c33365a77">&#9670;&nbsp;</a></span>mw_ap_cfg_get()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -643,7 +646,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">char **&#160;</td>
-          <td class="paramname"><em>pass</em>&#160;</td>
+          <td class="paramname"><em>pass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">enum <a class="el" href="group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4">mw_phy_type</a> *&#160;</td>
+          <td class="paramname"><em>phy_type</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -658,7 +667,8 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">slot</td><td>Configuration slot to use. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">ssid</td><td>String with the AP SSID got. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">pass</td><td>String with the AP SSID got.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pass</td><td>String with the AP SSID got. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">phy_type</td><td>Bitmask with the PHY type configuration.</td></tr>
   </table>
   </dd>
 </dl>
@@ -667,8 +677,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga358c077f1c80fd5ee497208b5d691115"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga358c077f1c80fd5ee497208b5d691115">&#9670;&nbsp;</a></span>mw_ap_cfg_set()</h2>
+<a id="ga3730b846dfb49135e536a2d21cebe351"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3730b846dfb49135e536a2d21cebe351">&#9670;&nbsp;</a></span>mw_ap_cfg_set()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -689,7 +699,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>pass</em>&#160;</td>
+          <td class="paramname"><em>pass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">enum <a class="el" href="group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4">mw_phy_type</a>&#160;</td>
+          <td class="paramname"><em>phy_type</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -704,7 +720,8 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">slot</td><td>Configuration slot to use. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ssid</td><td>String with the AP SSID to set. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pass</td><td>String with the AP SSID to set.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pass</td><td>String with the AP SSID to set. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">phy_type</td><td>Bitmask with the PHY type configuration.</td></tr>
   </table>
   </dd>
 </dl>
@@ -772,10 +789,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses received AP data and fills information of the AP at "pos". Useful to extract AP information from the data obtained by calling <a class="el" href="group__megawifi.html#gaf961d3319d6218008b48450d658c733b" title="Scan for access points.">mw_ap_scan()</a> function. </p>
+<p>Parses received AP data and fills information of the AP at "pos". Useful to extract AP information from the data obtained by calling <a class="el" href="group__megawifi.html#ga99c8dfc15220091883b5e3a2c5744fa5" title="Scan for access points.">mw_ap_scan()</a> function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ap_data</td><td>Access point data obtained from <a class="el" href="group__megawifi.html#gaf961d3319d6218008b48450d658c733b" title="Scan for access points.">mw_ap_scan()</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ap_data</td><td>Access point data obtained from <a class="el" href="group__megawifi.html#ga99c8dfc15220091883b5e3a2c5744fa5" title="Scan for access points.">mw_ap_scan()</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pos</td><td>Position at which to extract data. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">apd</td><td>Pointer to the extracted data from an AP. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data_len</td><td>Lenght of apData.</td></tr>
@@ -787,8 +804,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gaf961d3319d6218008b48450d658c733b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaf961d3319d6218008b48450d658c733b">&#9670;&nbsp;</a></span>mw_ap_scan()</h2>
+<a id="ga99c8dfc15220091883b5e3a2c5744fa5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga99c8dfc15220091883b5e3a2c5744fa5">&#9670;&nbsp;</a></span>mw_ap_scan()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -796,6 +813,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">int mw_ap_scan </td>
           <td>(</td>
+          <td class="paramtype">enum <a class="el" href="group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4">mw_phy_type</a>&#160;</td>
+          <td class="paramname"><em>phy_type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">char **&#160;</td>
           <td class="paramname"><em>ap_data</em>, </td>
         </tr>
@@ -816,6 +839,7 @@ Functions</h2></td></tr>
 <p>Scan for access points. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">phy_type</td><td>Bitmask with the PHY type configuration. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">ap_data</td><td>Data of the found access points. Each entry has the format specified on the <a class="el" href="structmw__ap__data.html" title="Access Point data.">mw_ap_data</a> structure. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">aps</td><td>Number of found access points.</td></tr>
   </table>
@@ -958,7 +982,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the reception procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00815">815</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00830">830</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1013,7 +1037,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the send procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00798">798</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00813">813</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1040,7 +1064,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A string with the date and time in textual format, e.g.: "Thu Mar 3 12:26:51 2016”, or NULL if error. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A string with the date and time in textual format, e.g.: "Thu Mar
+        3 12:26:51 2016", or NULL if error. </dd></dl>
 
 </div>
 </div>
@@ -1426,6 +1451,33 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+
+</div>
+</div>
+<a id="ga1ba162b634a00f22057575e92a8f4973"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1ba162b634a00f22057575e92a8f4973">&#9670;&nbsp;</a></span>mw_hrng_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* mw_hrng_get </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>rnd_len</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get random numbers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">rnd_len</td><td>Number of bytes of resulting random array.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The buffer with the requested random numbers on success, or NULL when error. </dd></dl>
 
 </div>
 </div>
@@ -1983,7 +2035,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00413">413</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00418">418</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -2107,7 +2159,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>Calling this function while there is a send procedure in progress, will cause the function call to fail with LSD_STAT_SEND_ERR_IN_PROGRESS. </dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>For very short data frames, it is possible that the send callback is run before this function returns. In this case, the function returns LSD_STAT_COMPLETE. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00473">473</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00478">478</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -2500,7 +2552,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00430">430</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00435">435</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -2569,7 +2621,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00448">448</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00453">453</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>

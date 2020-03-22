@@ -23,6 +23,10 @@
 // Number of tiles per horizontal plane line
 #define VDP_PLANE_HTILES		128
 
+/// Version register address. Not strictly part of the VDP, but it is handy
+/// having it here for refresh rate detection
+#define VDP_VERSION_REG_ADDR 0xA10000
+
 /** \addtogroup VdpIoPortAddr VdpIoPortAddr
  *  \brief Addresses for the VDP IO ports
  *  \{ */
@@ -49,8 +53,15 @@
 #define VDP_HV_COUNT_W   (*((volatile uint16_t*)VDP_HV_COUNT_ADDR))
 /** \} */
 
-/// Build color in CRAM format, with 3-bit r, b and b components
+/// Build color in CRAM format, with 3-bit g, b and b components
 #define VdpColor(r, g, b)	(((r)<<1) | ((g)<<5) | ((b)<<9))
+
+/// Converts a VDP palette color entry into its 3-bit components
+#define VdpToRGB(color, r, g, b)	do {	\
+	(r) = ((color) & 0xF)>>1;		\
+	(g) = ((color) & 0xF0)>>5;		\
+	(b) = ((color) & 0xF00)>>9;		\
+} while(0)
 
 /** \addtogroup VdpColors VdpColors
  *  \brief Simple color definitions in CRAM format.
@@ -84,7 +95,7 @@
 #define VDP_WIN_ADDR		0x8000
 /** \} */
 
-/// Horizontal scroll address en VRAM
+/// Horizontal scroll address in VRAM
 #define VDP_HSCROLL_ADDR	0xA000
 
 /** \addtogroup VdpTextColors VdpTextColors
@@ -210,6 +221,50 @@ static inline void VdpVRamClear(uint16_t addr, uint16_t wlen) {
 }
 
 /************************************************************************//**
+ * Copies from VRAM to VRAM a specified region.
+ *
+ * \param[in] src Start VRAM memory address to copy.
+ * \param[in] dst Destination VRAM address of the copy operation.
+ * \param[in] len Length in bytes of the zone to copy.
+ *
+ * \warning This function starts the DMA copy but does not wait for the copy
+ * operation to complete. During copy operation, only VDP status register,
+ * H/V counter and PSG registers can be accessed. If you need to access any
+ * other VDP register, call VdpDmaWait() first.
+ ****************************************************************************/
+void VdpDmaVRamCopy(uint16_t src, uint16_t dst, uint16_t len);
+
+/************************************************************************//**
+ * Fills specified VRAM region
+ *
+ * \param[in] dst  Start VRAM memory address to fill.
+ * \param[in] len  Length in bytes of the VRAM zone to fill.
+ * \param[in] incr Address increment after each byte copy.
+ * \param[in] fill Byte to write to the filled zone.
+ *
+ * \warning This function starts the DMA fill but does not wait for the fill
+ * operation to complete. During fill operation, only VDP status register,
+ * H/V counter and PSG registers can be accessed. If you need to access any
+ * other VDP register, call VdpDmaWait() first.
+ ****************************************************************************/
+void VdpDmaVRamFill(uint16_t dst, uint16_t len, uint16_t incr, uint16_t fill);
+
+/************************************************************************//**
+ * Start a DMA transfer.
+ *
+ * \param[in] src  Origin memory address.
+ * \param[in] dst  Destination VRAM memory address.
+ * \param[in] wLen Word length of the transfer.
+ * \param[in] mem  Memory type.
+ *
+ * \warning This function starts the DMA but does not wait for the transfer
+ * to complete. During operation, only VDP status register, * H/V counter and
+ * PSG registers can be accessed. If you need to access any * other VDP
+ * register, call VdpDmaWait() first.
+ ****************************************************************************/
+void VdpDma(uint32_t src, uint16_t dst, uint16_t wLen, uint16_t mem);
+
+/************************************************************************//**
  * Loads a 1bpp font on the VRAM, setting specified foreground and
  * background colours.
  *
@@ -221,6 +276,60 @@ static inline void VdpVRamClear(uint16_t addr, uint16_t wlen) {
  ****************************************************************************/
 void VdpFontLoad(const uint32_t *font, uint8_t chars, uint16_t addr,
 		uint8_t fgcol, uint8_t bgcol);
+
+/************************************************************************//**
+ * Load a tileset to the specified VRAM address.
+ *
+ * \param[in] tiles     Tileset to load.
+ * \param[in] vram_addr VRAM address to copy the tileset into.
+ * \param[in] wlen      Word length of the tileset.
+ ****************************************************************************/
+static inline void VdpTilesLoad(const uint32_t *tiles,
+		const uint16_t vram_addr, uint16_t wlen)
+{
+	VdpDma((uint32_t)tiles, vram_addr, wlen, VDP_DMA_MEM_VRAM);
+}
+
+/************************************************************************//**
+ * Load a palette to the specified CGRAM palette number.
+ *
+ * \param[in] pal    Palette to load.
+ * \param[in] pal_no Palette number (from 0 to 3).
+ ****************************************************************************/
+void VdpPalLoad(const uint16_t *pal, uint8_t pal_no);
+
+/************************************************************************//**
+ * Gets the requested palette.
+ *
+ * \param[in] pal_no Palette number (from 0 to 3).
+ *
+ * \return The requested palette.
+ ****************************************************************************/
+const uint16_t *VdpPalGet(uint8_t pal_no);
+
+/************************************************************************//**
+ * Performs a single palette fade out cycle.
+ *
+ * At most, 7 calls to this function are required for a complete fade-out.
+ *
+ * \param[in] pal_no Palette number to fade (from 0 to 3).
+ ****************************************************************************/
+void VdpPalFadeOut(uint8_t pal_no);
+
+/************************************************************************//**
+ * Load a time map (nametable) to the specified VRAM address.
+ *
+ * \param[in] map     Map to load.
+ * \param[in] vram_addr   VRAM address to load the map into.
+ * \param[in] map_width   Width of the map to load in tiles.
+ * \param[in] map_height  Height of the map to load in tiles.
+ * \param[in] plane_width Width of the plane displaying the map.
+ * \param[in] tile_offset Offset to apply to every tile in the loaded map.
+ * \param[in] pal_num     Palette to use with the entire tile map.
+ ****************************************************************************/
+void VdpMapLoad(const uint16_t *map, const uint16_t vram_addr, uint8_t map_width,
+		uint8_t map_height, uint8_t plane_width,
+		uint16_t tile_offset, uint8_t pal_num);
 
 /************************************************************************//**
  * Clears (sets to 0) the specified VRAM range.
@@ -250,13 +359,23 @@ void VdpLineClear(uint16_t planeAddr, uint8_t line);
  * \param[in] x         Horizontal text coordinate.
  * \param[in] y         Vertical text coordinate.
  * \param[in] txtColor  Text colour (see VdpTextColors).
- * \param[in] maxChars  Maximum number of characters to write
+ * \param[in] maxChars  Maximum number of characters to write.
  * \param[in] text      Null terminated text to write to the plane.
  * \param[in] fillChar  When nonzero, fill unused line space with it.
  ****************************************************************************/
 void VdpDrawText(uint16_t planeAddr, uint8_t x, uint8_t y, uint8_t txtColor,
 		uint8_t maxChars, const char *text, char fillChar);
 
+/************************************************************************//**
+ * Draws a number of characters on a plane.
+ *
+ * \param[in] planeAddr Address in VRAM of the plane used to draw text.
+ * \param[in] x         Horizontal text coordinate.
+ * \param[in] y         Vertical text coordinate.
+ * \param[in] txtColor  Text colour (see VdpTextColors).
+ * \param[in] numChars  Number of characters to draw.
+ * \param[in] text      Null terminated text to write to the plane.
+ ****************************************************************************/
 void VdpDrawChars(uint16_t planeAddr, uint8_t x, uint8_t y, uint8_t txtColor,
 		uint8_t numChars, const char *text);
 
@@ -272,6 +391,15 @@ void VdpDrawChars(uint16_t planeAddr, uint8_t x, uint8_t y, uint8_t txtColor,
 void VdpDrawHex(uint16_t planeAddr, uint8_t x, uint8_t y, uint8_t txtColor,
 		uint8_t num);
 
+/************************************************************************//**
+ * Draws a 32-bit decimal number on a plane.
+ *
+ * \param[in] planeAddr Address in VRAM of the plane used to draw text.
+ * \param[in] x         Horizontal text coordinate.
+ * \param[in] y         Vertical text coordinate.
+ * \param[in] txtColor  Text colour (see VdpTextColors).
+ * \param[in] num       Number to draw on the plane in hexadecimal format.
+ ****************************************************************************/
 void VdpDrawU32(uint16_t planeAddr, uint8_t x, uint8_t y, uint8_t txtColor,
 		uint32_t num);
 
@@ -300,35 +428,14 @@ void VdpVBlankWait(void);
 void VdpFramesWait(uint16_t frames);
 
 /************************************************************************//**
- * Copies from VRAM to VRAM a specified region.
- *
- * \param[in] src Start VRAM memory address to copy.
- * \param[in] dst Destination VRAM address of the copy operation.
- * \param[in] len Length in bytes of the zone to copy.
- *
- * \warning This function starts the DMA copy but does not wait for the copy
- * operation to complete. During copy operation, only VDP status register,
- * H/V counter and PSG registers can be accessed. If you need to access any
- * other VDP register, call VdpDmaWait() first.
+ * Disable VDP display (useful to make faster VDP writes).
  ****************************************************************************/
-void VdpDmaVRamCopy(uint16_t src, uint16_t dst, uint16_t len);
+void VdpDisable(void);
 
 /************************************************************************//**
- * Fills specified VRAM region
- *
- * \param[in] dst  Start VRAM memory address to fill.
- * \param[in] len  Length in bytes of the VRAM zone to fill.
- * \param[in] incr Address increment after each byte copy.
- * \param[in] fill Byte to write to the filled zone.
- *
- * \warning This function starts the DMA fill but does not wait for the fill
- * operation to complete. During fill operation, only VDP status register,
- * H/V counter and PSG registers can be accessed. If you need to access any
- * other VDP register, call VdpDmaWait() first.
+ * Enable VDP display.
  ****************************************************************************/
-void VdpDmaVRamFill(uint16_t dst, uint16_t len, uint16_t incr, uint16_t fill);
-
-void VdpDma(uint32_t src, uint16_t dst, uint16_t wLen, uint16_t mem);
+void VdpEnable(void);
 
 /************************************************************************//**
  * Waits until there is no DMA operation in progress. Useful only for VRAM
@@ -336,6 +443,29 @@ void VdpDma(uint32_t src, uint16_t dst, uint16_t wLen, uint16_t mem);
  * processor.
  ****************************************************************************/
 #define VdpDmaWait()	while(VDP_CTRL_PORT_W & 0x2)
+
+/************************************************************************//**
+ * Sets the background color.
+ *
+ * \param[in] color Color to set the background to.
+ ****************************************************************************/
+static inline void VdpBGColSet(uint16_t color)
+{
+	VdpRamRwPrep(VDP_CRAM_WR, 0);
+	VDP_DATA_PORT_W = color;
+}
+
+/************************************************************************//**
+ * Returns TRUE if refresh rate is 60 Hz.
+ *
+ * \return TRUE (1) when refresh rate is 60 Hz. FALSE (0) otherwise.
+ ****************************************************************************/
+static inline int VdpIs60Hz(void)
+{
+	uint8_t ver = *((uint8_t*)VDP_VERSION_REG_ADDR);
+
+	return ver & 0x40 ? 0 : 1;
+}
 
 #endif /*_VDP_H_*/
 
