@@ -729,7 +729,7 @@ The module has two network interfaces, each one with its unique BSSID (MAC addre
 
 ### Reading and writing to non-volatile Flash
 
-In addition to the standard 32 megabits of Flash ROM memory connected to the Megadrive 68k bus, MegaWiFi cartridges have 28 megabits of additional flash storage, directly usable by the game. This memory is organized in 4 KiB sectors, and supports the following operations:
+In addition to the standard 32 megabits of Flash ROM memory connected to the Megadrive 68k bus, MegaWiFi cartridges have 24 megabits of additional flash storage, directly usable by the game. This memory is organized in 4 KiB sectors, and supports the following operations:
 
 * Identify: call `mw_flash_id_get()` to obtain the flash memory identifiers. Usually not needed.
 * Erase: call `mw_flash_sector_erase()` to erase an entire 4 KiB sector. Erased sectors will be read as 0xFF.
@@ -742,7 +742,7 @@ Also keep in mind that flash memory suffers from wearing, so do not perform more
 
 ### Test program
 
-The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, and tries connecting to `www.duck.com` on port 443.
+The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, connects to `https://www.example.com` using both a TCP socket and an HTTPS request, displays the synchronized date/time, sends and receives using a client UDP socket, and echoes UDP data on port 7.
 
 ## Author
 

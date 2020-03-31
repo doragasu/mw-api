@@ -656,7 +656,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">    <span class="comment">// Success! You can use bssid[0] through bssid[5]</span></div>
 <div class="line">}</div>
 </div><!-- fragment --><h2>Reading and writing to non-volatile Flash</h2>
-<p>In addition to the standard 32 megabits of Flash ROM memory connected to the Megadrive 68k bus, MegaWiFi cartridges have 28 megabits of additional flash storage, directly usable by the game. This memory is organized in 4 KiB sectors, and supports the following operations:</p>
+<p>In addition to the standard 32 megabits of Flash ROM memory connected to the Megadrive 68k bus, MegaWiFi cartridges have 24 megabits of additional flash storage, directly usable by the game. This memory is organized in 4 KiB sectors, and supports the following operations:</p>
 <ul>
 <li>Identify: call <code><a class="el" href="group__megawifi.html#ga2576a203dfae25cead3a44954ee60d91" title="Get date and time.">mw_flash_id_get()</a></code> to obtain the flash memory identifiers. Usually not needed.</li>
 <li>Erase: call <code><a class="el" href="group__megawifi.html#ga35f6a09aa3ecd86e5327521a2a7f41c6" title="Erase a 4 KiB Flash sector. Every byte of an erased sector will be read as 0xFF.">mw_flash_sector_erase()</a></code> to erase an entire 4 KiB sector. Erased sectors will be read as 0xFF.</li>
@@ -666,7 +666,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <p>This functions can be used e.g. for highscore keeping or DLCs. When using these functions, you have to keep in mind that flash can only be erased in a 1 sector (i.e. 4 KiB) granularity, and thus if e.g. you want to keep highscores, to update one of the high scores, you will have to erase the complete sector, and write it again in its entirety.</p>
 <p>Also keep in mind that flash memory suffers from wearing, so do not perform more writes than necessary.</p>
 <h2>Test program</h2>
-<p>The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, and tries connecting to <code>www.duck.com</code> on port 443.</p>
+<p>The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, connects to <code><a href="https://www.example.com">https://www.example.com</a></code> using both a TCP socket and an HTTPS request, displays the synchronized date/time, sends and receives using a client UDP socket, and echoes UDP data on port 7.</p>
 <h1>Author</h1>
 <p>This API and documentation has been written by Jesús Alonso (doragasu).</p>
 <h1>Contributions</h1>
