@@ -26,7 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">1.1</span>
+   &#160;<span id="projectnumber">1.2</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -245,7 +245,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gabcab943ad7996de14e41a669a369d2b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the module BSSID (the MAC address) for the specified interface.  <a href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6">More...</a><br /></td></tr>
 <tr class="separator:gabcab943ad7996de14e41a669a369d2b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga603dad869097a4f978f2dbb6fc882f73"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga603dad869097a4f978f2dbb6fc882f73">mw_default_cfg_set</a> (void)</td></tr>
-<tr class="memdesc:ga603dad869097a4f978f2dbb6fc882f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set default module configuration.  <a href="group__megawifi.html#ga603dad869097a4f978f2dbb6fc882f73">More...</a><br /></td></tr>
+<tr class="memdesc:ga603dad869097a4f978f2dbb6fc882f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set default module configuration (AKA factory settings).  <a href="group__megawifi.html#ga603dad869097a4f978f2dbb6fc882f73">More...</a><br /></td></tr>
 <tr class="separator:ga603dad869097a4f978f2dbb6fc882f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3730b846dfb49135e536a2d21cebe351"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga3730b846dfb49135e536a2d21cebe351">mw_ap_cfg_set</a> (uint8_t slot, const char *ssid, const char *pass, enum <a class="el" href="group__mw-msg.html#gaeba6d6ea6271c5192a1c666618c8e8e4">mw_phy_type</a> phy_type)</td></tr>
 <tr class="memdesc:ga3730b846dfb49135e536a2d21cebe351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set access point configuration (SSID and password).  <a href="group__megawifi.html#ga3730b846dfb49135e536a2d21cebe351">More...</a><br /></td></tr>
@@ -259,6 +259,15 @@ Functions</h2></td></tr>
 <tr class="memitem:ga7aafc5a0e9d520da0143eb0f91f8a760"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga7aafc5a0e9d520da0143eb0f91f8a760">mw_ip_cfg_get</a> (uint8_t slot, struct <a class="el" href="structmw__ip__cfg.html">mw_ip_cfg</a> **ip)</td></tr>
 <tr class="memdesc:ga7aafc5a0e9d520da0143eb0f91f8a760"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get IPv4 configuration.  <a href="group__megawifi.html#ga7aafc5a0e9d520da0143eb0f91f8a760">More...</a><br /></td></tr>
 <tr class="separator:ga7aafc5a0e9d520da0143eb0f91f8a760"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga01bbc72587605bce1e5fe4d86ba8b51d"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga01bbc72587605bce1e5fe4d86ba8b51d">mw_wifi_adv_cfg_set</a> (const struct <a class="el" href="structmw__wifi__adv__cfg.html">mw_wifi_adv_cfg</a> *wifi)</td></tr>
+<tr class="memdesc:ga01bbc72587605bce1e5fe4d86ba8b51d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set advanced WiFi configuration.  <a href="group__megawifi.html#ga01bbc72587605bce1e5fe4d86ba8b51d">More...</a><br /></td></tr>
+<tr class="separator:ga01bbc72587605bce1e5fe4d86ba8b51d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa6cf1ab703afae1c3497d0453849b3bf"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structmw__wifi__adv__cfg.html">mw_wifi_adv_cfg</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaa6cf1ab703afae1c3497d0453849b3bf">mw_wifi_adv_cfg_get</a> (void)</td></tr>
+<tr class="memdesc:gaa6cf1ab703afae1c3497d0453849b3bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get advanced WiFi configuration.  <a href="group__megawifi.html#gaa6cf1ab703afae1c3497d0453849b3bf">More...</a><br /></td></tr>
+<tr class="separator:gaa6cf1ab703afae1c3497d0453849b3bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8f837a49e461344531f88555394363eb"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb">mw_cfg_save</a> (void)</td></tr>
+<tr class="memdesc:ga8f837a49e461344531f88555394363eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves changed configuration parameters to non-volatile memory.  <a href="group__megawifi.html#ga8f837a49e461344531f88555394363eb">More...</a><br /></td></tr>
+<tr class="separator:ga8f837a49e461344531f88555394363eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa9d6fc1f8168ba5519e1186067e8199e"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaa9d6fc1f8168ba5519e1186067e8199e">mw_ip_current</a> (struct <a class="el" href="structmw__ip__cfg.html">mw_ip_cfg</a> **ip)</td></tr>
 <tr class="memdesc:gaa9d6fc1f8168ba5519e1186067e8199e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current IP configuration, of the joined AP.  <a href="group__megawifi.html#gaa9d6fc1f8168ba5519e1186067e8199e">More...</a><br /></td></tr>
 <tr class="separator:gaa9d6fc1f8168ba5519e1186067e8199e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -275,11 +284,13 @@ Functions</h2></td></tr>
 <tr class="memdesc:gab71427cc580c31e355d36eca5e4ab9c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Polls the module status until it reports device is associated to AP or timeout occurs.  <a href="group__megawifi.html#gab71427cc580c31e355d36eca5e4ab9c4">More...</a><br /></td></tr>
 <tr class="separator:gab71427cc580c31e355d36eca5e4ab9c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5ffc1be949c123cd4abf43edfed9eb4e"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga5ffc1be949c123cd4abf43edfed9eb4e">mw_def_ap_cfg</a> (uint8_t slot)</td></tr>
+<tr class="memdesc:ga5ffc1be949c123cd4abf43edfed9eb4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets default AP/IP configuration.  <a href="group__megawifi.html#ga5ffc1be949c123cd4abf43edfed9eb4e">More...</a><br /></td></tr>
 <tr class="separator:ga5ffc1be949c123cd4abf43edfed9eb4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacb078d367e6351aa0dc386de143e2941"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gacb078d367e6351aa0dc386de143e2941">mw_ap_disassoc</a> (void)</td></tr>
 <tr class="memdesc:gacb078d367e6351aa0dc386de143e2941"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dissasociates from a previously associated AP.  <a href="group__megawifi.html#gacb078d367e6351aa0dc386de143e2941">More...</a><br /></td></tr>
 <tr class="separator:gacb078d367e6351aa0dc386de143e2941"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga185e5eb87b79e64a311cefd82ac2d51c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga185e5eb87b79e64a311cefd82ac2d51c">mw_def_ap_cfg_get</a> (void)</td></tr>
+<tr class="memdesc:ga185e5eb87b79e64a311cefd82ac2d51c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets default AP/IP configuration slot.  <a href="group__megawifi.html#ga185e5eb87b79e64a311cefd82ac2d51c">More...</a><br /></td></tr>
 <tr class="separator:ga185e5eb87b79e64a311cefd82ac2d51c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaf6aaaa928b6085b6ecf7012e2c6aa1b"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">mw_tcp_connect</a> (uint8_t ch, const char *dst_addr, const char *dst_port, const char *src_port)</td></tr>
 <tr class="memdesc:gaaf6aaaa928b6085b6ecf7012e2c6aa1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries establishing a TCP connection with specified server.  <a href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">More...</a><br /></td></tr>
@@ -378,6 +389,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga027dd5a50045b0d5d33b5fd6d124df2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finish an opened HTTP request.  <a href="group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d">More...</a><br /></td></tr>
 <tr class="separator:ga027dd5a50045b0d5d33b5fd6d124df2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6cffe37fa4e2b2ae0e177a021fab3aa7"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7">mw_http_cert_query</a> (void)</td></tr>
+<tr class="memdesc:ga6cffe37fa4e2b2ae0e177a021fab3aa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the X.509 hash of the installed PEM certificate.  <a href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7">More...</a><br /></td></tr>
 <tr class="separator:ga6cffe37fa4e2b2ae0e177a021fab3aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4d2998fcca3b6cae16f090b902327904"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904">mw_http_cert_set</a> (uint32_t cert_hash, const char *cert, uint16_t cert_len)</td></tr>
 <tr class="memdesc:ga4d2998fcca3b6cae16f090b902327904"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the PEM certificate to use on HTTPS requests.  <a href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904">More...</a><br /></td></tr>
@@ -403,7 +415,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>MegaWiFi API implementation. </p>
-<p>API to communicate with the wifi module and the Internet. API calls are documented and most of them are self explanatory. Mostly the only weird thing about the API is UDP reuse mode. If you enable reuse mode (setting the dst_addr and/or dst_port to NULL in the <a class="el" href="group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8" title="Configures a UDP socket to send/receive data.">mw_udp_set()</a> call), received data will prepend the IP and port of the peer (using <a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a> data structure), and data to be sent also requires the IP and port to be prepended to the payload.</p>
+<p>API to communicate with the wifi module and the Internet. API calls are documented and most of them are self explanatory. Mostly the only weird thing about the API is UDP reuse mode. If you enable reuse mode (setting the dst_addr and/or dst_port to NULL in the <a class="el" href="group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8" title="Configures a UDP socket to send/receive data.">mw_udp_set()</a> call), received data will prepend the IP and port of the peer (using <a class="el" href="structmw__reuse__payload.html" title="Payload with remote IP and port.">mw_reuse_payload</a> data structure), and data to be sent also requires the IP and port to be prepended to the payload.</p>
 <dl class="section author"><dt>Author</dt><dd>Jesus Alonso (doragasu) </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>2015</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This module uses a <a class="el" href="structloop__timer.html" title="Loop timer data structure.">loop_timer</a> from the loop module.</dd></dl>
@@ -443,7 +455,7 @@ Functions</h2></td></tr>
 
 <p>Puts the WiFi module in reset state. </p>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00612">612</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00652">652</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -464,7 +476,7 @@ Functions</h2></td></tr>
 
 <p>Releases the module from reset state. </p>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00617">617</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00657">657</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -726,7 +738,9 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Strings must be NULL terminated. Maximum SSID length is 32 bytes, maximum pass length is 64 bytes. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Strings must be NULL terminated. Maximum SSID length is 32 bytes, maximum pass length is 64 bytes. </dd>
+<dd>
+After a successful invocation, call <a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb" title="Saves changed configuration parameters to non-volatile memory.">mw_cfg_save()</a> for changes to be persistent </dd></dl>
 
 </div>
 </div>
@@ -876,6 +890,27 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ga8f837a49e461344531f88555394363eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8f837a49e461344531f88555394363eb">&#9670;&nbsp;</a></span>mw_cfg_save()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_cfg_save </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Saves changed configuration parameters to non-volatile memory. </p>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+
+</div>
+</div>
 <a id="ga2deb2a29f38acd84f8db310d12657f44"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga2deb2a29f38acd84f8db310d12657f44">&#9670;&nbsp;</a></span>mw_close()</h2>
 
@@ -982,7 +1017,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the reception procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00830">830</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00876">876</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1037,7 +1072,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the send procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00813">813</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00859">859</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -1084,14 +1119,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Sets default AP/IP configuration.</p>
+
+<p>Sets default AP/IP configuration. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">slot</td><td>Configuration slot to use.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>After a successful invocation, call <a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb" title="Saves changed configuration parameters to non-volatile memory.">mw_cfg_save()</a> for changes to be persistent </dd></dl>
 
 </div>
 </div>
@@ -1110,7 +1147,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Gets default AP/IP configuration slot.</p>
+
+<p>Gets default AP/IP configuration slot. </p>
 <dl class="section return"><dt>Returns</dt><dd>The default configuration slot, of -1 on error. </dd></dl>
 
 </div>
@@ -1159,7 +1197,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>After a successful invocation, call <a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb" title="Saves changed configuration parameters to non-volatile memory.">mw_cfg_save()</a> for changes to be persistent </dd></dl>
 
 </div>
 </div>
@@ -1179,7 +1218,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Set default module configuration. </p>
+<p>Set default module configuration (AKA factory settings). </p>
 <dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>For this command to take effect, it must be followed by a module reset. </dd></dl>
 
@@ -1450,7 +1489,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>After a successful invocation, call <a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb" title="Saves changed configuration parameters to non-volatile memory.">mw_cfg_save()</a> for changes to be persistent </dd></dl>
 
 </div>
 </div>
@@ -1496,7 +1536,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Query the X.509 hash of the installed PEM certificate.</p>
+
+<p>Query the X.509 hash of the installed PEM certificate. </p>
 <dl class="section return"><dt>Returns</dt><dd>0xFFFFFFFF if certificate is not installed or error occurs, or the installed X.509 certificate hash on success. </dd></dl>
 
 </div>
@@ -1866,7 +1907,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Strings must be NULL terminated. Maximum SSID length is 32 bytes, maximum pass length is 64 bytes. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>After a successful invocation, call <a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb" title="Saves changed configuration parameters to non-volatile memory.">mw_cfg_save()</a> for changes to be persistent </dd></dl>
 
 </div>
 </div>
@@ -2035,7 +2076,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00418">418</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00455">455</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -2159,7 +2200,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>Calling this function while there is a send procedure in progress, will cause the function call to fail with LSD_STAT_SEND_ERR_IN_PROGRESS. </dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>For very short data frames, it is possible that the send callback is run before this function returns. In this case, the function returns LSD_STAT_COMPLETE. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00478">478</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00515">515</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -2314,7 +2355,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>After a successful invocation, call <a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb" title="Saves changed configuration parameters to non-volatile memory.">mw_cfg_save()</a> for changes to be persistent </dd></dl>
 
 </div>
 </div>
@@ -2552,7 +2594,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00435">435</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00472">472</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -2621,7 +2663,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of the receive procedure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00453">453</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="megawifi_8h_source.html#l00490">490</a> of file <a class="el" href="megawifi_8h_source.html">megawifi.h</a>.</p>
 
 </div>
 </div>
@@ -2720,6 +2762,52 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure. </dd></dl>
+
+</div>
+</div>
+<a id="gaa6cf1ab703afae1c3497d0453849b3bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa6cf1ab703afae1c3497d0453849b3bf">&#9670;&nbsp;</a></span>mw_wifi_adv_cfg_get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structmw__wifi__adv__cfg.html">mw_wifi_adv_cfg</a>* mw_wifi_adv_cfg_get </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get advanced WiFi configuration. </p>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the advanced WiFi configuration, or NULL on error. </dd></dl>
+
+</div>
+</div>
+<a id="ga01bbc72587605bce1e5fe4d86ba8b51d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga01bbc72587605bce1e5fe4d86ba8b51d">&#9670;&nbsp;</a></span>mw_wifi_adv_cfg_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> mw_wifi_adv_cfg_set </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structmw__wifi__adv__cfg.html">mw_wifi_adv_cfg</a> *&#160;</td>
+          <td class="paramname"><em>wifi</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set advanced WiFi configuration. </p>
+<dl class="section return"><dt>Returns</dt><dd>MW_ERR_NONE on success, other code on failure.</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This function is dangerous. Changing these parameters is rarely needed, and setting incorrect values, may render the connection unstable and/or crash the WiFi module. Invalid configurations can even cause the module to crash in a bootloop, requiring a programmer to unbrick it. Make sure you thoroughly test the values you allow users to set here. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>If you want to change WiFi parameters, the recommendation is to get the current configuration via <a class="el" href="group__megawifi.html#gaa6cf1ab703afae1c3497d0453849b3bf" title="Get advanced WiFi configuration.">mw_wifi_adv_cfg_get()</a>, and from it change only the required parameters. </dd>
+<dd>
+These parameters will not take effect until saved to non-volatile storage (with <a class="el" href="group__megawifi.html#ga8f837a49e461344531f88555394363eb" title="Saves changed configuration parameters to non-volatile memory.">mw_cfg_save()</a>) and issuing a module reboot. </dd></dl>
 
 </div>
 </div>

@@ -19,5 +19,6 @@ var annotated_dup =
     [ "mw_msg_ip_cfg", "structmw__msg__ip__cfg.html", "structmw__msg__ip__cfg" ],
     [ "mw_msg_sntp_cfg", "structmw__msg__sntp__cfg.html", "structmw__msg__sntp__cfg" ],
     [ "mw_msg_sys_stat", "unionmw__msg__sys__stat.html", "unionmw__msg__sys__stat" ],
-    [ "mw_reuse_payload", "structmw__reuse__payload.html", "structmw__reuse__payload" ]
+    [ "mw_reuse_payload", "structmw__reuse__payload.html", "structmw__reuse__payload" ],
+    [ "mw_wifi_adv_cfg", "structmw__wifi__adv__cfg.html", "structmw__wifi__adv__cfg" ]
 ];

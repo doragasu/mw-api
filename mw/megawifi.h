@@ -184,7 +184,7 @@ enum mw_err mw_version_get(uint8_t *major, uint8_t *minor, char **variant);
 uint8_t *mw_bssid_get(enum mw_if_type interface_type);
 
 /************************************************************************//**
- * \brief Set default module configuration.
+ * \brief Set default module configuration (AKA factory settings).
  *
  * \return MW_ERR_NONE on success, other code on failure.
  *
@@ -205,6 +205,8 @@ enum mw_err mw_default_cfg_set(void);
  *
  * \note Strings must be NULL terminated. Maximum SSID length is 32 bytes,
  *       maximum pass length is 64 bytes.
+ * \note After a successful invocation, call mw_cfg_save() for changes to
+ * be persistent
  ****************************************************************************/
 enum mw_err mw_ap_cfg_set(uint8_t slot, const char *ssid, const char *pass,
 		 enum mw_phy_type phy_type);
@@ -234,8 +236,8 @@ enum mw_err mw_ap_cfg_get(uint8_t slot, char **ssid, char **pass,
  *
  * \return MW_ERR_NONE on success, other code on failure.
  *
- * \note Strings must be NULL terminated. Maximum SSID length is 32 bytes,
- *       maximum pass length is 64 bytes.
+ * \note After a successful invocation, call mw_cfg_save() for changes to
+ * be persistent
  ****************************************************************************/
 enum mw_err mw_ip_cfg_set(uint8_t slot, const struct mw_ip_cfg *ip);
 
@@ -248,6 +250,38 @@ enum mw_err mw_ip_cfg_set(uint8_t slot, const struct mw_ip_cfg *ip);
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
 enum mw_err mw_ip_cfg_get(uint8_t slot, struct mw_ip_cfg **ip);
+
+/************************************************************************//**
+ * \brief Set advanced WiFi configuration.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ *
+ * \warning This function is dangerous. Changing these parameters is rarely
+ * needed, and setting incorrect values, may render the connection unstable
+ * and/or crash the WiFi module. Invalid configurations can even cause the
+ * module to crash in a bootloop, requiring a programmer to unbrick it.
+ * Make sure you thoroughly test the values you allow users to set here.
+ * \note If you want to change WiFi parameters, the recommendation is to get
+ * the current configuration via mw_wifi_adv_cfg_get(), and from it change
+ * only the required parameters.
+ * \note These parameters will not take effect until saved to non-volatile
+ * storage (with mw_cfg_save()) and issuing a module reboot.
+ ****************************************************************************/
+enum mw_err mw_wifi_adv_cfg_set(const struct mw_wifi_adv_cfg *wifi);
+
+/************************************************************************//**
+ * \brief Get advanced WiFi configuration.
+ *
+ * \return Pointer to the advanced WiFi configuration, or NULL on error.
+ ****************************************************************************/
+struct mw_wifi_adv_cfg *mw_wifi_adv_cfg_get(void);
+
+/************************************************************************//**
+ * \brief Saves changed configuration parameters to non-volatile memory.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ ****************************************************************************/
+enum mw_err mw_cfg_save(void);
 
 /************************************************************************//**
  * \brief Get current IP configuration, of the joined AP.
@@ -312,11 +346,14 @@ enum mw_err mw_ap_assoc(uint8_t slot);
 enum mw_err mw_ap_assoc_wait(int tout_frames);
 
 /************************************************************************//**
- * Sets default AP/IP configuration.
+ * \brief Sets default AP/IP configuration.
  *
  * \param[in] slot Configuration slot to use.
  *
  * \return MW_ERR_NONE on success, other code on failure.
+ *
+ * \note After a successful invocation, call mw_cfg_save() for changes to
+ * be persistent
  ****************************************************************************/
 enum mw_err mw_def_ap_cfg(uint8_t slot);
 
@@ -328,7 +365,7 @@ enum mw_err mw_def_ap_cfg(uint8_t slot);
 enum mw_err mw_ap_disassoc(void);
 
 /************************************************************************//**
- * Gets default AP/IP configuration slot.
+ * \brief Gets default AP/IP configuration slot.
  *
  * \return The default configuration slot, of -1 on error.
  ****************************************************************************/
@@ -540,6 +577,9 @@ enum mw_sock_stat mw_sock_stat_get(uint8_t ch);
  *                   servers are desired, unused entries must be empty.
  *
  * \return MW_ERR_NONE on success, other code on failure.
+ *
+ * \note After a successful invocation, call mw_cfg_save() for changes to
+ * be persistent
  ****************************************************************************/
 enum mw_err mw_sntp_cfg_set(const char *tz_str, const char *server[3]);
 
@@ -623,6 +663,9 @@ uint8_t *mw_flash_read(uint32_t addr, uint16_t data_len);
  * \param[in] gamertag Gamertag information to set on specified slot.
  *
  * \return MW_ERR_NONE on success, other code on failure.
+ *
+ * \note After a successful invocation, call mw_cfg_save() for changes to
+ * be persistent
  ****************************************************************************/
 enum mw_err mw_gamertag_set(uint8_t slot, const struct mw_gamertag *gamertag);
 
@@ -739,7 +782,7 @@ enum mw_err mw_http_open(uint32_t content_len);
 int mw_http_finish(uint32_t *content_len, int tout_frames);
 
 /************************************************************************//**
- * Query the X.509 hash of the installed PEM certificate.
+ * \brief Query the X.509 hash of the installed PEM certificate.
  *
  * \return 0xFFFFFFFF if certificate is not installed or error occurs, or
  * the installed X.509 certificate hash on success.
@@ -786,6 +829,9 @@ char *mw_def_server_get(void);
  * \param[in] server_url The server URL to set.
  *
  * \return MW_ERR_NONE on success, other code on failure.
+ *
+ * \note After a successful invocation, call mw_cfg_save() for changes to
+ * be persistent
  ****************************************************************************/
 enum mw_err mw_def_server_set(const char *server_url);
 

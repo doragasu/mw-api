@@ -26,7 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">1.1</span>
+   &#160;<span id="projectnumber">1.2</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -91,6 +91,12 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 , <a class="el" href="structmw__ip__cfg.html#a94654a9a65b1f4683de3216c83dd30dd">mw_ip_cfg</a>
 , <a class="el" href="structmw__msg__flash__data.html#af4f158f70044fe12633f52c244aa5305">mw_msg_flash_data</a>
 , <a class="el" href="structmw__msg__flash__range.html#af42a75bc7a2bfe824a86c66ce5eca2e9">mw_msg_flash_range</a>
+</li>
+<li>ampdu_rx_enable
+: <a class="el" href="structmw__wifi__adv__cfg.html#a362a123db1aa9d6202a7c8c559ea688b">mw_wifi_adv_cfg</a>
+</li>
+<li>amsdu_rx_enable
+: <a class="el" href="structmw__wifi__adv__cfg.html#a9b73765ff056d990a418535804a0581f">mw_wifi_adv_cfg</a>
 </li>
 <li>ap_cfg
 : <a class="el" href="unionmw__cmd.html#aee26452d05e464067290263310cb3c74">mw_cmd</a>
@@ -256,6 +262,9 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 
 
 <h3><a id="index_l"></a>- l -</h3><ul>
+<li>left_continuous_rx_buf_num
+: <a class="el" href="structmw__wifi__adv__cfg.html#a65618883f38b27100908152b437002a2">mw_wifi_adv_cfg</a>
+</li>
 <li>len
 : <a class="el" href="structmw__msg__flash__range.html#ac283921a8bafbccd98c748d1d567d5d2">mw_msg_flash_range</a>
 </li>
@@ -302,6 +311,13 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 </ul>
 
 
+<h3><a id="index_q"></a>- q -</h3><ul>
+<li>qos_enable
+: <a class="el" href="structmw__wifi__adv__cfg.html#aa2c1b9ee84cc147db61ad90919d65469">mw_wifi_adv_cfg</a>
+</li>
+</ul>
+
+
 <h3><a id="index_r"></a>- r -</h3><ul>
 <li>remote_ip
 : <a class="el" href="structmw__reuse__payload.html#a2f0cf596cc850b4ba7f9282e1a9ce8d8">mw_reuse_payload</a>
@@ -314,12 +330,34 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 , <a class="el" href="structmw__msg__bind.html#a2b0e8ea92ae07d8187feda5206ed70b2">mw_msg_bind</a>
 , <a class="el" href="structmw__msg__ip__cfg.html#a7a6e52c52bf1b486824e541b82d41c85">mw_msg_ip_cfg</a>
 , <a class="el" href="unionmw__msg__sys__stat.html#a31ab8a7b8f525d8a8aab00c655fa8c84">mw_msg_sys_stat</a>
+, <a class="el" href="structmw__wifi__adv__cfg.html#a273b4b4566b814f49a5c8ba51474fa6a">mw_wifi_adv_cfg</a>
 </li>
 <li>rnd_len
 : <a class="el" href="unionmw__cmd.html#a5b0e9cac82b4aeebec64188fe4743930">mw_cmd</a>
 </li>
 <li>rssi
 : <a class="el" href="structmw__ap__data.html#ae37eb46c9629f9df4d506130b7273498">mw_ap_data</a>
+</li>
+<li>rx_ampdu_buf_len
+: <a class="el" href="structmw__wifi__adv__cfg.html#a88732cf4b805ec56a233883dbc2c7ee3">mw_wifi_adv_cfg</a>
+</li>
+<li>rx_ampdu_buf_num
+: <a class="el" href="structmw__wifi__adv__cfg.html#aea3fd739a76d9661eee9fedcae61507a">mw_wifi_adv_cfg</a>
+</li>
+<li>rx_ba_win
+: <a class="el" href="structmw__wifi__adv__cfg.html#ada375fecd837eb729ca74d8bbf561aae">mw_wifi_adv_cfg</a>
+</li>
+<li>rx_buf_len
+: <a class="el" href="structmw__wifi__adv__cfg.html#a61a00e52fda46051f2b3cc30c3581d20">mw_wifi_adv_cfg</a>
+</li>
+<li>rx_buf_num
+: <a class="el" href="structmw__wifi__adv__cfg.html#a47187c39bcd0772cd7868b9fad62961a">mw_wifi_adv_cfg</a>
+</li>
+<li>rx_max_single_pkt_len
+: <a class="el" href="structmw__wifi__adv__cfg.html#a23dac94b69b60822d40cc12da0b74c08">mw_wifi_adv_cfg</a>
+</li>
+<li>rx_pkt_num
+: <a class="el" href="structmw__wifi__adv__cfg.html#ab0b9282fa291fed2edb74632a1b40a58">mw_wifi_adv_cfg</a>
 </li>
 </ul>
 
@@ -371,6 +409,9 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 : <a class="el" href="structloop__func.html#a24216e713368e20bd4f570fce9392497">loop_func</a>
 , <a class="el" href="structloop__timer.html#a666fda5001236b06e0c14100a0b2e3b4">loop_timer</a>
 </li>
+<li>tx_buf_num
+: <a class="el" href="structmw__wifi__adv__cfg.html#af766e1e0cce532094acbb2541e2b6771">mw_wifi_adv_cfg</a>
+</li>
 <li>tz
 : <a class="el" href="structmw__msg__sntp__cfg.html#a50b8abd73fcc8e08df3a6a65e6c55111">mw_msg_sntp_cfg</a>
 </li>
@@ -387,6 +428,9 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 <h3><a id="index_w"></a>- w -</h3><ul>
 <li>w_data
 : <a class="el" href="unionmw__cmd.html#a7bcdd624bf58b31fade68e20b47aaf08">mw_cmd</a>
+</li>
+<li>wifi_adv_cfg
+: <a class="el" href="unionmw__cmd.html#a7f12e46078e954f8e615a0be47f86c15">mw_cmd</a>
 </li>
 </ul>
 </div><!-- contents -->

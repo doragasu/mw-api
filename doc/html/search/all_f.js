@@ -1,16 +1,17 @@
 var searchData=
 [
-  ['section_323',['SECTION',['../group__util.html#gaa2c44298bc422970bbd81c5622bce3ea',1,'util.h']]],
-  ['security_324',['security',['../structmw__gamertag.html#ab0931be9019b21951e3fe40f86d52243',1,'mw_gamertag']]],
-  ['servers_325',['servers',['../structmw__msg__sntp__cfg.html#a75a53f330d33e5f8d0af6ddaf29d94a1',1,'mw_msg_sntp_cfg']]],
-  ['slot_326',['slot',['../structmw__gamertag__set__msg.html#a1327b2437999c57355cb77db39d4d23a',1,'mw_gamertag_set_msg']]],
-  ['sntp_5fcfg_327',['sntp_cfg',['../unionmw__cmd.html#a4b0e09a0b487849f7f25837782119fba',1,'mw_cmd']]],
-  ['src_5fport_328',['src_port',['../structmw__msg__in__addr.html#aaf5ef94425df84a677b01af97f44d2be',1,'mw_msg_in_addr']]],
-  ['ssid_329',['ssid',['../structmw__ap__data.html#ac5a7e10c0e1b2c726f978c2b38e08599',1,'mw_ap_data::ssid()'],['../structmw__msg__ap__cfg.html#a7f2972a3e758b0700cfd478173415c90',1,'mw_msg_ap_cfg::ssid()']]],
-  ['ssid_5flen_330',['ssid_len',['../structmw__ap__data.html#ac78d0787dd7a1ac35a1c94345178036e',1,'mw_ap_data']]],
-  ['st_5fflags_331',['st_flags',['../unionmw__msg__sys__stat.html#a88471ef5ad828904b9da66c52863120d',1,'mw_msg_sys_stat']]],
-  ['str_332',['STR',['../group__util.html#ga30676fc71aab1d0c7ffe699e7f2bd344',1,'util.h']]],
-  ['str_5fis_5fuint8_333',['str_is_uint8',['../group__util.html#gaefdeee0521aeffc3705d9e36bd9047a0',1,'util.h']]],
-  ['str_5fto_5fuint8_334',['str_to_uint8',['../group__util.html#ga1592ef63a7bfa19eed825eb2a90e80d0',1,'util.h']]],
-  ['sys_5fstat_335',['sys_stat',['../unionmw__msg__sys__stat.html#a1e0225d35341fd30ae96f0c799233df4',1,'mw_msg_sys_stat::sys_stat()'],['../unionmw__cmd.html#ade0cbf72eabd15805525d02d2089723d',1,'mw_cmd::sys_stat()']]]
+  ['remote_5fip_327',['remote_ip',['../structmw__reuse__payload.html#a2f0cf596cc850b4ba7f9282e1a9ce8d8',1,'mw_reuse_payload']]],
+  ['remote_5fport_328',['remote_port',['../structmw__reuse__payload.html#a35426cfde08ca82c18f8b402d1dc7dd1',1,'mw_reuse_payload']]],
+  ['reserved_329',['reserved',['../structmw__msg__ip__cfg.html#a7a6e52c52bf1b486824e541b82d41c85',1,'mw_msg_ip_cfg::reserved()'],['../structmw__msg__bind.html#a2b0e8ea92ae07d8187feda5206ed70b2',1,'mw_msg_bind::reserved()'],['../structmw__wifi__adv__cfg.html#a273b4b4566b814f49a5c8ba51474fa6a',1,'mw_wifi_adv_cfg::reserved()'],['../structmw__gamertag__set__msg.html#a0f5edfecb4204864737059685cb4606d',1,'mw_gamertag_set_msg::reserved()'],['../unionmw__msg__sys__stat.html#a31ab8a7b8f525d8a8aab00c655fa8c84',1,'mw_msg_sys_stat::reserved()']]],
+  ['rnd_5flen_330',['rnd_len',['../unionmw__cmd.html#a5b0e9cac82b4aeebec64188fe4743930',1,'mw_cmd']]],
+  ['rom_5fdata_331',['ROM_DATA',['../group__util.html#ga20df393b602ee82662561f6cbcd5ed37',1,'util.h']]],
+  ['rom_5ftext_332',['ROM_TEXT',['../group__util.html#ga5c840927161d6bbf9b8643d50424498a',1,'util.h']]],
+  ['rssi_333',['rssi',['../structmw__ap__data.html#ae37eb46c9629f9df4d506130b7273498',1,'mw_ap_data']]],
+  ['rx_5fampdu_5fbuf_5flen_334',['rx_ampdu_buf_len',['../structmw__wifi__adv__cfg.html#a88732cf4b805ec56a233883dbc2c7ee3',1,'mw_wifi_adv_cfg']]],
+  ['rx_5fampdu_5fbuf_5fnum_335',['rx_ampdu_buf_num',['../structmw__wifi__adv__cfg.html#aea3fd739a76d9661eee9fedcae61507a',1,'mw_wifi_adv_cfg']]],
+  ['rx_5fba_5fwin_336',['rx_ba_win',['../structmw__wifi__adv__cfg.html#ada375fecd837eb729ca74d8bbf561aae',1,'mw_wifi_adv_cfg']]],
+  ['rx_5fbuf_5flen_337',['rx_buf_len',['../structmw__wifi__adv__cfg.html#a61a00e52fda46051f2b3cc30c3581d20',1,'mw_wifi_adv_cfg']]],
+  ['rx_5fbuf_5fnum_338',['rx_buf_num',['../structmw__wifi__adv__cfg.html#a47187c39bcd0772cd7868b9fad62961a',1,'mw_wifi_adv_cfg']]],
+  ['rx_5fmax_5fsingle_5fpkt_5flen_339',['rx_max_single_pkt_len',['../structmw__wifi__adv__cfg.html#a23dac94b69b60822d40cc12da0b74c08',1,'mw_wifi_adv_cfg']]],
+  ['rx_5fpkt_5fnum_340',['rx_pkt_num',['../structmw__wifi__adv__cfg.html#ab0b9282fa291fed2edb74632a1b40a58',1,'mw_wifi_adv_cfg']]]
 ];

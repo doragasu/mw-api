@@ -1398,3 +1398,59 @@ void mw_sleep(uint16_t frames)
 	loop_pend();
 }
 
+enum mw_err mw_cfg_save(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_NV_CFG_SAVE;
+	d.cmd->data_len = 0;
+
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+struct mw_wifi_adv_cfg *mw_wifi_adv_cfg_get(void)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return NULL;
+	}
+
+	d.cmd->cmd = MW_CMD_WIFI_ADV_GET;
+	d.cmd->data_len = 0;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return NULL;
+	}
+
+	return &d.cmd->wifi_adv_cfg;
+}
+
+enum mw_err mw_wifi_adv_cfg_set(const struct mw_wifi_adv_cfg *wifi)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_WIFI_ADV_SET;
+	d.cmd->data_len = sizeof(struct mw_wifi_adv_cfg);
+	d.cmd->wifi_adv_cfg = *wifi;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+

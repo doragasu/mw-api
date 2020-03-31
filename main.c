@@ -96,8 +96,12 @@ static void udp_recv_cb(enum lsd_status stat, uint8_t ch,
 		(const struct mw_reuse_payload*)data;
 	UNUSED_PARAM(ctx);
 
-	if (LSD_STAT_COMPLETE == stat) {
-		mw_udp_reuse_send(ch, udp, len, NULL, udp_send_complete_cb);
+	// Ignore frame if not from channel 2
+	if (LSD_STAT_COMPLETE == stat && 2 == ch) {
+		mw_udp_reuse_send(2, udp, len, NULL, udp_send_complete_cb);
+	} else {
+		mw_udp_reuse_recv((struct mw_reuse_payload*)cmd_buf,
+				MW_BUFLEN, NULL, udp_recv_cb);
 	}
 }
 
@@ -107,16 +111,28 @@ static void udp_normal_test(void)
 	int16_t len = sizeof(line);
 	uint8_t ch = 1;
 
+	// Make sure you are listening on the target address, e.g. with:
+	// nc -lu 12345
+	println("Send to UDP 12345, waiting for reply",
+			VDP_TXT_COL_CYAN);
 	// Send UDP data to peer and wait for reply
-	mw_udp_set(ch, "192.168.1.10", "12345", NULL);
-	mw_send_sync(ch, "MegaWiFi UDP test!", 19, 0);
-	mw_recv_sync(&ch, line, &len, 5 * 60);
+	if (mw_udp_set(ch, "192.168.1.22", "12345", NULL)) {
+		goto err;
+	}
+	mw_send_sync(ch, "MegaWiFi UDP test!\n", 20, 0);
+	mw_recv_sync(&ch, line, &len, 0);
 	line[39] = '\0';
 	if (1 == ch) {
 		println("Got UDP reply:", VDP_TXT_COL_CYAN);
 		println(line, VDP_TXT_COL_WHITE);
 	}
-	mw_udp_unset(ch);
+	mw_close(ch);
+
+	return;
+
+err:
+	println("UDP test failed!", VDP_TXT_COL_MAGENTA);
+	mw_close(1);
 }
 
 static void udp_reuse_test(void)
@@ -124,8 +140,11 @@ static void udp_reuse_test(void)
 	struct mw_reuse_payload *pkt =
 		(struct mw_reuse_payload * const)cmd_buf;
 
+	// You can send text and get the echo e.g. by:
+	// nc -u <dest_ip> 7
+	println("Doing echo on UDP port 7", VDP_TXT_COL_CYAN);
 	// Start UDP echo task
-	mw_udp_set(1, NULL, NULL, "7");
+	mw_udp_set(2, NULL, NULL, "7");
 	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
 }
 
@@ -160,10 +179,12 @@ static void http_test(void)
 
 	http_cert_set();
 
-	if (mw_http_url_set("https://www.example.com")) goto err_out;
-	if (mw_http_method_set(MW_HTTP_METHOD_GET)) goto err_out;
-	if (mw_http_open(0)) goto err_out;
-	if (mw_http_finish(&len, MS_TO_FRAMES(20000)) < 100) goto err_out;
+	if (mw_http_url_set("https://www.example.com") ||
+			mw_http_method_set(MW_HTTP_METHOD_GET) ||
+			mw_http_open(0) ||
+			mw_http_finish(&len, MS_TO_FRAMES(20000)) < 100) {
+		goto err_out;
+	}
 	if (len) {
 		if (http_recv(len)) goto err_out;
 	}
@@ -184,27 +205,34 @@ static void tcp_test(void)
 	println("Connecting to www.example.com", VDP_TXT_COL_WHITE);
 	err = mw_tcp_connect(1, "www.example.com", "80", NULL);
 	if (err != MW_ERR_NONE) {
-		println("HTTP test FAILED", VDP_TXT_COL_CYAN);
-		return;
+		println("TCP test FAILED", VDP_TXT_COL_CYAN);
+		goto out;
 	}
 	println("DONE!", VDP_TXT_COL_CYAN);
 	println(NULL, 0);
 
 	println("TCP test SUCCESS", VDP_TXT_COL_WHITE);
 
-	mw_tcp_disconnect(1);
+out:
+	mw_close(1);
 }
 
 static void datetime_test(void)
 {
 	const char *datetime;
 	uint32_t dt_bin[2] = {};
+	union mw_msg_sys_stat *stat;
 
 	// Wait until date/time is set
 	do {
 		mw_sleep(60);
-		datetime = mw_date_time_get(dt_bin);
-	} while (dt_bin[1] < 1577030004);
+		stat = mw_sys_stat_get();
+		if (!stat) {
+			println("Failed to get date/time", VDP_TXT_COL_CYAN);
+			return;
+		}
+	} while (!stat->dt_ok);
+	datetime = mw_date_time_get(dt_bin);
 	println(datetime, VDP_TXT_COL_WHITE);
 }
 
@@ -222,8 +250,7 @@ static void run_test(struct loop_timer *t)
 	if (err != MW_ERR_NONE) {
 		goto err;
 	}
-	// Wait an additional second to ensure DNS service is up
-	mw_sleep(MS_TO_FRAMES(1000));
+	mw_sleep(3 * 60);
 	println("DONE!", VDP_TXT_COL_CYAN);
 	println(NULL, 0);
 

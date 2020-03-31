@@ -99,6 +99,9 @@ enum PACKED mw_command {
 	MW_CMD_HTTP_CLEANUP	=  47,	///< Clean request data
 	MW_CMD_SERVER_URL_GET	=  48,	///< Get the main server URL
 	MW_CMD_SERVER_URL_SET	=  49,	///< Set the main server URL
+	MW_CMD_WIFI_ADV_GET	=  50,	///< Get advanced WiFi parameters
+	MW_CMD_WIFI_ADV_SET	=  51,	///< Set advanced WiFi parameters
+	MW_CMD_NV_CFG_SAVE	=  52,	///< Save non-volatile config
 	MW_CMD_ERROR		= 255	///< Error command reply
 };
 
@@ -198,6 +201,23 @@ struct mw_msg_bind {
 	uint8_t  channel;	///< Channel used for the socket bound to port
 };
 
+/// Advanced WiFi configuration
+struct mw_wifi_adv_cfg {
+	uint8_t qos_enable;			///< WiFi QOS feature enable flag
+	uint8_t ampdu_rx_enable;		///< WiFi AMPDU RX feature enable flag
+	uint8_t rx_ba_win;			///< WiFi Block Ack RX window size
+	uint8_t rx_ampdu_buf_num;		///< WiFi AMPDU RX buffer number
+	uint32_t rx_ampdu_buf_len;		///< WiFi AMPDU RX buffer length
+	uint32_t rx_max_single_pkt_len;		///< WiFi RX max single packet size
+	uint32_t rx_buf_len;			///< WiFi RX buffer size
+	uint8_t amsdu_rx_enable;		///< WiFi AMSDU RX feature enable flag
+	uint8_t rx_buf_num;			///< WiFi RX buffer number
+	uint8_t rx_pkt_num;			///< WiFi RX packet number
+	uint8_t left_continuous_rx_buf_num;	///< WiFi Rx left continuous rx buffer number
+	uint8_t tx_buf_num;			///< WiFi TX buffer number
+	uint8_t reserved[3];			///< Unused, set to 0
+};
+
 /// Gamertag data
 struct mw_gamertag {
 	/// Unique gamertag id
@@ -246,13 +266,23 @@ enum mw_sock_stat {
 union mw_msg_sys_stat {
 	uint32_t st_flags;		///< Accesses all the flags at once
 	struct {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 		enum mw_state sys_stat:8;	///< System status
 		uint8_t online:1;	///< Module is connected to the Internet
 		uint8_t cfg_ok:1;	///< Configuration OK
 		uint8_t dt_ok:1;	///< Date and time synchronized at least once
-		uint8_t cfg:2;		///< Network configuration set
+		uint8_t cfg:2;		///< Default network configuration
 		uint16_t reserved:3;	///< Reserved flags
 		uint16_t ch_ev:16;	///< Channel flags with the pending event
+#else
+		uint16_t ch_ev:16;	///< Channel flags with the pending event
+		uint16_t reserved:3;	///< Reserved flags
+		uint8_t cfg:2;		///< Default network configuration
+		uint8_t dt_ok:1;	///< Date and time synchronized at least once
+		uint8_t cfg_ok:1;	///< Configuration OK
+		uint8_t online:1;	///< Module is connected to the Internet
+		enum mw_state sys_stat:8;	///< System status
+#endif
 	};
 };
 
@@ -283,6 +313,7 @@ typedef union mw_cmd {
 			union mw_msg_sys_stat sys_stat;		///< System status
 			struct mw_gamertag_set_msg gamertag_set;///< Gamertag set
 			struct mw_gamertag gamertag_get;	///< Gamertag get
+			struct mw_wifi_adv_cfg wifi_adv_cfg;	///< Advanced WiFi configuration
 			uint16_t fl_sect;	///< Flash sector
 			uint32_t fl_id;		///< Flash IDs
 			uint16_t rnd_len;	///< Length of the random buffer to fill
@@ -290,10 +321,12 @@ typedef union mw_cmd {
 	};
 } mw_cmd;
 
-/// Data sent/received using UDP sockets, uses this special format when reuse
-/// flag has been set in the mw_udp_set() call. This allows the program using
-/// the UDP socket, to filter incoming IPs, and to be able to properly answer
-/// to incoming packets from several peers.
+/// \brief Payload with remote IP and port.
+///
+/// Data sent/received using UDP sockets, uses this special format when
+/// reuse flag has been set in the mw_udp_set() call. This allows the program
+/// using the UDP socket, to filter incoming IPs, and to be able to properly
+/// answer to incoming packets from several peers.
 struct mw_reuse_payload {
 	uint32_t remote_ip;	///< IP of the remote end
 	uint16_t remote_port;	///< Port of the remote end

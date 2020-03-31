@@ -61,6 +61,7 @@ var group__megawifi =
     [ "mw_ap_fill_next", "group__megawifi.html#ga2cd98705a48c59d7710b29223ce2b917", null ],
     [ "mw_ap_scan", "group__megawifi.html#ga99c8dfc15220091883b5e3a2c5744fa5", null ],
     [ "mw_bssid_get", "group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6", null ],
+    [ "mw_cfg_save", "group__megawifi.html#ga8f837a49e461344531f88555394363eb", null ],
     [ "mw_close", "group__megawifi.html#ga2deb2a29f38acd84f8db310d12657f44", null ],
     [ "mw_cmd_data_cb_set", "group__megawifi.html#ga3b2916f947783fb3e1d4bdbcdaa137b2", null ],
     [ "mw_cmd_recv", "group__megawifi.html#gae296015ee73ae119ae763bdae9839a60", null ],
@@ -111,5 +112,7 @@ var group__megawifi =
     [ "mw_udp_reuse_recv", "group__megawifi.html#ga3c07f0a16ac25b5dc8711b63027fb7b0", null ],
     [ "mw_udp_reuse_send", "group__megawifi.html#ga670038f755210f5e80cbf76493a2add6", null ],
     [ "mw_udp_set", "group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8", null ],
-    [ "mw_version_get", "group__megawifi.html#ga817e2088be79653bf665db41849ca668", null ]
+    [ "mw_version_get", "group__megawifi.html#ga817e2088be79653bf665db41849ca668", null ],
+    [ "mw_wifi_adv_cfg_get", "group__megawifi.html#gaa6cf1ab703afae1c3497d0453849b3bf", null ],
+    [ "mw_wifi_adv_cfg_set", "group__megawifi.html#ga01bbc72587605bce1e5fe4d86ba8b51d", null ]
 ];
