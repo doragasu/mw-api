@@ -26,7 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">1.2</span>
+   &#160;<span id="projectnumber">1.3</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -125,6 +125,10 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga431b9876483f11e3e9d927387d469e4b">MW_ASSOC_TOUT_MS</a>&#160;&#160;&#160;20000</td></tr>
 <tr class="memdesc:ga431b9876483f11e3e9d927387d469e4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout for the AP associate command in milliseconds. <br /></td></tr>
 <tr class="separator:ga431b9876483f11e3e9d927387d469e4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac5b2cf358c4b5353c8e97d34883ac285"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gac5b2cf358c4b5353c8e97d34883ac285">MW_UPGRADE_TOUT_MS</a>&#160;&#160;&#160;180000</td></tr>
+<tr class="memdesc:gac5b2cf358c4b5353c8e97d34883ac285"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout for upgrade command in milliseconds. <br /></td></tr>
+<tr class="separator:gac5b2cf358c4b5353c8e97d34883ac285"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6b2c9c6c63578092a372fb9c5f0e74b1"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga6b2c9c6c63578092a372fb9c5f0e74b1">MW_STAT_POLL_MS</a>&#160;&#160;&#160;250</td></tr>
 <tr class="memdesc:ga6b2c9c6c63578092a372fb9c5f0e74b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Milliseconds between status polls while in wm_ap_assoc_wait() <br /></td></tr>
@@ -252,9 +256,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga582e7d40df5994a7c11b24ace5bbe881"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga582e7d40df5994a7c11b24ace5bbe881">mw_detect</a> (uint8_t *major, uint8_t *minor, char **variant)</td></tr>
 <tr class="memdesc:ga582e7d40df5994a7c11b24ace5bbe881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs the startup sequence for the WiFi module, and tries detecting it by requesting the version data.  <a href="group__megawifi.html#ga582e7d40df5994a7c11b24ace5bbe881">More...</a><br /></td></tr>
 <tr class="separator:ga582e7d40df5994a7c11b24ace5bbe881"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga817e2088be79653bf665db41849ca668"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga817e2088be79653bf665db41849ca668">mw_version_get</a> (uint8_t *major, uint8_t *minor, char **variant)</td></tr>
-<tr class="memdesc:ga817e2088be79653bf665db41849ca668"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtain module version numbers and string.  <a href="group__megawifi.html#ga817e2088be79653bf665db41849ca668">More...</a><br /></td></tr>
-<tr class="separator:ga817e2088be79653bf665db41849ca668"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf32e3839a0773ea388789b766a4f2c15"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaf32e3839a0773ea388789b766a4f2c15">mw_version_get</a> (uint8_t version[3], char **variant)</td></tr>
+<tr class="memdesc:gaf32e3839a0773ea388789b766a4f2c15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtain module version numbers and string.  <a href="group__megawifi.html#gaf32e3839a0773ea388789b766a4f2c15">More...</a><br /></td></tr>
+<tr class="separator:gaf32e3839a0773ea388789b766a4f2c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabcab943ad7996de14e41a669a369d2b6"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6">mw_bssid_get</a> (enum <a class="el" href="group__megawifi.html#gaa395ab95fb1639b3faea74217972dda9">mw_if_type</a> interface_type)</td></tr>
 <tr class="memdesc:gabcab943ad7996de14e41a669a369d2b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the module BSSID (the MAC address) for the specified interface.  <a href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6">More...</a><br /></td></tr>
 <tr class="separator:gabcab943ad7996de14e41a669a369d2b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -354,9 +358,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga9eb5082f2dc47b0c802ba6dc233ada4e"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga9eb5082f2dc47b0c802ba6dc233ada4e">mw_date_time_get</a> (uint32_t dt_bin[2])</td></tr>
 <tr class="memdesc:ga9eb5082f2dc47b0c802ba6dc233ada4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get date and time.  <a href="group__megawifi.html#ga9eb5082f2dc47b0c802ba6dc233ada4e">More...</a><br /></td></tr>
 <tr class="separator:ga9eb5082f2dc47b0c802ba6dc233ada4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2576a203dfae25cead3a44954ee60d91"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga2576a203dfae25cead3a44954ee60d91">mw_flash_id_get</a> (uint8_t id[3])</td></tr>
-<tr class="memdesc:ga2576a203dfae25cead3a44954ee60d91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get date and time.  <a href="group__megawifi.html#ga2576a203dfae25cead3a44954ee60d91">More...</a><br /></td></tr>
-<tr class="separator:ga2576a203dfae25cead3a44954ee60d91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaaca89def1772ce78d2c0e58875d0ceb"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#gaaaca89def1772ce78d2c0e58875d0ceb">mw_flash_id_get</a> (uint8_t *man_id, uint16_t *dev_id)</td></tr>
+<tr class="memdesc:gaaaca89def1772ce78d2c0e58875d0ceb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the identifiers of the flash chip in the WiFi module.  <a href="group__megawifi.html#gaaaca89def1772ce78d2c0e58875d0ceb">More...</a><br /></td></tr>
+<tr class="separator:gaaaca89def1772ce78d2c0e58875d0ceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga35f6a09aa3ecd86e5327521a2a7f41c6"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga35f6a09aa3ecd86e5327521a2a7f41c6">mw_flash_sector_erase</a> (uint16_t sect)</td></tr>
 <tr class="memdesc:ga35f6a09aa3ecd86e5327521a2a7f41c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase a 4 KiB Flash sector. Every byte of an erased sector will be read as 0xFF.  <a href="group__megawifi.html#ga35f6a09aa3ecd86e5327521a2a7f41c6">More...</a><br /></td></tr>
 <tr class="separator:ga35f6a09aa3ecd86e5327521a2a7f41c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -420,6 +424,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga1ba162b634a00f22057575e92a8f4973"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga1ba162b634a00f22057575e92a8f4973">mw_hrng_get</a> (uint16_t rnd_len)</td></tr>
 <tr class="memdesc:ga1ba162b634a00f22057575e92a8f4973"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get random numbers.  <a href="group__megawifi.html#ga1ba162b634a00f22057575e92a8f4973">More...</a><br /></td></tr>
 <tr class="separator:ga1ba162b634a00f22057575e92a8f4973"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga70d88a6105a499de780e96dabf4cf5c1"><td class="memItemLeft" align="right" valign="top">enum <a class="el" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga70d88a6105a499de780e96dabf4cf5c1">mw_fw_upgrade</a> (const char *name)</td></tr>
+<tr class="memdesc:ga70d88a6105a499de780e96dabf4cf5c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Over-The-Air upgrade WiFi module firmware.  <a href="group__megawifi.html#ga70d88a6105a499de780e96dabf4cf5c1">More...</a><br /></td></tr>
+<tr class="separator:ga70d88a6105a499de780e96dabf4cf5c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga79e05a128d08dce3df5f444a3b9af88b"><td class="memItemLeft" align="right" valign="top">static enum lsd_status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__megawifi.html#ga79e05a128d08dce3df5f444a3b9af88b">mw_cmd_send</a> (<a class="el" href="unionmw__cmd.html">mw_cmd</a> *cmd, void *ctx, lsd_send_cb send_cb)</td></tr>
 <tr class="memdesc:ga79e05a128d08dce3df5f444a3b9af88b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a command to the WiFi module.  <a href="group__megawifi.html#ga79e05a128d08dce3df5f444a3b9af88b">More...</a><br /></td></tr>
 <tr class="separator:ga79e05a128d08dce3df5f444a3b9af88b"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -74,6 +74,8 @@ var mw_msg_8h =
     [ "MW_CMD_TCP_BIND", "mw-msg_8h.html#a7e2977d9598eca04448f1d9764f29ecc", null ],
     [ "MW_CMD_TCP_CON", "mw-msg_8h.html#a852fbe7f24714efb967afdeab8681382", null ],
     [ "MW_CMD_UDP_SET", "mw-msg_8h.html#a66a84fa6cc3b6a6192c0305b1b5857aa", null ],
+    [ "MW_CMD_UPGRADE_LIST", "mw-msg_8h.html#a281c5002db91513f31130723f536911e", null ],
+    [ "MW_CMD_UPGRADE_PERFORM", "mw-msg_8h.html#a4856a2b21017c92e22e23af3bab20ed8", null ],
     [ "MW_CMD_VERSION", "mw-msg_8h.html#acb719773206dc2a3487d65b7911312e8", null ],
     [ "MW_CMD_WIFI_ADV_GET", "mw-msg_8h.html#a81e2bf0b852e1a13a72b88469daee722", null ],
     [ "MW_CMD_WIFI_ADV_SET", "mw-msg_8h.html#a08c3d2bff964646410234226ab8d969c", null ],

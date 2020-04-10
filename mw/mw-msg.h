@@ -291,8 +291,8 @@ union mw_msg_sys_stat {
 
 /// Flash chip identifiers
 struct mw_flash_id {
-	uint16_t device;	/// Device ID
-	uint8_t manufacturer;	/// Manufacturer ID
+	uint16_t device;	///< Device ID
+	uint8_t manufacturer;	///< Manufacturer ID
 };
 
 /// Command sent to system FSM

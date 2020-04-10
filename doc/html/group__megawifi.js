@@ -27,6 +27,7 @@ var group__megawifi =
     [ "MW_STAT_POLL_MS", "group__megawifi.html#ga6b2c9c6c63578092a372fb9c5f0e74b1", null ],
     [ "mw_tcp_disconnect", "group__megawifi.html#ga1fba45bbaeb37503895f2261ea23a954", null ],
     [ "mw_udp_unset", "group__megawifi.html#gae8e653c57b71e824611d623dfe05ce6a", null ],
+    [ "MW_UPGRADE_TOUT_MS", "group__megawifi.html#gac5b2cf358c4b5353c8e97d34883ac285", null ],
     [ "mw_err", "group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e", [
       [ "MW_ERR_NONE", "group__megawifi.html#gga777c2b3caa535d405278734b0f5aad2ea469b336990144c39297268eca750af7f", null ],
       [ "MW_ERR", "group__megawifi.html#gga777c2b3caa535d405278734b0f5aad2ea6054a8c4d7c84903faf5ba1b967c88b9", null ],
@@ -74,10 +75,11 @@ var group__megawifi =
     [ "mw_default_cfg_set", "group__megawifi.html#ga603dad869097a4f978f2dbb6fc882f73", null ],
     [ "mw_detect", "group__megawifi.html#ga582e7d40df5994a7c11b24ace5bbe881", null ],
     [ "mw_factory_settings", "group__megawifi.html#ga9ac5a0d149e605170c10bf0ec1ae25a9", null ],
-    [ "mw_flash_id_get", "group__megawifi.html#ga2576a203dfae25cead3a44954ee60d91", null ],
+    [ "mw_flash_id_get", "group__megawifi.html#gaaaca89def1772ce78d2c0e58875d0ceb", null ],
     [ "mw_flash_read", "group__megawifi.html#gae2183be207f9ef7fa2c14932aa87269d", null ],
     [ "mw_flash_sector_erase", "group__megawifi.html#ga35f6a09aa3ecd86e5327521a2a7f41c6", null ],
     [ "mw_flash_write", "group__megawifi.html#gad2c3c09a3e99be8893cba9ad867fc4e9", null ],
+    [ "mw_fw_upgrade", "group__megawifi.html#ga70d88a6105a499de780e96dabf4cf5c1", null ],
     [ "mw_gamertag_get", "group__megawifi.html#ga635b2e45820d9872badae382a7730153", null ],
     [ "mw_gamertag_set", "group__megawifi.html#ga9ab26dbe9fc804915a4f8b5db4e194ed", null ],
     [ "mw_hrng_get", "group__megawifi.html#ga1ba162b634a00f22057575e92a8f4973", null ],
@@ -112,7 +114,7 @@ var group__megawifi =
     [ "mw_udp_reuse_recv", "group__megawifi.html#ga3c07f0a16ac25b5dc8711b63027fb7b0", null ],
     [ "mw_udp_reuse_send", "group__megawifi.html#ga670038f755210f5e80cbf76493a2add6", null ],
     [ "mw_udp_set", "group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8", null ],
-    [ "mw_version_get", "group__megawifi.html#ga817e2088be79653bf665db41849ca668", null ],
+    [ "mw_version_get", "group__megawifi.html#gaf32e3839a0773ea388789b766a4f2c15", null ],
     [ "mw_wifi_adv_cfg_get", "group__megawifi.html#gaa6cf1ab703afae1c3497d0453849b3bf", null ],
     [ "mw_wifi_adv_cfg_set", "group__megawifi.html#ga01bbc72587605bce1e5fe4d86ba8b51d", null ]
 ];

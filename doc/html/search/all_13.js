@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['w_5fdata_372',['w_data',['../unionmw__cmd.html#a7bcdd624bf58b31fade68e20b47aaf08',1,'mw_cmd']]],
-  ['wifi_5fadv_5fcfg_373',['wifi_adv_cfg',['../unionmw__cmd.html#a7f12e46078e954f8e615a0be47f86c15',1,'mw_cmd']]]
+  ['version_5fcmp_380',['version_cmp',['../group__util.html#gafcd38b059201c5b5386476abe742c3e7',1,'util.h']]],
+  ['version_5fto_5fstr_381',['version_to_str',['../group__util.html#ga823c6af3d494d2dfaf5bcccf8f9f15e9',1,'util.h']]]
 ];

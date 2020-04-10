@@ -242,7 +242,7 @@ int uint32_to_hex_str(uint32_t num, char *str, int pad);
 
 /************************************************************************//**
  * \brief Converts version numbers (major, minor, micro) into its string
- * representation <major>.<minor>.<micro>
+ * representation [major].[minor].[micro]
  *
  * \param[in]  version Version numbers
  * \param[out] str     Converted version string from version numbers.

@@ -26,7 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">MegaWiFi
-   &#160;<span id="projectnumber">1.2</span>
+   &#160;<span id="projectnumber">1.3</span>
    </div>
    <div id="projectbrief">MegaWiFi API documentation</div>
   </td>
@@ -182,9 +182,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gadeb908ba34661b2397003fe6bf969111"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#gadeb908ba34661b2397003fe6bf969111">ip_str_to_uint32</a> (const char *ip)</td></tr>
 <tr class="memdesc:gadeb908ba34661b2397003fe6bf969111"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the binary IP addres (uint32) corresponding to the input string.  <a href="group__util.html#gadeb908ba34661b2397003fe6bf969111">More...</a><br /></td></tr>
 <tr class="separator:gadeb908ba34661b2397003fe6bf969111"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa541fa75f7d12a2e2f98530a11d064eb"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#gaa541fa75f7d12a2e2f98530a11d064eb">uint8_to_str</a> (uint8_t num, char *str)</td></tr>
-<tr class="memdesc:gaa541fa75f7d12a2e2f98530a11d064eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an unsigned 8-bit number to its character string representation.  <a href="group__util.html#gaa541fa75f7d12a2e2f98530a11d064eb">More...</a><br /></td></tr>
-<tr class="separator:gaa541fa75f7d12a2e2f98530a11d064eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad01ca814a706054fae664b09831a426d"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#gad01ca814a706054fae664b09831a426d">uint8_to_str</a> (uint8_t num, char *str)</td></tr>
+<tr class="memdesc:gad01ca814a706054fae664b09831a426d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an unsigned 8-bit number to its character string representation.  <a href="group__util.html#gad01ca814a706054fae664b09831a426d">More...</a><br /></td></tr>
+<tr class="separator:gad01ca814a706054fae664b09831a426d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga648437f7d7b44a714f95c6a80f9a2a04"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga648437f7d7b44a714f95c6a80f9a2a04">int8_to_str</a> (int8_t num, char *str)</td></tr>
 <tr class="memdesc:ga648437f7d7b44a714f95c6a80f9a2a04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an signed 8-bit number to its character string representation.  <a href="group__util.html#ga648437f7d7b44a714f95c6a80f9a2a04">More...</a><br /></td></tr>
 <tr class="separator:ga648437f7d7b44a714f95c6a80f9a2a04"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,6 +206,12 @@ Functions</h2></td></tr>
 <tr class="memitem:gadc2fe63f7c4fde6fd40fdcbd34019d8b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#gadc2fe63f7c4fde6fd40fdcbd34019d8b">uint32_to_hex_str</a> (uint32_t num, char *str, int pad)</td></tr>
 <tr class="memdesc:gadc2fe63f7c4fde6fd40fdcbd34019d8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit number to its hexadecimal string representation.  <a href="group__util.html#gadc2fe63f7c4fde6fd40fdcbd34019d8b">More...</a><br /></td></tr>
 <tr class="separator:gadc2fe63f7c4fde6fd40fdcbd34019d8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga823c6af3d494d2dfaf5bcccf8f9f15e9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga823c6af3d494d2dfaf5bcccf8f9f15e9">version_to_str</a> (const uint8_t version[3], char *str)</td></tr>
+<tr class="memdesc:ga823c6af3d494d2dfaf5bcccf8f9f15e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts version numbers (major, minor, micro) into its string representation [major].[minor].[micro].  <a href="group__util.html#ga823c6af3d494d2dfaf5bcccf8f9f15e9">More...</a><br /></td></tr>
+<tr class="separator:ga823c6af3d494d2dfaf5bcccf8f9f15e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafcd38b059201c5b5386476abe742c3e7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#gafcd38b059201c5b5386476abe742c3e7">version_cmp</a> (const uint8_t old[3], const uint8_t new[3])</td></tr>
+<tr class="memdesc:gafcd38b059201c5b5386476abe742c3e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares two version number arrays (major, minor, micro).  <a href="group__util.html#gafcd38b059201c5b5386476abe742c3e7">More...</a><br /></td></tr>
+<tr class="separator:gafcd38b059201c5b5386476abe742c3e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>General purpose utilities. </p>
@@ -753,14 +759,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gaa541fa75f7d12a2e2f98530a11d064eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaa541fa75f7d12a2e2f98530a11d064eb">&#9670;&nbsp;</a></span>uint8_to_str()</h2>
+<a id="gad01ca814a706054fae664b09831a426d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad01ca814a706054fae664b09831a426d">&#9670;&nbsp;</a></span>uint8_to_str()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t uint8_to_str </td>
+          <td class="memname">uint16_t uint8_to_str </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>num</em>, </td>
@@ -789,6 +795,88 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Resulting str length (not including null termination). </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>str buffer length shall be at least 4 bytes. </dd></dl>
+
+</div>
+</div>
+<a id="gafcd38b059201c5b5386476abe742c3e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafcd38b059201c5b5386476abe742c3e7">&#9670;&nbsp;</a></span>version_cmp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int version_cmp </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t&#160;</td>
+          <td class="paramname"><em>old</em>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t&#160;</td>
+          <td class="paramname"><em>new</em>[3]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Compares two version number arrays (major, minor, micro). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">old</td><td>Old version numbers </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">new</td><td>New version numbers against to compare</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><ul>
+<li>&gt; 0 if new &gt; old</li>
+<li>&lt; 0 if new &lt; old</li>
+<li>0 if new == old </li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<a id="ga823c6af3d494d2dfaf5bcccf8f9f15e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga823c6af3d494d2dfaf5bcccf8f9f15e9">&#9670;&nbsp;</a></span>version_to_str()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int version_to_str </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t&#160;</td>
+          <td class="paramname"><em>version</em>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>str</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts version numbers (major, minor, micro) into its string representation [major].[minor].[micro]. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">version</td><td>Version numbers </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">str</td><td>Converted version string from version numbers.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The number of characters used for the string representation of the version number (excluding the null termination). </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>str must be at least 12 characters long to guarantee the hightest allowed version numbert (255.255.255) can be represented. </dd></dl>
 
 </div>
 </div>
