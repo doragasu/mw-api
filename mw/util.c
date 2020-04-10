@@ -123,14 +123,14 @@ uint8_t int16_to_str(int16_t num, char *str) {
 	return uint16_to_str(num, str) + off;
 }
 
-uint8_t uint8_to_str(uint8_t num, char *str)
+uint16_t uint8_to_str(uint8_t num, char *str)
 {
-	uint8_t i = 0;
-	uint8_t tmp;
+	uint16_t i = 0;
+	uint16_t tmp;
 
 	// Compute digits and write decimal number
 	// On 3 digit numbers, first one can only be 1 or 2. Take advantage of
-	// this to avoid division (TODO test if this is really faster).
+	// this to avoid division (test if this is really faster).
 	if (num > 199) {
 		str[i++] = '2';
 		num -= 200;
@@ -267,5 +267,33 @@ int uint32_to_hex_str(uint32_t num, char *str, int pad)
 	}
 	str[i] = '\0';
 	return i;
+}
+
+int version_to_str(const uint8_t version[3], char *str)
+{
+	int pos = 0;
+
+	for (int i = 0; i < 3; i++) {
+		pos += uint8_to_str(version[i], str + pos);
+		str[pos++] = '.';
+	}
+	str[--pos] = '\0';
+
+	return pos;
+}
+
+int version_cmp(const uint8_t old[3], const uint8_t new[3])
+{
+	int result;
+	int i;
+
+	for (i = 0; i < 2; i++) {
+		result = new[i] - old[i];
+		if (result) {
+			return result;
+		}
+	}
+
+	return new[i] - old[i];
 }
 

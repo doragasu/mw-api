@@ -16,6 +16,7 @@ LD      = ld
 GDB     = cgdb -d $(PREFIX)gdb --
 OBJCOPY = objcopy
 MDMA   ?= $(HOME)/src/github/mw-mdma-cli/mdma
+WFLASH ?= $(HOME)/src/github/mw-wf-cli/src/wflash
 EMU    ?= $(HOME)/src/gendev/blastem/blastem
 OBJDIR  = tmp
 
@@ -29,6 +30,10 @@ ASRCS = $(foreach DIR, $(DIRS), $(wildcard *.s))
 AOBJECTS := $(patsubst %.s,$(OBJDIR)/%.o,$(ASRCS)) 
 
 all: $(TARGET)
+
+.PHONY: wflash
+wflash: $(TARGET)
+	$(WFLASH) -Aef $(TARGET)
 
 .PHONY: cart
 cart: $(TARGET)

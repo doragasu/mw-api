@@ -20,6 +20,8 @@
 #define MW_ASSOC_TOUT		MS_TO_FRAMES(MW_ASSOC_TOUT_MS)
 #define MW_STAT_POLL_TOUT	MS_TO_FRAMES(MW_STAT_POLL_MS)
 #define MW_HTTP_OPEN_TOUT	MS_TO_FRAMES(MW_HTTP_OPEN_TOUT_MS)
+#define MW_UPGRADE_TOUT		MS_TO_FRAMES(MW_UPGRADE_TOUT_MS)
+
 /*
  * The module assumes that once started, sending always succeeds, but uses
  * timers (when defined) for data reception.
@@ -213,6 +215,7 @@ enum mw_err mw_detect(uint8_t *major, uint8_t *minor, char **variant)
 {
 	int retries = 5;
 	enum mw_err err;
+	uint8_t version[3];
 
 	// Wait a bit and take module out of resest
 	loop_timer_start(&d.timer, MS_TO_FRAMES(30));
@@ -224,13 +227,22 @@ enum mw_err mw_detect(uint8_t *major, uint8_t *minor, char **variant)
 	do {
 		retries--;
 		uart_reset_fifos();
-		err = mw_version_get(major, minor, variant);
+		err = mw_version_get(version, variant);
 	} while (err != MW_ERR_NONE && retries);
+
+	if (MW_ERR_NONE == err) {
+		if (major) {
+			*major = version[0];
+		}
+		if (minor) {
+			*minor = version[1];
+		}
+	}
 
 	return err;
 }
 
-enum mw_err mw_version_get(uint8_t *major, uint8_t *minor, char **variant)
+enum mw_err mw_version_get(uint8_t version[3], char **variant)
 {
 	enum mw_err err;
 
@@ -244,17 +256,14 @@ enum mw_err mw_version_get(uint8_t *major, uint8_t *minor, char **variant)
 	if (err) {
 		return err;
 	}
-	if (major) {
-		*major = d.cmd->data[0];
-	}
-	if (minor) {
-		*minor = d.cmd->data[1];
+	if (version) {
+		version[0] = d.cmd->data[0];
+		version[1] = d.cmd->data[1];
+		version[2] = d.cmd->data[2];
 	}
 	if (variant) {
-		/// \todo check this
-		// Version string is not NULL terminated, add proper termination
-		d.cmd->data[MIN(d.buf_len - 1, d.cmd->data_len)] = '\0';
-		*variant = (char*)(d.cmd->data + 2);
+		// Version string is NULL terminated
+		*variant = (char*)(d.cmd->data + 3);
 	}
 
 	return MW_ERR_NONE;
@@ -929,7 +938,7 @@ char *mw_date_time_get(uint32_t dt_bin[2])
 	return d.cmd->date_time.dt_str;
 }
 
-enum mw_err mw_flash_id_get(uint8_t id[3])
+enum mw_err mw_flash_id_get(uint8_t *man_id, uint16_t *dev_id)
 {
 	enum mw_err err;
 
@@ -944,9 +953,12 @@ enum mw_err mw_flash_id_get(uint8_t id[3])
 		return MW_ERR;
 	}
 
-	id[0] = d.cmd->data[0];
-	id[1] = d.cmd->data[1];
-	id[2] = d.cmd->data[2];
+	if (man_id) {
+		*man_id = d.cmd->flash_id.manufacturer;
+	}
+	if (dev_id) {
+		*dev_id = d.cmd->flash_id.device;
+	}
 
 	return MW_ERR_NONE;
 }
@@ -1447,6 +1459,25 @@ enum mw_err mw_wifi_adv_cfg_set(const struct mw_wifi_adv_cfg *wifi)
 	d.cmd->data_len = sizeof(struct mw_wifi_adv_cfg);
 	d.cmd->wifi_adv_cfg = *wifi;
 	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_fw_upgrade(const char *name)
+{
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	d.cmd->cmd = MW_CMD_UPGRADE_PERFORM;
+	d.cmd->data_len = strlen(name) + 1;
+	memcpy(d.cmd->data, name, d.cmd->data_len);
+	err = mw_command(MW_UPGRADE_TOUT);
 	if (err) {
 		return MW_ERR;
 	}

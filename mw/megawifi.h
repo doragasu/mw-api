@@ -40,6 +40,8 @@
 #define MW_SCAN_TOUT_MS		10000
 /// Timeout for the AP associate command in milliseconds
 #define MW_ASSOC_TOUT_MS	20000
+/// Timeout for upgrade command in milliseconds
+#define MW_UPGRADE_TOUT_MS	180000
 /// Milliseconds between status polls while in wm_ap_assoc_wait()
 #define MW_STAT_POLL_MS		250
 
@@ -155,8 +157,8 @@ void mw_cmd_data_cb_set(lsd_recv_cb cmd_recv_cb);
  * \brief Performs the startup sequence for the WiFi module, and tries
  * detecting it by requesting the version data.
  *
- * \param[out] major   Pointer to Major version number.
- * \param[out] minor   Pointer to Minor version number.
+ * \param[out] major   Major version number.
+ * \param[out] minor   Minor version number.
  * \param[out] variant String with firmware variant ("std" for standard).
  *
  * \return MW_ERR_NONE on success, other code on failure.
@@ -166,13 +168,12 @@ enum mw_err mw_detect(uint8_t *major, uint8_t *minor, char **variant);
 /************************************************************************//**
  * \brief Obtain module version numbers and string
  *
- * \param[out] major   Pointer to Major version number.
- * \param[out] minor   Pointer to Minor version number.
+ * \param[out] version Version numbers (major, minor, micro) in order.
  * \param[out] variant String with firmware variant ("std" for standard).
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
-enum mw_err mw_version_get(uint8_t *major, uint8_t *minor, char **variant);
+enum mw_err mw_version_get(uint8_t version[3], char **variant);
 
 /************************************************************************//**
  * \brief Gets the module BSSID (the MAC address) for the specified interface.
@@ -607,13 +608,13 @@ enum mw_err mw_sntp_cfg_get(char **tz_str, char *server[3]);
 char *mw_date_time_get(uint32_t dt_bin[2]);
 
 /************************************************************************//**
- * \brief Get date and time.
+ * \brief Get the identifiers of the flash chip in the WiFi module.
  *
- * \param[out] id Identifiers of the flash chip installed in the WiFi module.
+ * \param[out] man_id ID of the flash chip manufacturer.
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
-enum mw_err mw_flash_id_get(uint8_t id[3]);
+enum mw_err mw_flash_id_get(uint8_t *man_id, uint16_t *dev_id);
 
 /************************************************************************//**
  * \brief Erase a 4 KiB Flash sector. Every byte of an erased sector will be
@@ -844,6 +845,16 @@ enum mw_err mw_def_server_set(const char *server_url);
  * when error.
  ****************************************************************************/
 uint8_t *mw_hrng_get(uint16_t rnd_len);
+
+/************************************************************************//**
+ * \brief Over-The-Air upgrade WiFi module firmware.
+ *
+ * \param[in] name Name of the firmware blob to upgrade.
+ *                 E.g. "mw_rtos_std_v1.4"
+ *
+ * \return Status of the send procedure.
+ ****************************************************************************/
+enum mw_err mw_fw_upgrade(const char *name);
 
 /****** THE FOLLOWING COMMANDS ARE LOWER LEVEL AND USUALLY NOT NEEDED ******/
 

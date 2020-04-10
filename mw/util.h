@@ -148,7 +148,7 @@ uint32_t ip_str_to_uint32(const char *ip);
  * \return Resulting str length (not including null termination).
  * \note str buffer length shall be at least 4 bytes.
  ****************************************************************************/
-uint8_t uint8_to_str(uint8_t num, char *str);
+uint16_t uint8_to_str(uint8_t num, char *str);
 
 /************************************************************************//**
  * \brief Converts an signed 8-bit number to its character
@@ -239,6 +239,33 @@ void uint8_to_hex_str(uint8_t num, char *str);
  *         including the null termination.
  ****************************************************************************/
 int uint32_to_hex_str(uint32_t num, char *str, int pad);
+
+/************************************************************************//**
+ * \brief Converts version numbers (major, minor, micro) into its string
+ * representation <major>.<minor>.<micro>
+ *
+ * \param[in]  version Version numbers
+ * \param[out] str     Converted version string from version numbers.
+ *
+ * \return The number of characters used for the string representation of
+ * the version number (excluding the null termination).
+ * \note str must be at least 12 characters long to guarantee the hightest
+ * allowed version numbert (255.255.255) can be represented.
+ ****************************************************************************/
+int version_to_str(const uint8_t version[3], char *str);
+
+/************************************************************************//**
+ * \brief Compares two version number arrays (major, minor, micro).
+ *
+ * \param[in] old Old version numbers
+ * \param[in] new New version numbers against to compare
+ *
+ * \return
+ * * > 0 if new > old
+ * * < 0 if new < old
+ * *   0 if new == old
+ ****************************************************************************/
+int version_cmp(const uint8_t old[3], const uint8_t new[3]);
 
 #ifndef TRUE
 /// TRUE value for logic comparisons

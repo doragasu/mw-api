@@ -97,11 +97,14 @@ enum PACKED mw_command {
 	MW_CMD_HTTP_OPEN	=  45,	///< Open HTTP request
 	MW_CMD_HTTP_FINISH	=  46,	///< Finish HTTP request
 	MW_CMD_HTTP_CLEANUP	=  47,	///< Clean request data
-	MW_CMD_SERVER_URL_GET	=  48,	///< Get the main server URL
-	MW_CMD_SERVER_URL_SET	=  49,	///< Set the main server URL
-	MW_CMD_WIFI_ADV_GET	=  50,	///< Get advanced WiFi parameters
-	MW_CMD_WIFI_ADV_SET	=  51,	///< Set advanced WiFi parameters
-	MW_CMD_NV_CFG_SAVE	=  52,	///< Save non-volatile config
+// Reserved
+	MW_CMD_SERVER_URL_GET	=  49,	///< Get the main server URL
+	MW_CMD_SERVER_URL_SET	=  50,	///< Set the main server URL
+	MW_CMD_WIFI_ADV_GET	=  51,	///< Get advanced WiFi parameters
+	MW_CMD_WIFI_ADV_SET	=  52,	///< Set advanced WiFi parameters
+	MW_CMD_NV_CFG_SAVE	=  53,	///< Save non-volatile config
+	MW_CMD_UPGRADE_LIST	=  54,	///< Get firmware upgrade versions
+	MW_CMD_UPGRADE_PERFORM	=  55,	///< Start firmware upgrade
 	MW_CMD_ERROR		= 255	///< Error command reply
 };
 
@@ -286,6 +289,12 @@ union mw_msg_sys_stat {
 	};
 };
 
+/// Flash chip identifiers
+struct mw_flash_id {
+	uint16_t device;	/// Device ID
+	uint8_t manufacturer;	/// Manufacturer ID
+};
+
 /// Command sent to system FSM
 typedef union mw_cmd {
 	char packet[MW_CMD_MAX_BUFLEN + 2 * sizeof(uint16_t)];	///< Packet raw data
@@ -314,6 +323,7 @@ typedef union mw_cmd {
 			struct mw_gamertag_set_msg gamertag_set;///< Gamertag set
 			struct mw_gamertag gamertag_get;	///< Gamertag get
 			struct mw_wifi_adv_cfg wifi_adv_cfg;	///< Advanced WiFi configuration
+			struct mw_flash_id flash_id;		///< Flash chip identifiers
 			uint16_t fl_sect;	///< Flash sector
 			uint32_t fl_id;		///< Flash IDs
 			uint16_t rnd_len;	///< Length of the random buffer to fill
