@@ -46,17 +46,6 @@
 #include "16c550.h"
 #include "mw-msg.h"
 
-/** \addtogroup ReturnCodes ReturnCodes
- *  \brief OK/Error codes returned by several functions.
- *  \{ */
-/// Function completed successfully
-#define LSD_OK			0
-/// Generic error code
-#define LSD_ERROR		-1
-/// A framing error occurred. Possible data loss.
-#define LSD_FRAMING_ERROR	-2
-/** \} */
-
 /// LSD frame overhead in bytes
 #define LSD_OVERHEAD		4
 

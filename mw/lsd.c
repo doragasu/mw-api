@@ -142,9 +142,9 @@ static void process_recv(void)
 
 	case LSD_RECV_LEN:	// Receive len low
 		d.rx.frame_len |= recv;
+		d.rx.pos = 0;
 		if (d.rx.frame_len) {
 			// If there's payload, receive it. Else wait for ETX
-			d.rx.pos = 0;
 			d.rx.stat = LSD_RECV_DATA;
 		} else {
 			d.rx.stat = LSD_RECV_ETX;
@@ -247,21 +247,21 @@ void lsd_init(void)
 int lsd_ch_enable(uint8_t ch)
 {
 	if (ch >= LSD_MAX_CH) {
-		return LSD_ERROR;
+		return LSD_STAT_ERROR;
 	}
 
 	d.ch_enable[ch] = TRUE;
-	return LSD_OK;
+	return LSD_STAT_COMPLETE;
 }
 
 int lsd_ch_disable(uint8_t ch)
 {
 	if (ch >= LSD_MAX_CH) {
-		return LSD_ERROR;
+		return LSD_STAT_ERROR;
 	}
 
 	d.ch_enable[ch] = FALSE;
-	return LSD_OK;
+	return LSD_STAT_COMPLETE;
 }
 
 /// \todo Should we call the send callback on errors?

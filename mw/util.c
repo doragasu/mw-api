@@ -1,3 +1,4 @@
+#include <string.h>
 #include "util.h"
 
 const char *str_is_uint8(const char *str)
@@ -295,5 +296,50 @@ int version_cmp(const uint8_t old[3], const uint8_t new[3])
 	}
 
 	return new[i] - old[i];
+}
+
+uint16_t concat_strings(const char **str, uint8_t num_strs, char *output,
+		uint16_t max_len)
+{
+	uint16_t pos = 0;
+	int str_len;
+
+	for (uint8_t i = 0; i < num_strs; i++) {
+		if (!str[i]) {
+			return 0;
+		}
+		str_len = strlen(str[i]) + 1;
+		if ((pos + str_len) > max_len) {
+			return 0;
+		}
+		memcpy(output + pos, str[i], str_len);
+		pos += str_len;
+	}
+
+	return pos;
+}
+
+uint16_t concat_kv_pairs(const char **key, const char **value,
+		uint8_t num_pairs, char *output, uint16_t max_len)
+{
+	uint16_t pos = 0;
+	int key_len, value_len;
+
+	for (uint8_t i = 0; i < num_pairs; i++) {
+		if (!key[i] || !value[i]) {
+			return 0;
+		}
+		key_len = strlen(key[i]) + 1;
+		value_len = strlen(value[i]) + 1;
+		if ((pos + key_len + value_len) > max_len) {
+			return 0;
+		}
+		memcpy(output + pos, key[i], key_len);
+		pos += key_len;
+		memcpy(output + pos, value[i], value_len);
+		pos += value_len;
+	}
+
+	return pos;
 }
 

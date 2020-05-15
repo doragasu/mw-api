@@ -29,9 +29,9 @@
 #define NULL ((void*)0)
 #endif
 
-/// Stringify helper macro (do not use directly)
+/// Helper for STR macro, to ensure item is expanded
 #define _STR(item)	#item
-/// Stringify macro
+/// Converts a statically defined item to string
 #define STR(item)	_STR(item)
 
 /// Returns TRUE if number is in the specified range
@@ -266,6 +266,35 @@ int version_to_str(const uint8_t version[3], char *str);
  * *   0 if new == old
  ****************************************************************************/
 int version_cmp(const uint8_t old[3], const uint8_t new[3]);
+
+/************************************************************************//**
+ * \brief Concatenates an array of strings into an output string, separated
+ * by a '\0' character.
+ *
+ * \param[in]  str      Array of strings to concatenate into output.
+ * \param[in]  num_strs Number of strings in str array.
+ * \param[out] output   Output array that will hold concatenated strings.
+ * \param[in]  max_len  Length of output. Function will error if not enough.
+ *
+ * \return The length of concatenated output strings, or 0 on error.
+ ****************************************************************************/
+uint16_t concat_strings(const char **str, uint8_t num_strs, char *output,
+		uint16_t max_len);
+
+/************************************************************************//**
+ * \brief Concatenates two arrays of key/value pairs, into an output string,
+ * separating each key and value with a '\0' character.
+ *
+ * \param[in]  key       Array of keys to concatenate into output.
+ * \param[in]  value     Array of values to concatenate into output.
+ * \param[in]  num_pairs Number of key/value pairs in key and value arrays.
+ * \param[out] output    Output array that will hold concatenated strings.
+ * \param[in]  max_len   Length of output. Function will error if not enough.
+ *
+ * \return The length of concatenated output key/val strings, or 0 on error.
+ ****************************************************************************/
+uint16_t concat_kv_pairs(const char **key, const char **value,
+		uint8_t num_pairs, char *output, uint16_t max_len);
 
 #ifndef TRUE
 /// TRUE value for logic comparisons

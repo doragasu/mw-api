@@ -16,6 +16,7 @@
 #include "loop.h"
 
 #define MW_COMMAND_TOUT		MS_TO_FRAMES(MW_COMMAND_TOUT_MS)
+#define MW_CONNECT_TOUT		MS_TO_FRAMES(MW_CONNECT_TOUT_MS)
 #define MW_SCAN_TOUT		MS_TO_FRAMES(MW_SCAN_TOUT_MS)
 #define MW_ASSOC_TOUT		MS_TO_FRAMES(MW_ASSOC_TOUT_MS)
 #define MW_STAT_POLL_TOUT	MS_TO_FRAMES(MW_STAT_POLL_MS)
@@ -162,6 +163,31 @@ static enum mw_err mw_command(int timeout_frames)
 			d.cmd_data_cb(LSD_STAT_COMPLETE, md.ch,
 					(char*)d.cmd, md.len, NULL);
 		}
+	}
+
+	return MW_ERR_NONE;
+}
+
+static enum mw_err string_based_cmd(enum mw_command cmd, const char *payload,
+		int timeout_frames)
+{
+	enum mw_err err;
+	size_t len;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	if (!payload || !(len = strlen(payload))) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->cmd = cmd;
+	d.cmd->data_len = len + 1;
+	memcpy(d.cmd->data, payload, len + 1);
+	err = mw_command(timeout_frames);
+	if (err) {
+		return MW_ERR;
 	}
 
 	return MW_ERR_NONE;
@@ -656,7 +682,7 @@ enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr,
 	d.cmd->data_len = fill_addr(dst_addr, dst_port, src_port,
 			&d.cmd->in_addr);
 	d.cmd->in_addr.channel = ch;
-	err = mw_command(MW_COMMAND_TOUT);
+	err = mw_command(MW_CONNECT_TOUT);
 	if (err) {
 		return MW_ERR;
 	}
@@ -1107,26 +1133,7 @@ struct mw_gamertag *mw_gamertag_get(uint8_t slot)
 
 enum mw_err mw_http_url_set(const char *url)
 {
-	enum mw_err err;
-	size_t len;
-
-	if (!d.mw_ready) {
-		return MW_ERR_NOT_READY;
-	}
-
-	if (!url || !(len = strlen(url))) {
-		return MW_ERR_PARAM;
-	}
-
-	d.cmd->cmd = MW_CMD_HTTP_URL_SET;
-	d.cmd->data_len = len + 1;
-	memcpy(d.cmd->data, url, len + 1);
-	err = mw_command(MW_COMMAND_TOUT);
-	if (err) {
-		return MW_ERR;
-	}
-
-	return MW_ERR_NONE;
+	return string_based_cmd(MW_CMD_HTTP_URL_SET, url, MW_COMMAND_TOUT);
 }
 
 enum mw_err mw_http_method_set(enum mw_http_method method)
@@ -1184,26 +1191,7 @@ enum mw_err mw_http_header_add(const char *key, const char *value)
 
 enum mw_err mw_http_header_del(const char *key)
 {
-	enum mw_err err;
-	size_t len;
-
-	if (!d.mw_ready) {
-		return MW_ERR_NOT_READY;
-	}
-
-	if (!key || !(len = strlen(key))) {
-		return MW_ERR_PARAM;
-	}
-
-	d.cmd->cmd = MW_CMD_HTTP_HDR_DEL;
-	d.cmd->data_len = len + 1;
-	memcpy(d.cmd->data, key, len + 1);
-	err = mw_command(MW_COMMAND_TOUT);
-	if (err) {
-		return MW_ERR;
-	}
-
-	return MW_ERR_NONE;
+	return string_based_cmd(MW_CMD_HTTP_HDR_DEL, key, MW_COMMAND_TOUT);
 }
 
 enum mw_err mw_http_open(uint32_t content_len)
@@ -1335,46 +1323,13 @@ char *mw_def_server_get(void)
 
 enum mw_err mw_def_server_set(const char *server_url)
 {
-	enum mw_err err;
-	size_t len;
-
-	if (!d.mw_ready) {
-		return MW_ERR_NOT_READY;
-	}
-
-	if (!server_url || !(len = strlen(server_url))) {
-		return MW_ERR_PARAM;
-	}
-
-	d.cmd->cmd = MW_CMD_SERVER_URL_SET;
-	d.cmd->data_len = len + 1;
-	memcpy(d.cmd->data, server_url, len + 1);
-	err = mw_command(MW_COMMAND_TOUT);
-	if (err) {
-		return MW_ERR;
-	}
-
-	return MW_ERR_NONE;
+	return string_based_cmd(MW_CMD_SERVER_URL_SET, server_url,
+			MW_COMMAND_TOUT);
 }
 
 enum mw_err mw_log(const char *msg)
 {
-	enum mw_err err;
-
-	if (!d.mw_ready) {
-		return MW_ERR_NOT_READY;
-	}
-
-	d.cmd->cmd = MW_CMD_LOG;
-	d.cmd->data_len = strlen(msg) + 1;
-	memcpy(d.cmd->data, msg, d.cmd->data_len);
-
-	err = mw_command(MW_COMMAND_TOUT);
-	if (err) {
-		return MW_ERR;
-	}
-
-	return MW_ERR_NONE;
+	return string_based_cmd(MW_CMD_LOG, msg, MW_COMMAND_TOUT);
 }
 
 enum mw_err mw_factory_settings(void)
@@ -1464,6 +1419,104 @@ enum mw_err mw_wifi_adv_cfg_set(const struct mw_wifi_adv_cfg *wifi)
 	}
 
 	return MW_ERR_NONE;
+}
+
+enum mw_err mw_ga_endpoint_set(const char *endpoint, const char *priv_key)
+{
+	const char * strings[2] = {endpoint, priv_key};
+	enum mw_err err;
+	uint16_t pos;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	pos = concat_strings(strings, 2, (char*)d.cmd->data,
+			MW_CMD_MAX_BUFLEN - 1);
+
+	if (!pos) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->data[pos++] = '\0';
+	d.cmd->cmd = MW_CMD_GAME_ENDPOINT_SET;
+	d.cmd->data_len = pos;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+enum mw_err mw_ga_key_value_add(const char **key, const char **value,
+		unsigned int num_pairs)
+{
+	uint16_t pos;
+	enum mw_err err;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	pos = concat_kv_pairs(key, value, num_pairs, (char*)d.cmd->data,
+			MW_CMD_MAX_BUFLEN - 1);
+	if (!pos && num_pairs) {
+		return MW_ERR_PARAM;
+	}
+
+	d.cmd->data[pos++] = '\0';
+	d.cmd->cmd = MW_CMD_GAME_KEYVAL_ADD;
+	d.cmd->data_len = pos;
+	err = mw_command(MW_COMMAND_TOUT);
+	if (err) {
+		return MW_ERR;
+	}
+
+	return MW_ERR_NONE;
+}
+
+int mw_ga_request(enum mw_http_method method, const char **path,
+		uint8_t num_paths, const char **key, const char **value,
+		uint8_t num_kv_pairs, uint32_t *content_len, int tout_frames)
+{
+	enum mw_err err;
+	uint16_t pos;
+	uint16_t added;
+
+	if (!d.mw_ready) {
+		return MW_ERR_NOT_READY;
+	}
+
+	added = concat_strings(path, num_paths, d.cmd->ga_request.req,
+			MW_CMD_MAX_BUFLEN - 4);
+	if (!added) {
+		return MW_ERR_PARAM;
+	}
+
+	pos = added;
+	added = concat_kv_pairs(key, value, num_kv_pairs, d.cmd->ga_request.req + pos,
+			MW_CMD_MAX_BUFLEN - 4 - pos);
+	if (!added && num_kv_pairs) {
+		return MW_ERR_PARAM;
+	}
+	pos += added;
+	d.cmd->ga_request.req[pos++] = '\0';
+
+	d.cmd->ga_request.method = method;
+	d.cmd->ga_request.num_paths = num_paths;
+	d.cmd->ga_request.num_kv_pairs = num_kv_pairs;
+	d.cmd->cmd = MW_CMD_GAME_REQUEST;
+	d.cmd->data_len = pos + 3;
+	err = mw_command(tout_frames);
+	if (err) {
+		return MW_ERR;
+	}
+
+	lsd_ch_enable(MW_HTTP_CH);
+
+	*content_len = d.cmd->dw_data[0];
+	return d.cmd->w_data[2];
 }
 
 enum mw_err mw_fw_upgrade(const char *name)

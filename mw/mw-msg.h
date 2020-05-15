@@ -49,63 +49,66 @@
 
 /// Supported commands.
 enum PACKED mw_command {
-	MW_CMD_OK		=   0,	///< OK command reply
-	MW_CMD_VERSION      	=   1,	///< Get firmware version
-	MW_CMD_ECHO		=   2,	///< Echo data
-	MW_CMD_AP_SCAN		=   3,	///< Scan for access points
-	MW_CMD_AP_CFG		=   4,	///< Configure access point
-	MW_CMD_AP_CFG_GET   	=   5,	///< Get access point configuration
-	MW_CMD_IP_CURRENT 	=   6,	///< Get current IPv4 configuration
+	MW_CMD_OK		 =   0,	///< OK command reply
+	MW_CMD_VERSION      	 =   1,	///< Get firmware version
+	MW_CMD_ECHO		 =   2,	///< Echo data
+	MW_CMD_AP_SCAN		 =   3,	///< Scan for access points
+	MW_CMD_AP_CFG		 =   4,	///< Configure access point
+	MW_CMD_AP_CFG_GET   	 =   5,	///< Get access point configuration
+	MW_CMD_IP_CURRENT 	 =   6,	///< Get current IPv4 configuration
 // Reserved
-	MW_CMD_IP_CFG		=   8,	///< Configure IPv4
-	MW_CMD_IP_CFG_GET	=   9,	///< Get IPv4 configuration
-	MW_CMD_DEF_AP_CFG	=  10,	///< Set default AP configuration
-	MW_CMD_DEF_AP_CFG_GET	=  11,	///< Get default AP configuration
-	MW_CMD_AP_JOIN		=  12,	///< Join access point
-	MW_CMD_AP_LEAVE		=  13,	///< Leave previously joined AP
-	MW_CMD_TCP_CON		=  14,	///< Connect TCP socket
-	MW_CMD_TCP_BIND		=  15,	///< Bind TCP socket to port
+	MW_CMD_IP_CFG		 =   8,	///< Configure IPv4
+	MW_CMD_IP_CFG_GET	 =   9,	///< Get IPv4 configuration
+	MW_CMD_DEF_AP_CFG	 =  10,	///< Set default AP configuration
+	MW_CMD_DEF_AP_CFG_GET	 =  11,	///< Get default AP configuration
+	MW_CMD_AP_JOIN		 =  12,	///< Join access point
+	MW_CMD_AP_LEAVE		 =  13,	///< Leave previously joined AP
+	MW_CMD_TCP_CON		 =  14,	///< Connect TCP socket
+	MW_CMD_TCP_BIND		 =  15,	///< Bind TCP socket to port
 // Reserved
-	MW_CMD_CLOSE		=  17,	///< Disconnect and free TCP/UDP socket
-	MW_CMD_UDP_SET		=  18,	///< Configure UDP socket
-// Reserved (for setting socket options)
-	MW_CMD_SOCK_STAT	=  20,	///< Get socket status
-	MW_CMD_PING		=  21,	///< Ping host
-	MW_CMD_SNTP_CFG		=  22,	///< Configure SNTP service
-	MW_CMD_SNTP_CFG_GET     =  23,  ///< Get SNTP configuration
-	MW_CMD_DATETIME		=  24,	///< Get date and time
-	MW_CMD_DT_SET       	=  25,	///< Set date and time
-	MW_CMD_FLASH_WRITE	=  26,	///< Write to WiFi module flash
-	MW_CMD_FLASH_READ	=  27,	///< Read from WiFi module flash
-	MW_CMD_FLASH_ERASE	=  28,	///< Erase sector from WiFi flash
-	MW_CMD_FLASH_ID 	=  29,	///< Get WiFi flash chip identifiers
-	MW_CMD_SYS_STAT		=  30,	///< Get system status
-	MW_CMD_DEF_CFG_SET	=  31,	///< Set default configuration
-	MW_CMD_HRNG_GET		=  32,	///< Gets random numbers
-	MW_CMD_BSSID_GET	=  33,	///< Gets the WiFi BSSID
-	MW_CMD_GAMERTAG_SET	=  34,	///< Configures a gamertag
-	MW_CMD_GAMERTAG_GET	=  35,	///< Gets a stored gamertag
-	MW_CMD_LOG		=  36,	///< Write a message to log trace
-	MW_CMD_FACTORY_RESET	=  37,	///< Set default configuratioSet default configuration
-	MW_CMD_SLEEP		=  38,	///< Set the module to sleep mode
-	MW_CMD_HTTP_URL_SET	=  39,	///< Set HTTP URL for request
-	MW_CMD_HTTP_METHOD_SET	=  40,	///< Set HTTP request method
-	MW_CMD_HTTP_CERT_QUERY  =  41,	///< Query the X.509 hash of cert
-	MW_CMD_HTTP_CERT_SET	=  42,	///< Set HTTPS certificate
-	MW_CMD_HTTP_HDR_ADD	=  43,	///< Add HTTP request header
-	MW_CMD_HTTP_HDR_DEL	=  44,	///< Delete HTTP request header
-	MW_CMD_HTTP_OPEN	=  45,	///< Open HTTP request
-	MW_CMD_HTTP_FINISH	=  46,	///< Finish HTTP request
-	MW_CMD_HTTP_CLEANUP	=  47,	///< Clean request data
+	MW_CMD_CLOSE		 =  17,	///< Disconnect and free TCP/UDP socket
+	MW_CMD_UDP_SET		 =  18,	///< Configure UDP socket
+// Reserved (for setting socket  options)
+	MW_CMD_SOCK_STAT	 =  20,	///< Get socket status
+	MW_CMD_PING		 =  21,	///< Ping host
+	MW_CMD_SNTP_CFG		 =  22,	///< Configure SNTP service
+	MW_CMD_SNTP_CFG_GET      =  23,  ///< Get SNTP configuration
+	MW_CMD_DATETIME		 =  24,	///< Get date and time
+	MW_CMD_DT_SET       	 =  25,	///< Set date and time
+	MW_CMD_FLASH_WRITE	 =  26,	///< Write to WiFi module flash
+	MW_CMD_FLASH_READ	 =  27,	///< Read from WiFi module flash
+	MW_CMD_FLASH_ERASE	 =  28,	///< Erase sector from WiFi flash
+	MW_CMD_FLASH_ID 	 =  29,	///< Get WiFi flash chip identifiers
+	MW_CMD_SYS_STAT		 =  30,	///< Get system status
+	MW_CMD_DEF_CFG_SET	 =  31,	///< Set default configuration
+	MW_CMD_HRNG_GET		 =  32,	///< Gets random numbers
+	MW_CMD_BSSID_GET	 =  33,	///< Gets the WiFi BSSID
+	MW_CMD_GAMERTAG_SET	 =  34,	///< Configures a gamertag
+	MW_CMD_GAMERTAG_GET	 =  35,	///< Gets a stored gamertag
+	MW_CMD_LOG		 =  36,	///< Write a message to log trace
+	MW_CMD_FACTORY_RESET	 =  37,	///< Set default configuratioSet default configuration
+	MW_CMD_SLEEP		 =  38,	///< Set the module to sleep mode
+	MW_CMD_HTTP_URL_SET	 =  39,	///< Set HTTP URL for request
+	MW_CMD_HTTP_METHOD_SET	 =  40,	///< Set HTTP request method
+	MW_CMD_HTTP_CERT_QUERY   =  41,	///< Query the X.509 hash of cert
+	MW_CMD_HTTP_CERT_SET	 =  42,	///< Set HTTPS certificate
+	MW_CMD_HTTP_HDR_ADD	 =  43,	///< Add HTTP request header
+	MW_CMD_HTTP_HDR_DEL	 =  44,	///< Delete HTTP request header
+	MW_CMD_HTTP_OPEN	 =  45,	///< Open HTTP request
+	MW_CMD_HTTP_FINISH	 =  46,	///< Finish HTTP request
+	MW_CMD_HTTP_CLEANUP	 =  47,	///< Clean request data
 // Reserved
-	MW_CMD_SERVER_URL_GET	=  49,	///< Get the main server URL
-	MW_CMD_SERVER_URL_SET	=  50,	///< Set the main server URL
-	MW_CMD_WIFI_ADV_GET	=  51,	///< Get advanced WiFi parameters
-	MW_CMD_WIFI_ADV_SET	=  52,	///< Set advanced WiFi parameters
-	MW_CMD_NV_CFG_SAVE	=  53,	///< Save non-volatile config
-	MW_CMD_UPGRADE_LIST	=  54,	///< Get firmware upgrade versions
-	MW_CMD_UPGRADE_PERFORM	=  55,	///< Start firmware upgrade
-	MW_CMD_ERROR		= 255	///< Error command reply
+	MW_CMD_SERVER_URL_GET	 =  49,	///< Get the main server URL
+	MW_CMD_SERVER_URL_SET	 =  50,	///< Set the main server URL
+	MW_CMD_WIFI_ADV_GET	 =  51,	///< Get advanced WiFi parameters
+	MW_CMD_WIFI_ADV_SET	 =  52,	///< Set advanced WiFi parameters
+	MW_CMD_NV_CFG_SAVE	 =  53,	///< Save non-volatile config
+	MW_CMD_UPGRADE_LIST	 =  54,	///< Get firmware upgrade versions
+	MW_CMD_UPGRADE_PERFORM	 =  55,	///< Start firmware upgrade
+	MW_CMD_GAME_ENDPOINT_SET =  56,	///< Set game API endpoint
+	MW_CMD_GAME_KEYVAL_ADD	 =  57,	///< Add key/value appended to requests
+	MW_CMD_GAME_REQUEST	 =  58,	///< Perform a game API request
+	MW_CMD_ERROR		 = 255	///< Error command reply
 };
 
 /// Supported security protocols
@@ -295,6 +298,14 @@ struct mw_flash_id {
 	uint8_t manufacturer;	///< Manufacturer ID
 };
 
+/// Game API request
+struct mw_ga_request {
+	uint8_t method;		///< Request method
+	uint8_t num_paths;	///< Number of paths
+	uint8_t num_kv_pairs;	///< Number of key/value pairs
+	char req[];		///< Request data
+};
+
 /// Command sent to system FSM
 typedef union mw_cmd {
 	char packet[MW_CMD_MAX_BUFLEN + 2 * sizeof(uint16_t)];	///< Packet raw data
@@ -324,6 +335,7 @@ typedef union mw_cmd {
 			struct mw_gamertag gamertag_get;	///< Gamertag get
 			struct mw_wifi_adv_cfg wifi_adv_cfg;	///< Advanced WiFi configuration
 			struct mw_flash_id flash_id;		///< Flash chip identifiers
+			struct mw_ga_request ga_request;	///< Game API request
 			uint16_t fl_sect;	///< Flash sector
 			uint32_t fl_id;		///< Flash IDs
 			uint16_t rnd_len;	///< Length of the random buffer to fill

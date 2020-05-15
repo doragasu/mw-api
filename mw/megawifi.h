@@ -34,6 +34,8 @@
 
 /// Timeout for standard commands in milliseconds
 #define MW_COMMAND_TOUT_MS	1000
+/// Timeout for TCP connections
+#define MW_CONNECT_TOUT_MS	10000
 /// Timeout for HTTP open command in milliseconds
 #define MW_HTTP_OPEN_TOUT_MS	10000
 /// Timeout for the AP scan command in milliseconds
@@ -848,10 +850,79 @@ enum mw_err mw_def_server_set(const char *server_url);
 uint8_t *mw_hrng_get(uint16_t rnd_len);
 
 /************************************************************************//**
+ * \brief Set endpoint for Game API.
+ *
+ * Example endpoint for GameJolt: "https://api.gamejolt.com/api/game/v1_2/".
+ *
+ * \param[in] endpoint Endpoint for the Game API to set.
+ * \param[in] priv_key Private key used for request signatures.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ *
+ * \note The endpoint set persists between successive mw_ga_request() calls.
+ ****************************************************************************/
+enum mw_err mw_ga_endpoint_set(const char *endpoint, const char *priv_key);
+
+/************************************************************************//**
+ * \brief Add parameters to the Game API request in key/value format.
+ *
+ * Example key:value pair for GameJolt: "game_id":"123456".
+ *
+ * \param[in] key       Array with the keys to add.
+ * \param[in] value     Array with the values to add
+ * \param[in] num_pairs Number of key/value pairs to add.
+ *
+ * \return MW_ERR_NONE on success, other code on failure.
+ *
+ * \note The key/value pairs set persist between successive mw_ga_request()
+ * calls.
+ * \note Call mw_ga_key_value_add(NULL, NULL, 0) to clear previously set
+ * key/value pairs.
+ * \note Key/value pairs must NOT be URL encoded. Encoding is handled
+ * internally.
+ ****************************************************************************/
+enum mw_err mw_ga_key_value_add(const char **key, const char **value,
+		unsigned int num_pairs);
+
+/************************************************************************//**
+ * \brief Perform a GameAPI request, with the previously set endpoint and
+ * key/value pairs.
+ *
+ * The request can also have URL encoded parameters. that are added to the
+ * previously set key/value pairs.
+ *
+ * Example request for GameJolt:
+ * - method: MW_HTTP_METHOD_GET
+ * - path: "trophies"
+ * - key:value: "achieved":"true"
+ *
+ * \param[in]  method       HTTP method to use. Most likely MW_HTTP_METHOD_GET.
+ * \param[in]  path         Additional paths to add to the request.
+ * \param[in]  num_paths    Number of additional paths to add.
+ * \param[in]  key          Additional paths to add to the request.
+ * \param[in]  value        Additional paths to add to the request.
+ * \param[in]  num_kv_pairs Number of key/value pairs.
+ * \param[out] content_len   Content length of the API response.
+ * \param[in]  tout_frames   Number of frames to wait before canceling the
+ *             request due to a timeout error.
+ *
+ * \return HTTP status code on success (e.g. 200), or an error (lower than
+ * 100) if the HTTP request could not be completed.
+ * \note Even if the HTTP request is completed, that does not mean there are
+ * no errors, if the returned status code is 4xx or 5xx, there is a client
+ * side or server side error.
+ * \note path, key and value parameters must not be URL encoded. Encoding is
+ * handled internally.
+ ****************************************************************************/
+int mw_ga_request(enum mw_http_method method, const char **path,
+		uint8_t num_paths, const char **key, const char **value,
+		uint8_t num_kv_pairs, uint32_t *content_len, int tout_frames);
+
+/************************************************************************//**
  * \brief Over-The-Air upgrade WiFi module firmware.
  *
  * \param[in] name Name of the firmware blob to upgrade.
- *                 E.g. "mw_rtos_std_v1.4"
+ *                 E.g. "mw_rtos_std_v1.4.1"
  *
  * \return Status of the send procedure.
  ****************************************************************************/
