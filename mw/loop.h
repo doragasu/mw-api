@@ -172,6 +172,14 @@ int loop_timer_del(struct loop_timer *timer);
 int loop(void);
 
 /************************************************************************//**
+ * \brief Exit a previously entered loop
+ *
+ * \param[in] return_value Value to be returned by the loop() call.
+ *                         It must be nonzero.
+ ****************************************************************************/
+void loop_end(int return_value);
+
+/************************************************************************//**
  * \brief De-initialize loop module, and free associated resources.
  *
  * \warning Memory allocated using MpAlloc() after a loop_init(), will be

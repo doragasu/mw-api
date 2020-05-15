@@ -115,8 +115,9 @@ static void udp_normal_test(void)
 	// nc -lu 12345
 	println("Send to UDP 12345, waiting for reply",
 			VDP_TXT_COL_CYAN);
-	// Send UDP data to peer and wait for reply
-	if (mw_udp_set(ch, "192.168.1.22", "12345", NULL)) {
+	// Send UDP data to peer and wait for reply. Localhost works only when
+	// using emulators, so change IP as needed when using the real thing.
+	if (mw_udp_set(ch, "127.0.0.1", "12345", NULL)) {
 		goto err;
 	}
 	mw_send_sync(ch, "MegaWiFi UDP test!\n", 20, 0);
@@ -141,10 +142,10 @@ static void udp_reuse_test(void)
 		(struct mw_reuse_payload * const)cmd_buf;
 
 	// You can send text and get the echo e.g. by:
-	// nc -u <dest_ip> 7
-	println("Doing echo on UDP port 7", VDP_TXT_COL_CYAN);
+	// nc -u <dest_ip> 8007
+	println("Doing echo on UDP port 8007", VDP_TXT_COL_CYAN);
 	// Start UDP echo task
-	mw_udp_set(2, NULL, NULL, "7");
+	mw_udp_set(2, NULL, NULL, "8007");
 	mw_udp_reuse_recv(pkt, MW_BUFLEN, NULL, udp_recv_cb);
 }
 
@@ -236,6 +237,30 @@ static void datetime_test(void)
 	println(datetime, VDP_TXT_COL_WHITE);
 }
 
+static void flash_test(void) {
+	uint16_t *p_runs = (uint16_t*)mw_flash_read(0, 2);
+	uint16_t runs = *p_runs;
+	char msg[] = "ID:        , runs:      ";
+	uint16_t dev_id = 0;
+	uint8_t man_id = 0;
+
+	mw_flash_id_get(&man_id, &dev_id);
+	if (0xFFFF == runs) {
+		runs = 0;
+	}
+	runs++;
+	mw_flash_sector_erase(0);
+	mw_flash_write(0, (uint8_t*)&runs, sizeof(uint16_t));
+
+	uint8_to_hex_str(man_id, &msg[4]);
+	msg[6] = ' ';
+	uint8_to_hex_str(dev_id>>8, &msg[7]);
+	uint8_to_hex_str(dev_id, &msg[9]);
+	msg[11] = ',';
+	uint16_to_str(runs, &msg[19]);
+	println(msg, VDP_TXT_COL_WHITE);
+}
+
 static void run_test(struct loop_timer *t)
 {
 	enum mw_err err;
@@ -254,6 +279,7 @@ static void run_test(struct loop_timer *t)
 	println("DONE!", VDP_TXT_COL_CYAN);
 	println(NULL, 0);
 
+	flash_test();
 	tcp_test();
 	http_test();
 	datetime_test();

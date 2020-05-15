@@ -20,7 +20,7 @@ extern uint8_t _eflash;
 typedef struct {
 	uint8_t *floor;
 	uint8_t *pos;
-    uint8_t init_done;
+	uint8_t init_done;
 } mp_data;
 
 /// Local module data
@@ -28,12 +28,12 @@ mp_data md = {0, 0, 0};
 
 void mp_init(int force_init)
 {
-    if (!md.init_done || force_init) {
-    	// Ensure the origin is aligned and initialize current position
-    	md.floor = MP_ALIGN_COMP(&_eflash);
-    	md.pos = md.floor;
-        md.init_done = 1;
-    }
+	if (!md.init_done || force_init) {
+		// Ensure the origin is aligned and initialize current position
+		md.floor = MP_ALIGN_COMP(&_eflash);
+		md.pos = md.floor;
+		md.init_done = 1;
+	}
 }
 
 void *mp_alloc(uint16_t length)
@@ -55,7 +55,7 @@ void *mp_alloc(uint16_t length)
 void *mp_calloc(uint16_t length)
 {
 	void *mem = mp_alloc(length);;
-	
+
 	if (mem) memset(mem, 0, length);
 
 	return mem;
