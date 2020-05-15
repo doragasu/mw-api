@@ -26,7 +26,8 @@
 /// Allowed states for the reception state machine.
 enum recv_state {
 	LSD_RECV_ERROR = -1,	///< An error has occurred
-	LSD_RECV_IDLE = 0,	///< Currently inactive
+	LSD_RECV_PARTIAL = 0,	///< Partial frame was received
+	LSD_RECV_IDLE,		///< Currently inactive
 	LSD_RECV_STX,		///< Waiting for STX
 	LSD_RECV_CH_LENH,	///< Receiving channel and length (high bits)
 	LSD_RECV_LEN,		///< Receiving frame length
@@ -89,20 +90,25 @@ static void recv_error(enum lsd_status stat)
 	}
 }
 
+static void recv_complete(void)
+{
+	if (d.rx.cb) {
+		d.rx.cb(LSD_STAT_COMPLETE, d.rx.ch, d.rx.buf,
+				d.rx.pos, d.rx.ctx);
+	}
+}
+
 static void recv_add(uint8_t recv)
 {
 	d.rx.buf[d.rx.pos++] = recv;
 	if (d.rx.pos >= d.rx.frame_len) {
 		d.rx.stat = LSD_RECV_ETX;
-	}
-}
-
-static void recv_complete(void)
-{
-	d.rx.stat = LSD_RECV_IDLE;
-	if (d.rx.cb) {
-		d.rx.cb(LSD_STAT_COMPLETE, d.rx.ch, d.rx.buf,
-				d.rx.pos, d.rx.ctx);
+	} else if (d.rx.pos >= d.rx.max) {
+		// Filled the available buffer space, so force
+		// a frame completion and flag partial reception
+		d.rx.frame_len -= d.rx.pos;
+		d.rx.stat = LSD_RECV_PARTIAL;
+		recv_complete();
 	}
 }
 
@@ -118,10 +124,10 @@ static void process_recv(void)
 		break;
 
 	case LSD_RECV_CH_LENH:	// Receive CH and len high
-		// Check special case: if we receive STX and pos == 0,
+		// Check special case: if we receive ETX here,
 		// then this is the real STX (previous one was ETX from
-		// previous frame!).
-		if (!(LSD_STX_ETX == recv && 0 == d.rx.pos)) {
+		// previous frame).
+		if (!(LSD_STX_ETX == recv)) {
 			d.rx.ch = recv>>4;
 			d.rx.frame_len = (recv & 0x0F)<<8;
 			// Sanity check (not exceding number of channels)
@@ -136,10 +142,7 @@ static void process_recv(void)
 
 	case LSD_RECV_LEN:	// Receive len low
 		d.rx.frame_len |= recv;
-		// Sanity check (not exceeding maximum buffer length)
-		if (d.rx.frame_len > d.rx.max) {
-			recv_error(LSD_STAT_ERR_FRAME_TOO_LONG);
-		} else if (d.rx.frame_len) {
+		if (d.rx.frame_len) {
 			// If there's payload, receive it. Else wait for ETX
 			d.rx.pos = 0;
 			d.rx.stat = LSD_RECV_DATA;
@@ -154,6 +157,7 @@ static void process_recv(void)
 
 	case LSD_RECV_ETX:	// ETX should come here
 		if (LSD_STX_ETX == recv) {
+			d.rx.stat = LSD_RECV_IDLE;
 			recv_complete();
 		} else {
 			// Error, ETX not received.
@@ -162,7 +166,7 @@ static void process_recv(void)
 		break;
 
 	default:
-		// Code should never reach here!
+		// Should not receive data in other states
 		recv_error(LSD_STAT_ERROR);
 		break;
 	}
@@ -236,6 +240,7 @@ void lsd_init(void)
 {
 	uart_init();
 	memset(&d, 0, sizeof(struct lsd_data));
+	d.rx.stat = LSD_RECV_IDLE;
 	lsd_line_sync();
 }
 
@@ -293,21 +298,23 @@ enum lsd_status lsd_send(uint8_t ch, const char *data, int16_t len,
 //	}
 }
 
-enum lsd_status lsd_recv(char *buf, int16_t len, void *ctx,
-		lsd_recv_cb recv_cb)
+enum lsd_status lsd_recv(char *buf, int16_t len, void *ctx, lsd_recv_cb recv_cb)
 {
-	if (len >= LSD_MAX_LEN) {
+	if (len >= (LSD_MAX_LEN + 1)) {
 		return LSD_STAT_ERR_FRAME_TOO_LONG;
+	}
+
+	if (LSD_RECV_IDLE == d.rx.stat) {
+		d.rx.stat = LSD_RECV_STX;
+	} else if (LSD_RECV_PARTIAL == d.rx.stat) {
+		d.rx.pos = 0;
+		d.rx.stat = LSD_RECV_DATA;
 	}
 
 	d.rx.buf = buf;
 	d.rx.max = len;
 	d.rx.cb = recv_cb;
 	d.rx.ctx = ctx;
-	d.rx.pos = 0;
-	d.rx.frame_len = 0;
-	d.rx.ch = 0;
-	d.rx.stat = LSD_RECV_STX;
 
 	/// \todo Optimization: start receiving data right now. This must be
 	/// carefully evaluated as it can cause a race for very short frames
