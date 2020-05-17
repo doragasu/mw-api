@@ -1,21 +1,5 @@
 var searchData=
 [
-  ['mw_5fap_5fdata_404',['mw_ap_data',['../structmw__ap__data.html',1,'']]],
-  ['mw_5fcmd_405',['mw_cmd',['../unionmw__cmd.html',1,'']]],
-  ['mw_5fflash_5fid_406',['mw_flash_id',['../structmw__flash__id.html',1,'']]],
-  ['mw_5fga_5frequest_407',['mw_ga_request',['../structmw__ga__request.html',1,'']]],
-  ['mw_5fgamertag_408',['mw_gamertag',['../structmw__gamertag.html',1,'']]],
-  ['mw_5fgamertag_5fset_5fmsg_409',['mw_gamertag_set_msg',['../structmw__gamertag__set__msg.html',1,'']]],
-  ['mw_5fip_5fcfg_410',['mw_ip_cfg',['../structmw__ip__cfg.html',1,'']]],
-  ['mw_5fmsg_5fap_5fcfg_411',['mw_msg_ap_cfg',['../structmw__msg__ap__cfg.html',1,'']]],
-  ['mw_5fmsg_5fbind_412',['mw_msg_bind',['../structmw__msg__bind.html',1,'']]],
-  ['mw_5fmsg_5fdate_5ftime_413',['mw_msg_date_time',['../structmw__msg__date__time.html',1,'']]],
-  ['mw_5fmsg_5fflash_5fdata_414',['mw_msg_flash_data',['../structmw__msg__flash__data.html',1,'']]],
-  ['mw_5fmsg_5fflash_5frange_415',['mw_msg_flash_range',['../structmw__msg__flash__range.html',1,'']]],
-  ['mw_5fmsg_5fin_5faddr_416',['mw_msg_in_addr',['../structmw__msg__in__addr.html',1,'']]],
-  ['mw_5fmsg_5fip_5fcfg_417',['mw_msg_ip_cfg',['../structmw__msg__ip__cfg.html',1,'']]],
-  ['mw_5fmsg_5fsntp_5fcfg_418',['mw_msg_sntp_cfg',['../structmw__msg__sntp__cfg.html',1,'']]],
-  ['mw_5fmsg_5fsys_5fstat_419',['mw_msg_sys_stat',['../unionmw__msg__sys__stat.html',1,'']]],
-  ['mw_5freuse_5fpayload_420',['mw_reuse_payload',['../structmw__reuse__payload.html',1,'']]],
-  ['mw_5fwifi_5fadv_5fcfg_421',['mw_wifi_adv_cfg',['../structmw__wifi__adv__cfg.html',1,'']]]
+  ['loop_5ffunc_422',['loop_func',['../structloop__func.html',1,'']]],
+  ['loop_5ftimer_423',['loop_timer',['../structloop__timer.html',1,'']]]
 ];

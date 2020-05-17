@@ -1,5 +1,6 @@
 var annotated_dup =
 [
+    [ "gj_trophy", "structgj__trophy.html", "structgj__trophy" ],
     [ "ip_addr", "unionip__addr.html", "unionip__addr" ],
     [ "jsmn_parser", "structjsmn__parser.html", "structjsmn__parser" ],
     [ "jsmntok_t", "structjsmntok__t.html", "structjsmntok__t" ],

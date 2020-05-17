@@ -1,8 +1,25 @@
 var searchData=
 [
   ['ga_5frequest_51',['ga_request',['../unionmw__cmd.html#ad5040928e92d7e473c0c3416e5ceab2d',1,'mw_cmd']]],
-  ['gamertag_52',['gamertag',['../structmw__gamertag__set__msg.html#ac7f7af55e1ee4f6e53516adf6ae3b851',1,'mw_gamertag_set_msg']]],
-  ['gamertag_5fget_53',['gamertag_get',['../unionmw__cmd.html#a7f8212d6672fa2f06bb0ad2c75385de6',1,'mw_cmd']]],
-  ['gamertag_5fset_54',['gamertag_set',['../unionmw__cmd.html#a3812cb8a373035752cf5ba8a55430b87',1,'mw_cmd']]],
-  ['gateway_55',['gateway',['../structmw__ip__cfg.html#a438550afd98599c477dcdfafe5862503',1,'mw_ip_cfg']]]
+  ['gamejolt_52',['gamejolt',['../group__gamejolt.html',1,'']]],
+  ['gamejolt_2eh_53',['gamejolt.h',['../gamejolt_8h.html',1,'']]],
+  ['gamertag_54',['gamertag',['../structmw__gamertag__set__msg.html#ac7f7af55e1ee4f6e53516adf6ae3b851',1,'mw_gamertag_set_msg']]],
+  ['gamertag_5fget_55',['gamertag_get',['../unionmw__cmd.html#a7f8212d6672fa2f06bb0ad2c75385de6',1,'mw_cmd']]],
+  ['gamertag_5fset_56',['gamertag_set',['../unionmw__cmd.html#a3812cb8a373035752cf5ba8a55430b87',1,'mw_cmd']]],
+  ['gateway_57',['gateway',['../structmw__ip__cfg.html#a438550afd98599c477dcdfafe5862503',1,'mw_ip_cfg']]],
+  ['gj_5finit_58',['gj_init',['../group__gamejolt.html#gaf77fb716f3f1b8e1274ba593bc0189d2',1,'gamejolt.h']]],
+  ['gj_5frequest_59',['gj_request',['../group__gamejolt.html#ga66470120f9b833a491ed0899af10fd19',1,'gamejolt.h']]],
+  ['gj_5ftrophies_5ffetch_60',['gj_trophies_fetch',['../group__gamejolt.html#ga28a634cadcda7414c10eeda0885dc337',1,'gamejolt.h']]],
+  ['gj_5ftrophy_61',['gj_trophy',['../structgj__trophy.html',1,'']]],
+  ['gj_5ftrophy_5fadd_5fachieved_62',['gj_trophy_add_achieved',['../group__gamejolt.html#ga0df3c5d9e5d88a3bc0bcffee7d61e447',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5fdifficulty_63',['gj_trophy_difficulty',['../group__gamejolt.html#gae5752836528673b05e4c26b89b29e412',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5fdifficulty_5fstr_64',['gj_trophy_difficulty_str',['../group__gamejolt.html#gac9c0f57f027319ee1e75cd0265bf41e9',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5fget_5fnext_65',['gj_trophy_get_next',['../group__gamejolt.html#ga2470d73269e0912debaf32324380ef80',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5fremove_5fachieved_66',['gj_trophy_remove_achieved',['../group__gamejolt.html#gae4d5b402b0349153f1d7c840b6f90636',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5fresponse_5ftable_67',['GJ_TROPHY_RESPONSE_TABLE',['../group__gamejolt.html#ga7f20b4165a8b5f5dd852c443382445d7',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5ftype_5fbronze_68',['GJ_TROPHY_TYPE_BRONZE',['../group__gamejolt.html#ggae5752836528673b05e4c26b89b29e412adb04e9800a3e0032fb29a6c294fbdc2f',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5ftype_5fgold_69',['GJ_TROPHY_TYPE_GOLD',['../group__gamejolt.html#ggae5752836528673b05e4c26b89b29e412a5dea27f5a81583c18cea7464bc32cedc',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5ftype_5fplatinum_70',['GJ_TROPHY_TYPE_PLATINUM',['../group__gamejolt.html#ggae5752836528673b05e4c26b89b29e412a47ade67c033c70e479d19125dc82b001',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5ftype_5fsilver_71',['GJ_TROPHY_TYPE_SILVER',['../group__gamejolt.html#ggae5752836528673b05e4c26b89b29e412a2327613904f0f6dc1cab943d1cf9a044',1,'gamejolt.h']]],
+  ['gj_5ftrophy_5ftype_5funknown_72',['GJ_TROPHY_TYPE_UNKNOWN',['../group__gamejolt.html#ggae5752836528673b05e4c26b89b29e412ad4bb6929f921e14787153ee26c9a92d7',1,'gamejolt.h']]]
 ];
