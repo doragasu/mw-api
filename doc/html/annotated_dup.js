@@ -8,6 +8,7 @@ var annotated_dup =
     [ "mw_ap_data", "structmw__ap__data.html", "structmw__ap__data" ],
     [ "mw_cmd", "unionmw__cmd.html", "unionmw__cmd" ],
     [ "mw_flash_id", "structmw__flash__id.html", "structmw__flash__id" ],
+    [ "mw_ga_request", "structmw__ga__request.html", "structmw__ga__request" ],
     [ "mw_gamertag", "structmw__gamertag.html", "structmw__gamertag" ],
     [ "mw_gamertag_set_msg", "structmw__gamertag__set__msg.html", "structmw__gamertag__set__msg" ],
     [ "mw_ip_cfg", "structmw__ip__cfg.html", "structmw__ip__cfg" ],

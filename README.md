@@ -12,7 +12,7 @@ The full API documentation [can be found here](https://doragasu.github.io/mw-api
 
 You will need a complete Genesis/Megadrive toolchain. The sources use some C standard library calls, such as `memcpy()`, `setjmp()`, `longjmp()`, etc. Thus your toolchain must include a C standard library implementation such as *newlib*.
 
-To build the files, you can use the provided Makefile, suiting it to your needs, or just add the source files to your project to build them.
+If you are an SGDK user, I wrote [detailed instructions about the build process here](https://github.com/doragasu/mw-sgdk-example). Otherwise, to build the files, you can use the provided Makefile, suiting it to your needs, or just add the source files to your project to build them.
 
 ## Overview
 
@@ -662,11 +662,11 @@ Once date and time is synchronized, you can get it, both in human readable forma
 	date_time_string = mw_date_time_get(date_time_bin);
 ```
 
-For the date/time to work properly, the timezone and NTP servers must be properly set. This is done calling `mw_sntp_cfg_set()`, and configuration is stored in non volatile flash to survive power cycles, so you should do this only once. As an example, you can set the time configuration for the eastern Europe timezone (UTC+1) as follows:
+For the date/time to work properly, the timezone and NTP servers must be properly set. This is done calling `mw_sntp_cfg_set()`, and configuration is stored in non volatile flash to survive power cycles, so you should do this only once. As an example, you can set the time configuration for the eastern Europe timezone (GMT-1 when not in dailight time) as follows:
 
 ```C
 	enum mw_err err;
-	const char *timezone = "UTC+1";
+	const char *timezone = "GMT-1";
 	const char *ntp_serv[] = {
 		"0.pool.ntp.org",
 		"1.pool.ntp.org",
@@ -729,7 +729,7 @@ The module has two network interfaces, each one with its unique BSSID (MAC addre
 
 ### Reading and writing to non-volatile Flash
 
-In addition to the standard 32 megabits of Flash ROM memory connected to the Megadrive 68k bus, MegaWiFi cartridges have 24 megabits of additional flash storage, directly usable by the game. This memory is organized in 4 KiB sectors, and supports the following operations:
+In addition to the standard 32 megabits of Flash ROM memory connected to the Megadrive 68k bus, MegaWiFi cartridges have 16 megabits of additional flash storage, directly usable by the game. This memory is organized in 4 KiB sectors, and supports the following operations:
 
 * Identify: call `mw_flash_id_get()` to obtain the flash memory identifiers. Usually not needed.
 * Erase: call `mw_flash_sector_erase()` to erase an entire 4 KiB sector. Erased sectors will be read as 0xFF.

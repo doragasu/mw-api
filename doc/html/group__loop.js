@@ -20,6 +20,7 @@ var group__loop =
     [ "loop_timer_cb", "group__loop.html#gab12de3fc7408181eb2546c7a0b7809b7", null ],
     [ "loop", "group__loop.html#ga4c3a8dbc5064a8e7d9baffbe604216f1", null ],
     [ "loop_deinit", "group__loop.html#gafad462189af12da5ffd60af6b941af8f", null ],
+    [ "loop_end", "group__loop.html#ga1085ce4bc5679e3f00be198ee094f2b3", null ],
     [ "loop_func_add", "group__loop.html#ga063359b6f53ca8e491c41807cd4d5760", null ],
     [ "loop_func_del", "group__loop.html#gaa03956cab3336c7c1b458fdb1230c541", null ],
     [ "loop_func_disable", "group__loop.html#ga2679bfecd7f56ed43e8c4be04904775d", null ],

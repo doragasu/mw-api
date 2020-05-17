@@ -13,6 +13,7 @@ var unionmw__cmd =
     [ "fl_range", "unionmw__cmd.html#a300794113e173bf99123a278d663333f", null ],
     [ "fl_sect", "unionmw__cmd.html#a67da39070ac1a93fe2d3773b29faa811", null ],
     [ "flash_id", "unionmw__cmd.html#a8d4b2c9bb7987a1acb8f95bff86e85b6", null ],
+    [ "ga_request", "unionmw__cmd.html#ad5040928e92d7e473c0c3416e5ceab2d", null ],
     [ "gamertag_get", "unionmw__cmd.html#a7f8212d6672fa2f06bb0ad2c75385de6", null ],
     [ "gamertag_set", "unionmw__cmd.html#a3812cb8a373035752cf5ba8a55430b87", null ],
     [ "in_addr", "unionmw__cmd.html#a70fa039a39a56cc8f2e8e289271d1b85", null ],

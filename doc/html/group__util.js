@@ -18,6 +18,8 @@ var group__util =
     [ "STR", "group__util.html#ga30676fc71aab1d0c7ffe699e7f2bd344", null ],
     [ "TRUE", "group__util.html#gaa8cecfc5c5c054d2875c03e77b7be15d", null ],
     [ "UNUSED_PARAM", "group__util.html#ga6c7ba74ad57863d1342878d2c703e660", null ],
+    [ "concat_kv_pairs", "group__util.html#ga4d93e0bc7ba49f6adb51a3dd926cdac7", null ],
+    [ "concat_strings", "group__util.html#ga2f86bbf7488b576a113edaf5b85b310f", null ],
     [ "int16_to_str", "group__util.html#gaca1e9a557a959fe3ebd6062d36ce8738", null ],
     [ "int8_to_str", "group__util.html#ga648437f7d7b44a714f95c6a80f9a2a04", null ],
     [ "ip_str_to_uint32", "group__util.html#gadeb908ba34661b2397003fe6bf969111", null ],

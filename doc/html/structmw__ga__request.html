@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.18"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MegaWiFi: mw_reuse_payload Struct Reference</title>
+<title>MegaWiFi: mw_ga_request Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -64,7 +64,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('structmw__reuse__payload.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structmw__ga__request.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -86,52 +86,39 @@ $(document).ready(function(){initNavTree('structmw__reuse__payload.html',''); in
   <div class="summary">
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">mw_reuse_payload Struct Reference<div class="ingroups"><a class="el" href="group__mw-msg.html">mw-msg</a></div></div>  </div>
+<div class="title">mw_ga_request Struct Reference<div class="ingroups"><a class="el" href="group__mw-msg.html">mw-msg</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Payload with remote IP and port.  
- <a href="structmw__reuse__payload.html#details">More...</a></p>
+<p>Game API request.  
+ <a href="structmw__ga__request.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a2f0cf596cc850b4ba7f9282e1a9ce8d8"><td class="memItemLeft" align="right" valign="top"><a id="a2f0cf596cc850b4ba7f9282e1a9ce8d8"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__reuse__payload.html#a2f0cf596cc850b4ba7f9282e1a9ce8d8">remote_ip</a></td></tr>
-<tr class="memdesc:a2f0cf596cc850b4ba7f9282e1a9ce8d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">IP of the remote end. <br /></td></tr>
-<tr class="separator:a2f0cf596cc850b4ba7f9282e1a9ce8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35426cfde08ca82c18f8b402d1dc7dd1"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__reuse__payload.html#a35426cfde08ca82c18f8b402d1dc7dd1">remote_port</a></td></tr>
-<tr class="separator:a35426cfde08ca82c18f8b402d1dc7dd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef43bd437c6d227657201d69d18371ef"><td class="memItemLeft" align="right" valign="top"><a id="aef43bd437c6d227657201d69d18371ef"></a>
-char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__reuse__payload.html#aef43bd437c6d227657201d69d18371ef">payload</a> [<a class="el" href="group__mw-msg.html#ga04d849bdc5bc400fc1b5c9543601a804">MW_CMD_MAX_BUFLEN</a> - 4 - 2]</td></tr>
-<tr class="memdesc:aef43bd437c6d227657201d69d18371ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data payload. <br /></td></tr>
-<tr class="separator:aef43bd437c6d227657201d69d18371ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7247c5a48a2980c71531be9c85821552"><td class="memItemLeft" align="right" valign="top"><a id="a7247c5a48a2980c71531be9c85821552"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__ga__request.html#a7247c5a48a2980c71531be9c85821552">method</a></td></tr>
+<tr class="memdesc:a7247c5a48a2980c71531be9c85821552"><td class="mdescLeft">&#160;</td><td class="mdescRight">Request method. <br /></td></tr>
+<tr class="separator:a7247c5a48a2980c71531be9c85821552"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b197b542d5b8bb84a36be92d570b15d"><td class="memItemLeft" align="right" valign="top"><a id="a4b197b542d5b8bb84a36be92d570b15d"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__ga__request.html#a4b197b542d5b8bb84a36be92d570b15d">num_paths</a></td></tr>
+<tr class="memdesc:a4b197b542d5b8bb84a36be92d570b15d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of paths. <br /></td></tr>
+<tr class="separator:a4b197b542d5b8bb84a36be92d570b15d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5505502e3af59ef3367d278d9069951c"><td class="memItemLeft" align="right" valign="top"><a id="a5505502e3af59ef3367d278d9069951c"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__ga__request.html#a5505502e3af59ef3367d278d9069951c">num_kv_pairs</a></td></tr>
+<tr class="memdesc:a5505502e3af59ef3367d278d9069951c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of key/value pairs. <br /></td></tr>
+<tr class="separator:a5505502e3af59ef3367d278d9069951c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a530579be35ab115453872ba0787a53f4"><td class="memItemLeft" align="right" valign="top"><a id="a530579be35ab115453872ba0787a53f4"></a>
+char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmw__ga__request.html#a530579be35ab115453872ba0787a53f4">req</a> []</td></tr>
+<tr class="memdesc:a530579be35ab115453872ba0787a53f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Request data. <br /></td></tr>
+<tr class="separator:a530579be35ab115453872ba0787a53f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Payload with remote IP and port. </p>
-<p>Data sent/received using UDP sockets, uses this special format when reuse flag has been set in the <a class="el" href="group__megawifi.html#gaabaf8bfcd3efbb4ea4acec7889825cf8" title="Configures a UDP socket to send/receive data.">mw_udp_set()</a> call. This allows the program using the UDP socket, to filter incoming IPs, and to be able to properly answer to incoming packets from several peers. </p>
+<div class="textblock"><p>Game API request. </p>
 
-<p class="definition">Definition at line <a class="el" href="mw-msg_8h_source.html#l00352">352</a> of file <a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>.</p>
-</div><h2 class="groupheader">Field Documentation</h2>
-<a id="a35426cfde08ca82c18f8b402d1dc7dd1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35426cfde08ca82c18f8b402d1dc7dd1">&#9670;&nbsp;</a></span>remote_port</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint16_t mw_reuse_payload::remote_port</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Port of the remote end </p>
-
-<p class="definition">Definition at line <a class="el" href="mw-msg_8h_source.html#l00354">354</a> of file <a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>.</p>
-
-</div>
-</div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<p class="definition">Definition at line <a class="el" href="mw-msg_8h_source.html#l00302">302</a> of file <a class="el" href="mw-msg_8h_source.html">mw-msg.h</a>.</p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>mw/<a class="el" href="mw-msg_8h_source.html">mw-msg.h</a></li>
 </ul>
 </div><!-- contents -->
@@ -139,7 +126,7 @@ char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="structmw__reuse__payload.html">mw_reuse_payload</a></li>
+    <li class="navelem"><a class="el" href="structmw__ga__request.html">mw_ga_request</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.18 </li>

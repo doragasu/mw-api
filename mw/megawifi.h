@@ -613,7 +613,7 @@ char *mw_date_time_get(uint32_t dt_bin[2]);
  * \brief Get the identifiers of the flash chip in the WiFi module.
  *
  * \param[out] man_id ID of the flash chip manufacturer.
- * \param[out] man_id Device IDs of the flash chip.
+ * \param[out] dev_id Device IDs of the flash chip.
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/

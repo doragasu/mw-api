@@ -94,6 +94,12 @@ var group__mw_msg =
       [ "device", "structmw__flash__id.html#ae72417ccf66b3d63cc3de7e20025b863", null ],
       [ "manufacturer", "structmw__flash__id.html#a3a1fe0974e67e7c542436166a8745c63", null ]
     ] ],
+    [ "mw_ga_request", "structmw__ga__request.html", [
+      [ "method", "structmw__ga__request.html#a7247c5a48a2980c71531be9c85821552", null ],
+      [ "num_kv_pairs", "structmw__ga__request.html#a5505502e3af59ef3367d278d9069951c", null ],
+      [ "num_paths", "structmw__ga__request.html#a4b197b542d5b8bb84a36be92d570b15d", null ],
+      [ "req", "structmw__ga__request.html#a530579be35ab115453872ba0787a53f4", null ]
+    ] ],
     [ "mw_cmd", "unionmw__cmd.html", [
       [ "ap_cfg", "unionmw__cmd.html#aee26452d05e464067290263310cb3c74", null ],
       [ "bind", "unionmw__cmd.html#a97e4cf5d7dcf920cb8f8e8d4e127719b", null ],
@@ -108,6 +114,7 @@ var group__mw_msg =
       [ "fl_range", "unionmw__cmd.html#a300794113e173bf99123a278d663333f", null ],
       [ "fl_sect", "unionmw__cmd.html#a67da39070ac1a93fe2d3773b29faa811", null ],
       [ "flash_id", "unionmw__cmd.html#a8d4b2c9bb7987a1acb8f95bff86e85b6", null ],
+      [ "ga_request", "unionmw__cmd.html#ad5040928e92d7e473c0c3416e5ceab2d", null ],
       [ "gamertag_get", "unionmw__cmd.html#a7f8212d6672fa2f06bb0ad2c75385de6", null ],
       [ "gamertag_set", "unionmw__cmd.html#a3812cb8a373035752cf5ba8a55430b87", null ],
       [ "in_addr", "unionmw__cmd.html#a70fa039a39a56cc8f2e8e289271d1b85", null ],
