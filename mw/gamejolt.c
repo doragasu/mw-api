@@ -8,6 +8,14 @@
 #include "megawifi.h"
 #include "gamejolt.h"
 
+// Macro to fill optional parameters for requests
+#define FILL_OPTION(key, value, index, item) \
+	if (item) { \
+		key[index] = #item; \
+		value[index] = item; \
+		index += 1; \
+	}
+
 static const char * const trophy_strings[] = {
 	"Bronze", "Silver", "Gold", "Platinum", "Unknown"
 };
@@ -21,6 +29,7 @@ enum boolean {
 struct {
 	char *buf;
 	uint16_t buf_len;
+	uint16_t tout_frames;
 } gj = {};
 
 static char *line_next(const char *data)
@@ -116,7 +125,7 @@ out:
 
 bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 		const char *username, const char *user_token, char *reply_buf,
-		uint16_t buf_len)
+		uint16_t buf_len, uint16_t tout_frames)
 {
 	const char *key[4] = {"game_id", "username", "user_token", "format"};
 	const char *value[4] = {game_id,  username,   user_token,  "keypair"};
@@ -128,6 +137,8 @@ bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 			mw_ga_key_value_add(key, value, 4)) {
 		return true;
 	}
+
+	gj.tout_frames = tout_frames;
 
 	return false;
 }
@@ -181,28 +192,27 @@ char *gj_recv(uint32_t *len, uint16_t tout_frames)
 }
 
 char *gj_request(const char **path, uint8_t num_paths, const char **key,
-		const char **value, uint8_t num_kv_pairs, uint16_t tout_frames,
-		uint32_t *out_len)
+		const char **value, uint8_t num_kv_pairs, uint32_t *out_len)
 {
 	char *reply;
 	int status = mw_ga_request(MW_HTTP_METHOD_GET, path, num_paths, key,
-			value, num_kv_pairs, out_len, tout_frames);
+			value, num_kv_pairs, out_len, gj.tout_frames);
 
 
 	if (status < 100) {
 		return NULL;
 	}
 	if (status < 200 || status >= 300) {
-		gj_flush(*out_len, tout_frames);
+		gj_flush(*out_len, gj.tout_frames);
 		return NULL;
 	}
+	// If chunked response, limit to the buffer length minus 1
+	// character for proper string termination
 	if (INT32_MAX == *out_len) {
-		// Chunked response, limit to the buffer length minus 1
-		// character for proper string termination
-		*out_len = gj.buf_len - 1;
+		*out_len = gj.buf_len - 1U;
 	}
 
-	reply = gj_recv(out_len, tout_frames);
+	reply = gj_recv(out_len, gj.tout_frames);
 	if (reply) {
 		enum boolean success;
 		char *aux = key_bool_get(reply, "success", &success);
@@ -215,8 +225,7 @@ char *gj_request(const char **path, uint8_t num_paths, const char **key,
 	return reply;
 }
 
-char *gj_trophies_fetch(bool achieved, const char *trophy_id,
-		uint16_t tout_frames)
+char *gj_trophies_fetch(bool achieved, const char *trophy_id)
 {
 	const char *path = "trophies";
 	const char *key[2] = {NULL, NULL};
@@ -229,14 +238,9 @@ char *gj_trophies_fetch(bool achieved, const char *trophy_id,
 		val[kv_idx] = "true";
 		kv_idx++;
 	}
+	FILL_OPTION(key, val, kv_idx, trophy_id);
 
-	if (trophy_id) {
-		key[kv_idx] = "trophy_id";
-		val[kv_idx] = trophy_id;
-		kv_idx++;
-	}
-
-	return gj_request(&path, 1, key, val, kv_idx, tout_frames, &reply_len);
+	return gj_request(&path, 1, key, val, kv_idx, &reply_len);
 }
 
 static enum gj_trophy_difficulty get_trophy(const char *difficulty_str)
@@ -301,11 +305,14 @@ static char *decode_boolean(char *data, const char *key, bool *output)
 	return data;
 }
 
+// To use this decoder macro, you need the following variables to be declared:
+// - pos: Position of the data to decode (char*)
+// - output: Struct of the corresponding data type to decode
 #define X_AS_DECODER(field, decoder, type) \
-	pos = decode_ ## decoder(pos, #field, &trophy->field); \
+	pos = decode_ ## decoder(pos, #field, &output->field); \
 	if (!pos) { return NULL; }
 
-char *gj_trophy_get_next(char *data, struct gj_trophy *trophy)
+char *gj_trophy_get_next(char *data, struct gj_trophy *output)
 {
 	char *pos = data;
 
@@ -313,13 +320,12 @@ char *gj_trophy_get_next(char *data, struct gj_trophy *trophy)
 		NULL;
 	}
 
-	memset(trophy, 0, sizeof(struct gj_trophy));
+	memset(output, 0, sizeof(struct gj_trophy));
 
-	// Expand decoders
 	GJ_TROPHY_RESPONSE_TABLE(X_AS_DECODER);
 
-	if ('\0' == trophy->description[0]) {
-		trophy->secret = true;
+	if ('\0' == output->description[0]) {
+		output->secret = true;
 	};
 
 	return pos;
@@ -334,23 +340,54 @@ const char *gj_trophy_difficulty_str(enum gj_trophy_difficulty difficulty)
 	return trophy_strings[difficulty];
 }
 
-bool gj_trophy_add_achieved(const char *trophy_id, uint16_t tout_frames)
+bool gj_trophy_add_achieved(const char *trophy_id)
 {
 	const char *path[2] = {"trophies", "add-achieved"};
 	const char *key = "trophy_id";
 	uint32_t reply_len;
 
-	return !gj_request(path, 2, &key, &trophy_id, 1,
-			tout_frames, &reply_len);
+	return !gj_request(path, 2, &key, &trophy_id, 1, &reply_len);
 }
 
-bool gj_trophy_remove_achieved(const char *trophy_id, uint16_t tout_frames)
+bool gj_trophy_remove_achieved(const char *trophy_id)
 {
 	const char *path[2] = {"trophies", "remove-achieved"};
 	const char *key = "trophy_id";
 	uint32_t reply_len;
 
-	return !gj_request(path, 2, &key, &trophy_id, 1,
-			tout_frames, &reply_len);
+	return !gj_request(path, 2, &key, &trophy_id, 1, &reply_len);
+}
+
+bool gj_time(struct gj_time *output)
+{
+	const char *path = "time";
+	uint32_t len;
+	char *pos = gj_request(&path, 1, NULL, NULL, 0, &len);
+
+	memset(output, 0, sizeof(struct gj_time));
+
+	GJ_TIME_RESPONSE_TABLE(X_AS_DECODER);
+
+	return !pos;
+}
+
+
+bool gj_scores_add(const char *score, const char *sort, const char *table_id,
+		const char *guest, const char *extra_data)
+{
+	const char *path[2] = {"scores", "add"};
+	const char *key[5] = {"score", "sort"};
+	const char *val[5] = {score, sort};
+	int kv_idx = 2;
+	uint32_t reply_len;
+
+	if (!score || !sort) {
+		return true;
+	}
+	FILL_OPTION(key, val, kv_idx, table_id);
+	FILL_OPTION(key, val, kv_idx, guest);
+	FILL_OPTION(key, val, kv_idx, extra_data);
+
+	return !gj_request(path, 2, key, val, kv_idx, &reply_len);
 }
 

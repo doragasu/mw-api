@@ -42,6 +42,15 @@ enum gj_trophy_difficulty {
 	X_MACRO(image_url,   string,            char*) \
 	X_MACRO(achieved,    string,            char*)
 
+#define GJ_TIME_RESPONSE_TABLE(X_MACRO) \
+	X_MACRO(timestamp, string, char*) \
+	X_MACRO(timezone,  string, char*) \
+	X_MACRO(day,       string, char*) \
+	X_MACRO(hour,      string, char*) \
+	X_MACRO(minute,    string, char*) \
+	X_MACRO(second,    string, char*)
+
+
 /// Expands a response table as a structure with its fields
 #define X_AS_STRUCT(field, decoder, type) \
 	type field;
@@ -50,6 +59,11 @@ enum gj_trophy_difficulty {
 struct gj_trophy {
 	GJ_TROPHY_RESPONSE_TABLE(X_AS_STRUCT);
 	bool secret;	///< If true, trophy is secret
+};
+
+/// Holds the date/time from server
+struct gj_time {
+	GJ_TIME_RESPONSE_TABLE(X_AS_STRUCT);
 };
 
 /************************************************************************//**
@@ -66,6 +80,8 @@ struct gj_trophy {
  * \param[in] user_token  Token corresponding to username.
  * \param[in] reply_buf   Pre-allocated buffer to use for data reception.
  * \param[in] buf_len     Length of reply_buf buffer.
+ * \param[in] tout_frames Number of frames to wait for requests before
+ *                        timing out.
  *
  * \return false on success, true on error.
  *
@@ -75,7 +91,7 @@ struct gj_trophy {
  ****************************************************************************/
 bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 		const char *username, const char *user_token, char *reply_buf,
-		uint16_t buf_len);
+		uint16_t buf_len, uint16_t tout_frames);
 
 /************************************************************************//**
  * \brief Fetch player trophies.
@@ -83,13 +99,11 @@ bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
  * \param[in] achieved    If true, only achieved trophies are get.
  * \param[in] trophy_id   If not NULL, a single trophy with specified id
  *            is retrieved.
- * \param[in] tout_frames Number of frames to wait for reply before timing out.
  *
  * \return Raw trophy data on success, NULL on failure. Use gh_trophy_get_next()
  * to decode the raw information.
  ****************************************************************************/
-char *gj_trophies_fetch(bool achieved, const char *trophy_id,
-		uint16_t tout_frames);
+char *gj_trophies_fetch(bool achieved, const char *trophy_id);
 
 /************************************************************************//**
  * \brief Decode the trophy raw data for the next entry.
@@ -111,21 +125,19 @@ char *gj_trophy_get_next(char *pos, struct gj_trophy *trophy);
  * \brief Mark a trophy as achieved.
  *
  * \param[in] trophy_id   Identifier of the trophy to mark as achieved.
- * \param[in] tout_frames Number of frames to wait for reply before timing out.
  *
  * \return true if error, false on success.
  ****************************************************************************/
-bool gj_trophy_add_achieved(const char *trophy_id, uint16_t tout_frames);
+bool gj_trophy_add_achieved(const char *trophy_id);
 
 /************************************************************************//**
  * \brief Mark a trophy as not achieved.
  *
  * \param[in] trophy_id   Identifier of the trophy to mark as not achieved.
- * \param[in] tout_frames Number of frames to wait for reply before timing out.
  *
  * \return true if error, false on success.
  ****************************************************************************/
-bool gj_trophy_remove_achieved(const char *trophy_id, uint16_t tout_frames);
+bool gj_trophy_remove_achieved(const char *trophy_id);
 
 /************************************************************************//**
  * \brief Get the string corresponding to a trophy difficulty.
@@ -136,6 +148,30 @@ bool gj_trophy_remove_achieved(const char *trophy_id, uint16_t tout_frames);
  * value of difficulty is out of range, "Unknown" string will be returned.
  ****************************************************************************/
 const char *gj_trophy_difficulty_str(enum gj_trophy_difficulty difficulty);
+
+/************************************************************************//**
+ * \brief Get the date and time from server.
+ *
+ * \param[out] time        Date and time from the server.
+ *
+ * \return true if error, false on success.
+ ****************************************************************************/
+bool gj_time(struct gj_time *time);
+
+/************************************************************************//**
+ * \brief Add a score to a scoreboard.
+ *
+ * \param[in] score      Score in textual format (e.g. "500 torreznos")
+ * \param[in] sort       Number used to sort the score (e.g. "500")
+ * \param[in] table_id   Table id, or NULL for the main game table.
+ * \param[in] guest      Name of the guest player, or NULL for user player.
+ * \param[in] extra_data Extra data to save with score, NULL for none.
+ *
+ * \return true if error, false on success.
+ * \note guest parameter is not yet supported.
+ ****************************************************************************/
+bool gj_scores_add(const char *score, const char *sort, const char *table_id,
+		const char *guest, const char *extra_data);
 
 /************************************************************************//**
  * \brief Generic GameJolt Game API request.
@@ -149,15 +185,13 @@ const char *gj_trophy_difficulty_str(enum gj_trophy_difficulty difficulty);
  * \param[in]  key          Array of keys for key/value parameters.
  * \param[in]  value        Array of values for key/value parameters.
  * \param[in]  num_kv_pairs Number of elements in key and value arrays.
- * \param[in]  tout_frames  Frames to wait for reply before timing out.
  * \param[out] out_len      Length of the received reply to request.
  *
  * \return The string corresponding to the specified difficulty. If the input
  * value of difficulty is out of range, "Unknown" string will be returned.
  ****************************************************************************/
 char *gj_request(const char **path, uint8_t num_paths, const char **key,
-		const char **value, uint8_t num_kv_pairs, uint16_t tout_frames,
-		uint32_t *out_len);
+		const char **value, uint8_t num_kv_pairs, uint32_t *out_len);
 
 #endif /*_GAMEJOLT_H_*/
 
