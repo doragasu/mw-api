@@ -305,6 +305,27 @@ static char *decode_boolean(char *data, const char *key, bool *output)
 	return data;
 }
 
+static char *decode_bool_num(char *data, const char *key, bool *output)
+{
+	char *value;
+
+	data = decode_string(data, key, &value);
+	if (!data) {
+		return NULL;
+	}
+
+	if (!strcmp(value, "0")) {
+		*output = BOOL_FALSE;
+	} else if (!strcmp(value, "1")) {
+		*output = BOOL_TRUE;
+	} else {
+		*output = BOOL_ERROR;
+		return NULL;
+	}
+
+	return data;
+}
+
 // To use this decoder macro, you need the following variables to be declared:
 // - pos: Position of the data to decode (char*)
 // - output: Struct of the corresponding data type to decode
@@ -312,21 +333,19 @@ static char *decode_boolean(char *data, const char *key, bool *output)
 	pos = decode_ ## decoder(pos, #field, &output->field); \
 	if (!pos) { return NULL; }
 
-char *gj_trophy_get_next(char *data, struct gj_trophy *output)
+char *gj_trophy_get_next(char *pos, struct gj_trophy *output)
 {
-	char *pos = data;
-
-	if (!data || !data[0]) {
+	if (!pos || !pos[0]) {
 		NULL;
 	}
-
-	memset(output, 0, sizeof(struct gj_trophy));
 
 	GJ_TROPHY_RESPONSE_TABLE(X_AS_DECODER);
 
 	if ('\0' == output->description[0]) {
 		output->secret = true;
-	};
+	} else {
+		output->secret = false;
+	}
 
 	return pos;
 }
@@ -364,8 +383,6 @@ bool gj_time(struct gj_time *output)
 	uint32_t len;
 	char *pos = gj_request(&path, 1, NULL, NULL, 0, &len);
 
-	memset(output, 0, sizeof(struct gj_time));
-
 	GJ_TIME_RESPONSE_TABLE(X_AS_DECODER);
 
 	return !pos;
@@ -389,5 +406,79 @@ bool gj_scores_add(const char *score, const char *sort, const char *table_id,
 	FILL_OPTION(key, val, kv_idx, extra_data);
 
 	return !gj_request(path, 2, key, val, kv_idx, &reply_len);
+}
+
+char *gj_scores_fetch(const char *limit, const char *table_id,
+		const char *guest, const char *better_than,
+		const char *worse_than)
+{
+	const char *path = "scores";
+	const char *key[5] = {NULL};
+	const char *val[5] = {NULL};
+	int kv_idx = 0;
+	uint32_t reply_len;
+
+	FILL_OPTION(key, val, kv_idx, limit);
+	FILL_OPTION(key, val, kv_idx, table_id);
+	FILL_OPTION(key, val, kv_idx, guest);
+	FILL_OPTION(key, val, kv_idx, better_than);
+	FILL_OPTION(key, val, kv_idx, worse_than);
+
+	return gj_request(&path, 1, key, val, kv_idx, &reply_len);
+}
+
+char *gj_score_get_next(char *pos, struct gj_score *output)
+{
+	if (!pos || !pos[0]) {
+		NULL;
+	}
+
+	GJ_SCORE_RESPONSE_TABLE(X_AS_DECODER);
+
+	return pos;
+}
+
+char *gj_scores_tables(void)
+{
+	const char *path[2] = {"scores", "tables"};
+	uint32_t reply_len;
+
+	return gj_request(path, 2, NULL, NULL, 0, &reply_len);
+}
+
+char *gj_score_table_get_next(char *pos, struct gj_score_table *output)
+{
+	if (!pos || !pos[0]) {
+		NULL;
+	}
+
+	GJ_SCORE_TABLE_RESPONSE_TABLE(X_AS_DECODER);
+
+	return pos;
+}
+
+char *gj_scores_get_rank(const char *sort, const char *table_id)
+{
+	const char *path[2] = {"scores", "get-rank"};
+	const char *key[2] = {"sort"};
+	const char *val[2] = {sort};
+	int kv_idx = 1;
+	uint32_t reply_len;
+	char *rank = NULL;
+	char *data;
+
+	FILL_OPTION(key, val, kv_idx, table_id);
+
+	data = gj_request(path, 2, key, val, kv_idx, &reply_len);
+
+	if (!data) {
+		return NULL;
+	}
+	data = decode_string(data, "rank", &rank);
+	if (!data) {
+		return NULL;
+	}
+
+	return rank;
 }
 

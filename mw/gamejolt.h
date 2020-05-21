@@ -33,7 +33,7 @@ enum gj_trophy_difficulty {
 	GJ_TROPHY_TYPE_UNKNOWN		///< Unknown, just for errors
 };
 
-/// Reply fields to a trophy fetch request. To be used with X Macros
+/// Reply fields to a trophy fetch request.
 #define GJ_TROPHY_RESPONSE_TABLE(X_MACRO) \
 	X_MACRO(id,          string,            char*) \
 	X_MACRO(title,       string,            char*) \
@@ -42,6 +42,7 @@ enum gj_trophy_difficulty {
 	X_MACRO(image_url,   string,            char*) \
 	X_MACRO(achieved,    string,            char*)
 
+/// Reply fields to a time fetch request.
 #define GJ_TIME_RESPONSE_TABLE(X_MACRO) \
 	X_MACRO(timestamp, string, char*) \
 	X_MACRO(timezone,  string, char*) \
@@ -50,6 +51,26 @@ enum gj_trophy_difficulty {
 	X_MACRO(minute,    string, char*) \
 	X_MACRO(second,    string, char*)
 
+/// Reply field to a scores fetch request.
+#define GJ_SCORE_RESPONSE_TABLE(X_MACRO) \
+	X_MACRO(score,            string, char*) \
+	X_MACRO(sort,             string, char*) \
+	X_MACRO(extra_data,       string, char*) \
+	X_MACRO(user,             string, char*) \
+	X_MACRO(user_id,          string, char*) \
+	X_MACRO(guest,            string, char*) \
+	X_MACRO(stored,           string, char*) \
+	X_MACRO(stored_timestamp, string, char*)
+
+#define GJ_SCORE_TABLE_RESPONSE_TABLE(X_MACRO) \
+	X_MACRO(id,          string, char*) \
+	X_MACRO(name,        string, char*) \
+	X_MACRO(description, string, char*) \
+	X_MACRO(primary,     bool_num, bool)
+
+#define GJ_SCORE_GETRANK_RESPONSE_TABLE(X_MACRO) \
+	X_MACRO(message, string, char*) \
+	X_MACRO(rank,    string, char*)
 
 /// Expands a response table as a structure with its fields
 #define X_AS_STRUCT(field, decoder, type) \
@@ -64,6 +85,16 @@ struct gj_trophy {
 /// Holds the date/time from server
 struct gj_time {
 	GJ_TIME_RESPONSE_TABLE(X_AS_STRUCT);
+};
+
+/// Holds data of a single score.
+struct gj_score {
+	GJ_SCORE_RESPONSE_TABLE(X_AS_STRUCT);
+};
+
+/// Holds data of a single score table.
+struct gj_score_table {
+	GJ_SCORE_TABLE_RESPONSE_TABLE(X_AS_STRUCT);
 };
 
 /************************************************************************//**
@@ -117,7 +148,7 @@ char *gj_trophies_fetch(bool achieved, const char *trophy_id);
  * \param[out]   trophy Decoded trophy data.
  *
  * \return Position of the next trophy to decode (to be used on next call
- * to this function), or NULL if the curren trophy could not be decoded.
+ * to this function), or NULL if the current trophy could not be decoded.
  ****************************************************************************/
 char *gj_trophy_get_next(char *pos, struct gj_trophy *trophy);
 
@@ -157,6 +188,74 @@ const char *gj_trophy_difficulty_str(enum gj_trophy_difficulty difficulty);
  * \return true if error, false on success.
  ****************************************************************************/
 bool gj_time(struct gj_time *time);
+
+/************************************************************************//**
+ * \brief Fetch scores data.
+ *
+ * \param[in] limit       Number of scores to return (defaults to 10).
+ * \param[in] table_id    Table id, or NULL for the main game table.
+ * \param[in] guest       Name of the guest player, or NULL for user player.
+ * \param[in] better_than Get only scores better than this sort value.
+ * \param[in] worse_than  Get only scores worse than this sort value.
+ *
+ * \return Raw scores data on success, or NULL on failure.
+ * Use gj_scores_get_next() to decode the raw score data.
+ * \note All parameters are optional, use NULL if you do not want to set
+ * them.
+ ****************************************************************************/
+char *gj_scores_fetch(const char *limit, const char *table_id,
+		const char *guest, const char *better_than,
+		const char *worse_than);
+
+/************************************************************************//**
+ * \brief Decode the score raw data for the next entry.
+ *
+ * On first call, set pos to the value returned by gj_scores_fetch(). On
+ * successive calls, set pos to the last non-NULL returned value of this
+ * function.
+ *
+ * \param[inout] pos   Position of the trophy to extract. Note that input
+ *               raw data is modified to add null terminations for fields
+ * \param[out]   score Decoded trophy data.
+ *
+ * \return Position of the next score to decode (to be used on next call
+ * to this function), or NULL if the current score could not be decoded.
+ ****************************************************************************/
+char *gj_score_get_next(char *pos, struct gj_score *score);
+
+/************************************************************************//**
+ * \brief Fetch score tables.
+ *
+ * \return Raw score tables data on success, or NULL on failure.
+ * Use gj_score_table_get_next() to decode the raw score table data.
+ ****************************************************************************/
+char *gj_scores_tables(void);
+
+/************************************************************************//**
+ * \brief Decode the score tables raw data for the next entry.
+ *
+ * On first call, set pos to the value returned by gj_scores_tables_fetch().
+ * On successive calls, set pos to the last non-NULL returned value by this
+ * function.
+ *
+ * \param[inout] pos         Position of the score table to extract. Note that
+ *               input raw data is modified to add null terminations for fields
+ * \param[out]   score_table Decoded score table data.
+ *
+ * \return Position of the next score to decode (to be used on next call
+ * to this function), or NULL if the current score could not be decoded.
+ ****************************************************************************/
+char *gj_score_table_get_next(char *pos, struct gj_score_table *score_table);
+
+/************************************************************************//**
+ * \brief Get ranking corresponding to a sort parameter.
+ *
+ * \param[in] sort     Score sort value to get ranking position from table.
+ * \param[in] table_id Score table id, or NULL for the main table.
+ *
+ * \return Ranking corresponding to sort parameter, or NULL on error.
+ ****************************************************************************/
+char *gj_scores_get_rank(const char *sort, const char *table_id);
 
 /************************************************************************//**
  * \brief Add a score to a scoreboard.
