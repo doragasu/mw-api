@@ -24,6 +24,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/// Module error codes. On success value is 0. On error all values are
+/// negative, with the exception of the HTTP status error. In this case,
+/// the value reported is the HTTP status code obtained (e.g. 500).
+enum gj_error {
+	GJ_ERR_NONE      =  0,	///< No error
+	GJ_ERR_PARAM     = -1,	///< Missing or invalid parameter
+	GJ_ERR_REQUEST   = -2,	///< Request failed (network or server down?)
+	GJ_ERR_RECEPTION = -3,	///< Failed to receive response data
+	GJ_ERR_RESPONSE  = -4,	///< Response has no success:"true" head
+	GJ_ERR_PARSE     = -5	///< Error while parsing response data
+};
+
+/// Error codes, to use with gj_get_err
 /// Difficulty to achieve the trophy
 enum gj_trophy_difficulty {
 	GJ_TROPHY_TYPE_BRONZE = 0,	///< Bronze trophy (easiest)
@@ -134,6 +147,16 @@ struct gj_score_table {
 bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 		const char *username, const char *user_token, char *reply_buf,
 		uint16_t buf_len, uint16_t tout_frames);
+
+/************************************************************************//**
+ * \brief Return the last error code.
+ *
+ * If any other of the functions in the module return with error, call this
+ * function immediately after the error, to get the error code.
+ *
+ * \return The error code. 0 (GJ_ERR_NONE) if no error occurred.
+ ****************************************************************************/
+enum gj_error gj_get_error(void);
 
 /************************************************************************//**
  * \brief Fetch player trophies.

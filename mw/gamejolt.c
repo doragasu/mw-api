@@ -36,6 +36,7 @@ struct {
 	uint16_t tout_frames;
 	char username[33];
 	char user_token[33];
+	enum gj_error error;
 } gj = {};
 
 static char *line_next(const char *data)
@@ -138,9 +139,11 @@ bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 
 	gj.buf = reply_buf;
 	gj.buf_len = buf_len;
+	gj.error = GJ_ERR_NONE;
 
 	if (mw_ga_endpoint_set(endpoint, private_key) ||
 			mw_ga_key_value_add(key, value, 2)) {
+		gj.error = GJ_ERR_REQUEST;
 		return true;
 	}
 
@@ -151,21 +154,6 @@ bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 	gj.user_token[32] = '\0';
 
 	return false;
-}
-
-void gj_flush(uint32_t remaining, uint16_t tout_frames)
-{
-	int16_t to_recv;
-	uint8_t ch = MW_HTTP_CH;
-
-	while(remaining) {
-		to_recv = MIN(gj.buf_len, remaining);
-		if (MW_ERR_NONE != mw_recv_sync(&ch, gj.buf, &to_recv,
-					tout_frames)) {
-			return;
-		}
-		remaining -= to_recv;
-	}
 }
 
 char *gj_recv(uint32_t *len, uint16_t tout_frames)
@@ -201,19 +189,27 @@ char *gj_recv(uint32_t *len, uint16_t tout_frames)
 	return gj.buf;
 }
 
+enum gj_error gj_get_error(void)
+{
+	return gj.error;
+}
+
 char *gj_request(const char **path, uint8_t num_paths, const char **key,
 		const char **value, uint8_t num_kv_pairs, uint32_t *out_len)
 {
 	char *reply;
-	int status = mw_ga_request(MW_HTTP_METHOD_GET, path, num_paths, key,
+	int status;
+
+	gj.error = GJ_ERR_NONE;
+	status = mw_ga_request(MW_HTTP_METHOD_GET, path, num_paths, key,
 			value, num_kv_pairs, out_len, gj.tout_frames);
 
-
 	if (status < 100) {
+		gj.error = GJ_ERR_REQUEST;
 		return NULL;
 	}
 	if (status < 200 || status >= 300) {
-		gj_flush(*out_len, gj.tout_frames);
+		gj.error = status;
 		return NULL;
 	}
 	// If chunked response, limit to the buffer length minus 1
@@ -227,10 +223,13 @@ char *gj_request(const char **path, uint8_t num_paths, const char **key,
 		enum boolean success;
 		char *aux = key_bool_get(reply, "success", &success);
 		if (success != BOOL_TRUE) {
+			gj.error = GJ_ERR_RESPONSE;
 			return NULL;
 		}
 		*out_len -= aux - reply;
 		reply = aux;
+	} else {
+		gj.error = GJ_ERR_RECEPTION;
 	}
 	return reply;
 }
@@ -271,6 +270,7 @@ static char *decode_string(char *data, const char *key, char **output)
 {
 	data = val_get(data, key, output);
 	if (!*output) {
+		gj.error = GJ_ERR_PARSE;
 		return NULL;
 	}
 
@@ -288,6 +288,7 @@ static char *decode_trophy_difficulty(char *data, const char *key,
 	}
 	*output = get_trophy(value);
 	if (GJ_TROPHY_TYPE_UNKNOWN == *output) {
+		gj.error = GJ_ERR_PARSE;
 		return NULL;
 	}
 
@@ -309,7 +310,8 @@ static char *decode_boolean(char *data, const char *key, bool *output)
 		*output = BOOL_TRUE;
 	} else {
 		*output = BOOL_ERROR;
-		return NULL;
+		gj.error = GJ_ERR_PARSE;
+		data = NULL;
 	}
 
 	return data;
@@ -330,7 +332,8 @@ static char *decode_bool_num(char *data, const char *key, bool *output)
 		*output = BOOL_TRUE;
 	} else {
 		*output = BOOL_ERROR;
-		return NULL;
+		gj.error = GJ_ERR_PARSE;
+		data = NULL;
 	}
 
 	return data;
@@ -346,7 +349,8 @@ static char *decode_bool_num(char *data, const char *key, bool *output)
 char *gj_trophy_get_next(char *pos, struct gj_trophy *output)
 {
 	if (!pos || !pos[0]) {
-		NULL;
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
 	}
 
 	GJ_TROPHY_RESPONSE_TABLE(X_AS_DECODER);
@@ -376,6 +380,11 @@ bool gj_trophy_add_achieved(const char *trophy_id)
 	const char *val[3] = {gj.username, gj.username, trophy_id};
 	uint32_t reply_len;
 
+	if (!trophy_id) {
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
+	}
+
 	return !gj_request(path, 2, key, val, 3, &reply_len);
 }
 
@@ -385,6 +394,11 @@ bool gj_trophy_remove_achieved(const char *trophy_id)
 	const char *key[3] = {"username", "user_token", "trophy_id"};
 	const char *val[3] = {gj.username, gj.user_token, trophy_id};
 	uint32_t reply_len;
+
+	if (!trophy_id) {
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
+	}
 
 	return !gj_request(path, 2, key, val, 3, &reply_len);
 }
@@ -411,6 +425,7 @@ bool gj_scores_add(const char *score, const char *sort, const char *table_id,
 	uint32_t reply_len;
 
 	if (!score || !sort) {
+		gj.error = GJ_ERR_PARAM;
 		return true;
 	}
 	if (!guest) {
@@ -454,7 +469,8 @@ char *gj_scores_fetch(const char *limit, const char *table_id,
 char *gj_score_get_next(char *pos, struct gj_score *output)
 {
 	if (!pos || !pos[0]) {
-		NULL;
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
 	}
 
 	GJ_SCORE_RESPONSE_TABLE(X_AS_DECODER);
@@ -473,7 +489,8 @@ char *gj_scores_tables(void)
 char *gj_score_table_get_next(char *pos, struct gj_score_table *output)
 {
 	if (!pos || !pos[0]) {
-		NULL;
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
 	}
 
 	GJ_SCORE_TABLE_RESPONSE_TABLE(X_AS_DECODER);
@@ -490,6 +507,11 @@ char *gj_scores_get_rank(const char *sort, const char *table_id)
 	uint32_t reply_len;
 	char *rank = NULL;
 	char *data;
+
+	if (!sort) {
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
+	}
 
 	FILL_OPTION(key, val, kv_idx, table_id);
 
@@ -513,6 +535,11 @@ bool gj_data_store_set(const char *key, const char *data, bool user_store)
 	const char *val_arr[4] = {key, data};
 	int kv_idx = 2;
 	uint32_t reply_len;
+
+	if (!key || !data) {
+		gj.error = GJ_ERR_PARAM;
+		return true;
+	}
 
 	if (user_store) {
 		key_arr[kv_idx] = "username";
@@ -567,6 +594,7 @@ char *data_store_fetch(const char *key, bool user_store)
 	char *result;
 
 	if (!key) {
+		gj.error = GJ_ERR_PARAM;
 		return NULL;
 	}
 
@@ -597,6 +625,7 @@ char *gj_data_store_update(const char *key,
 	char *result;
 
 	if (!key || !value || operation < 0 || operation >= GJ_OP_MAX) {
+		gj.error = GJ_ERR_PARAM;
 		return NULL;
 	}
 
@@ -626,6 +655,7 @@ bool gj_data_store_remove(const char *key, bool user_store)
 	uint32_t reply_len;
 
 	if (!key) {
+		gj.error = GJ_ERR_PARAM;
 		return NULL;
 	}
 
