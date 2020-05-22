@@ -20,6 +20,10 @@ static const char * const trophy_strings[] = {
 	"Bronze", "Silver", "Gold", "Platinum", "Unknown"
 };
 
+static const char * const operation_strings[GJ_OP_MAX] = {
+	"add", "subtract", "multiply", "divide", "append", "prepend"
+};
+
 enum boolean {
 	BOOL_ERROR = -1,
 	BOOL_FALSE =  0,
@@ -30,6 +34,8 @@ struct {
 	char *buf;
 	uint16_t buf_len;
 	uint16_t tout_frames;
+	char username[33];
+	char user_token[33];
 } gj = {};
 
 static char *line_next(const char *data)
@@ -127,18 +133,22 @@ bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 		const char *username, const char *user_token, char *reply_buf,
 		uint16_t buf_len, uint16_t tout_frames)
 {
-	const char *key[4] = {"game_id", "username", "user_token", "format"};
-	const char *value[4] = {game_id,  username,   user_token,  "keypair"};
+	const char *key[2] = {"game_id","format"};
+	const char *value[2] = {game_id,"keypair"};
 
 	gj.buf = reply_buf;
 	gj.buf_len = buf_len;
 
 	if (mw_ga_endpoint_set(endpoint, private_key) ||
-			mw_ga_key_value_add(key, value, 4)) {
+			mw_ga_key_value_add(key, value, 2)) {
 		return true;
 	}
 
 	gj.tout_frames = tout_frames;
+	strncpy(gj.username, username, 32);
+	gj.username[32] = '\0';
+	strncpy(gj.user_token, user_token, 32);
+	gj.user_token[32] = '\0';
 
 	return false;
 }
@@ -228,9 +238,9 @@ char *gj_request(const char **path, uint8_t num_paths, const char **key,
 char *gj_trophies_fetch(bool achieved, const char *trophy_id)
 {
 	const char *path = "trophies";
-	const char *key[2] = {NULL, NULL};
-	const char *val[2] = {NULL, NULL};
-	uint8_t kv_idx = 0;
+	const char *key[4] = {"username", "user_token"};
+	const char *val[4] = {gj.username, gj.user_token};
+	uint8_t kv_idx = 2;
 	uint32_t reply_len;
 
 	if (achieved) {
@@ -361,20 +371,22 @@ const char *gj_trophy_difficulty_str(enum gj_trophy_difficulty difficulty)
 
 bool gj_trophy_add_achieved(const char *trophy_id)
 {
-	const char *path[2] = {"trophies", "add-achieved"};
-	const char *key = "trophy_id";
+	const char *path[4] = {"trophies", "add-achieved"};
+	const char *key[3] = {"username", "user_token", "trophy_id"};
+	const char *val[3] = {gj.username, gj.username, trophy_id};
 	uint32_t reply_len;
 
-	return !gj_request(path, 2, &key, &trophy_id, 1, &reply_len);
+	return !gj_request(path, 2, key, val, 3, &reply_len);
 }
 
 bool gj_trophy_remove_achieved(const char *trophy_id)
 {
 	const char *path[2] = {"trophies", "remove-achieved"};
-	const char *key = "trophy_id";
+	const char *key[3] = {"username", "user_token", "trophy_id"};
+	const char *val[3] = {gj.username, gj.user_token, trophy_id};
 	uint32_t reply_len;
 
-	return !gj_request(path, 2, &key, &trophy_id, 1, &reply_len);
+	return !gj_request(path, 2, key, val, 3, &reply_len);
 }
 
 bool gj_time(struct gj_time *output)
@@ -393,13 +405,19 @@ bool gj_scores_add(const char *score, const char *sort, const char *table_id,
 		const char *guest, const char *extra_data)
 {
 	const char *path[2] = {"scores", "add"};
-	const char *key[5] = {"score", "sort"};
-	const char *val[5] = {score, sort};
+	const char *key[6] = {"score", "sort"};
+	const char *val[6] = {score, sort};
 	int kv_idx = 2;
 	uint32_t reply_len;
 
 	if (!score || !sort) {
 		return true;
+	}
+	if (!guest) {
+		key[kv_idx] = "username";
+		val[kv_idx++] = gj.username;
+		key[kv_idx] = "user_token";
+		val[kv_idx++] = gj.user_token;
 	}
 	FILL_OPTION(key, val, kv_idx, table_id);
 	FILL_OPTION(key, val, kv_idx, guest);
@@ -410,14 +428,20 @@ bool gj_scores_add(const char *score, const char *sort, const char *table_id,
 
 char *gj_scores_fetch(const char *limit, const char *table_id,
 		const char *guest, const char *better_than,
-		const char *worse_than)
+		const char *worse_than, bool only_user)
 {
 	const char *path = "scores";
-	const char *key[5] = {NULL};
-	const char *val[5] = {NULL};
+	const char *key[6] = {NULL};
+	const char *val[6] = {NULL};
 	int kv_idx = 0;
 	uint32_t reply_len;
 
+	if (!guest && only_user) {
+		key[kv_idx] = "username";
+		val[kv_idx++] = gj.username;
+		key[kv_idx] = "user_token";
+		val[kv_idx++] = gj.user_token;
+	}
 	FILL_OPTION(key, val, kv_idx, limit);
 	FILL_OPTION(key, val, kv_idx, table_id);
 	FILL_OPTION(key, val, kv_idx, guest);
@@ -480,5 +504,138 @@ char *gj_scores_get_rank(const char *sort, const char *table_id)
 	}
 
 	return rank;
+}
+
+bool gj_data_store_set(const char *key, const char *data, bool user_store)
+{
+	const char *path[2] = {"data-store", "set"};
+	const char *key_arr[4] = {"key", "data"};
+	const char *val_arr[4] = {key, data};
+	int kv_idx = 2;
+	uint32_t reply_len;
+
+	if (user_store) {
+		key_arr[kv_idx] = "username";
+		val_arr[kv_idx++] = gj.username;
+		key_arr[kv_idx] = "user_token";
+		val_arr[kv_idx++] = gj.user_token;
+	}
+
+	return !gj_request(path, 2, key_arr, val_arr, kv_idx, &reply_len);
+}
+
+char *gj_data_store_keys_fetch(const char *pattern, bool user_store)
+{
+	const char *path[2] = {"data-store", "get-keys"};
+	const char *key[3] = {0};
+	const char *val[3] = {0};
+	int kv_idx = 0;
+	uint32_t reply_len;
+	char *result;
+
+	FILL_OPTION(key, val, kv_idx, pattern);
+	if (user_store) {
+		key[kv_idx] = "username";
+		val[kv_idx++] = gj.username;
+		key[kv_idx] = "user_token";
+		val[kv_idx++] = gj.user_token;
+	}
+
+	result = gj_request(path, 2, key, val, kv_idx, &reply_len);
+	if (!result) {
+		return NULL;
+	}
+	// On empty list, "keys" is returned instead of a "key" array.
+	if (0 == memcmp(result, "keys:", 5)) {
+		*result = '\0';
+	}
+	return result;
+}
+
+char *gj_data_store_key_next(char *pos, char **output)
+{
+	return decode_string(pos, "key", output);
+}
+
+char *data_store_fetch(const char *key, bool user_store)
+{
+	const char *path = "data-store";
+	const char *key_arr[3] = {"key"};
+	const char *val_arr[3] = {key};
+	int kv_idx = 1;
+	uint32_t reply_len;
+	char *result;
+
+	if (!key) {
+		return NULL;
+	}
+
+	if (user_store) {
+		key_arr[kv_idx] = "username";
+		val_arr[kv_idx++] = gj.username;
+		key_arr[kv_idx] = "user_token";
+		val_arr[kv_idx++] = gj.user_token;
+	}
+
+	result = gj_request(&path, 1, key_arr, val_arr, kv_idx, &reply_len);
+	if (!result || !decode_string(result, "data", &result)) {
+		return NULL;
+	}
+
+	return result;
+}
+
+char *gj_data_store_update(const char *key,
+		enum gj_data_store_update_operation operation,
+		const char *value, bool user_store)
+{
+	const char *path[2] = {"data-store", "update"};
+	const char *key_arr[5] = {"key", "value", "operation"};
+	const char *val_arr[5] = {key, value};
+	int kv_idx = 2;
+	uint32_t reply_len;
+	char *result;
+
+	if (!key || !value || operation < 0 || operation >= GJ_OP_MAX) {
+		return NULL;
+	}
+
+	val_arr[kv_idx++] = operation_strings[operation];
+
+	if (user_store) {
+		key_arr[kv_idx] = "username";
+		val_arr[kv_idx++] = gj.username;
+		key_arr[kv_idx] = "user_token";
+		val_arr[kv_idx++] = gj.user_token;
+	}
+
+	result = gj_request(path, 2, key_arr, val_arr, kv_idx, &reply_len);
+	if (!result || !decode_string(result, "data", &result)) {
+		return NULL;
+	}
+
+	return result;
+}
+
+bool gj_data_store_remove(const char *key, bool user_store)
+{
+	const char *path[2] = {"data-store", "remove"};
+	const char *key_arr[3] = {"key"};
+	const char *val_arr[3] = {key};
+	int kv_idx = 1;
+	uint32_t reply_len;
+
+	if (!key) {
+		return NULL;
+	}
+
+	if (user_store) {
+		key_arr[kv_idx] = "username";
+		val_arr[kv_idx++] = gj.username;
+		key_arr[kv_idx] = "user_token";
+		val_arr[kv_idx++] = gj.user_token;
+	}
+
+	return !gj_request(path, 2, key_arr, val_arr, kv_idx, &reply_len);
 }
 

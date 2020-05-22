@@ -33,6 +33,17 @@ enum gj_trophy_difficulty {
 	GJ_TROPHY_TYPE_UNKNOWN		///< Unknown, just for errors
 };
 
+/// Operations supported by gj_data_store_update() function
+enum gj_data_store_update_operation {
+	GJ_OP_ADD = 0,	///< Adds the value to item
+	GJ_OP_SUBTRACT,	///< Subtracs the value from item
+	GJ_OP_MULTIPLY,	///< Multiplies value by item
+	GJ_OP_DIVIDE,	///< Divides the item by value
+	GJ_OP_APPEND,	///< Appends value to the data store
+	GJ_OP_PREPEND,	///< Prepends value to the data store
+	GJ_OP_MAX	///< Maximum enum value, do not use for operation
+};
+
 /// Reply fields to a trophy fetch request.
 #define GJ_TROPHY_RESPONSE_TABLE(X_MACRO) \
 	X_MACRO(id,          string,            char*) \
@@ -131,7 +142,7 @@ bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
  * \param[in] trophy_id   If not NULL, a single trophy with specified id
  *            is retrieved.
  *
- * \return Raw trophy data on success, NULL on failure. Use gh_trophy_get_next()
+ * \return Raw trophy data on success, NULL on failure. Use gj_trophy_get_next()
  * to decode the raw information.
  ****************************************************************************/
 char *gj_trophies_fetch(bool achieved, const char *trophy_id);
@@ -194,18 +205,19 @@ bool gj_time(struct gj_time *time);
  *
  * \param[in] limit       Number of scores to return (defaults to 10).
  * \param[in] table_id    Table id, or NULL for the main game table.
- * \param[in] guest       Name of the guest player, or NULL for user player.
+ * \param[in] guest       Set if you want to get score only from guest player.
  * \param[in] better_than Get only scores better than this sort value.
  * \param[in] worse_than  Get only scores worse than this sort value.
+ * \param[in] only_user   Set to true if you want to get the user scores.
  *
  * \return Raw scores data on success, or NULL on failure.
- * Use gj_scores_get_next() to decode the raw score data.
+ * Use gj_score_get_next() to decode the raw score data.
  * \note All parameters are optional, use NULL if you do not want to set
  * them.
  ****************************************************************************/
 char *gj_scores_fetch(const char *limit, const char *table_id,
 		const char *guest, const char *better_than,
-		const char *worse_than);
+		const char *worse_than, bool only_user);
 
 /************************************************************************//**
  * \brief Decode the score raw data for the next entry.
@@ -267,10 +279,86 @@ char *gj_scores_get_rank(const char *sort, const char *table_id);
  * \param[in] extra_data Extra data to save with score, NULL for none.
  *
  * \return true if error, false on success.
- * \note guest parameter is not yet supported.
  ****************************************************************************/
 bool gj_scores_add(const char *score, const char *sort, const char *table_id,
 		const char *guest, const char *extra_data);
+
+/************************************************************************//**
+ * \brief Sets a key/value pair in the data store.
+ *
+ * \param[in] key        Key to set.
+ * \param[in] data       Value to set.
+ * \param[in] user_store When true, data is saved in user storage. Otherwise
+ *                       it will be saved in the game global store.
+ *
+ * \return true if error, false on success.
+ ****************************************************************************/
+bool gj_data_store_set(const char *key, const char *data, bool user_store);
+
+/************************************************************************//**
+ * \brief Fetch data store keys.
+ *
+ * \param[in] pattern    Optional. If set, match returned keys with pattern.
+ * \param[in] user_store When true, data is retrieved from user storage.
+ *                       Otherwise it will be saved in the game global store.
+ *
+ * \return Raw keys on success, or NULL on failure. Use
+ * gj_data_store_key_next() to decode the raw key data.
+ ****************************************************************************/
+char *gj_data_store_keys_fetch(const char *pattern, bool user_store);
+
+/************************************************************************//**
+ * \brief Decode the key data from a gj_data_store_keys_fetch() call.
+ *
+ * On first call, set pos to the value returned by gj_data_store_keys_fetch().
+ * On successive calls, set pos to the last non-NULL returned value by this
+ * function.
+ *
+ * \param[inout] pos         Position of the key to extract. Note that input
+ *                           raw data is modified to add null terminations.
+ * \param[out]   score_table Decoded key data.
+ *
+ * \return Position of the next score to decode (to be used on next call
+ * to this function), or NULL if the current key could not be decoded.
+ ****************************************************************************/
+char *gj_data_store_key_next(char *pos, char **output);
+
+/************************************************************************//**
+ * \brief Retrieve data from the data store.
+ *
+ * \param[in] key        Key to use for data retrieval.
+ * \param[in] user_store When true, data is retrieved from user storage.
+ *                       Otherwise it will be saved in the game global store.
+ *
+ * \return Data associated with requested key, or NULL on failure.
+ ****************************************************************************/
+char *data_store_fetch(const char *key, bool user_store);
+
+/************************************************************************//**
+ * \brief Update data in the data store.
+ *
+ * \param[in] key        Key to use for the data to be updated.
+ * \param[in] operation  Operation to apply to the data to update.
+ * \param[in] value      Value to use in the update operation.
+ * \param[in] user_store When true, data is updated from user storage.
+ *                       Otherwise it will be updated in the game global store.
+ *
+ * \return The updated data on success, or NULL on error.
+ ****************************************************************************/
+char *gj_data_store_update(const char *key,
+		enum gj_data_store_update_operation operation,
+		const char *value, bool user_store);
+
+/************************************************************************//**
+ * \brief Remove data from the data store.
+ *
+ * \param[in] key        Key to use for data removal.
+ * \param[in] user_store When true, data is removed from user storage.
+ *                       Otherwise it will be removed in the game global store.
+ *
+ * \return false on success, true on error.
+ ****************************************************************************/
+bool gj_data_store_remove(const char *key, bool user_store);
 
 /************************************************************************//**
  * \brief Generic GameJolt Game API request.
