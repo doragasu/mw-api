@@ -1,18 +1,9 @@
 var searchData=
 [
-  ['long_5fto_5fstr_468',['long_to_str',['../group__util.html#ga312e2d6c6ba4c6b237f316453b833ca2',1,'util.h']]],
-  ['loop_469',['loop',['../group__loop.html#ga4c3a8dbc5064a8e7d9baffbe604216f1',1,'loop.h']]],
-  ['loop_5fdeinit_470',['loop_deinit',['../group__loop.html#gafad462189af12da5ffd60af6b941af8f',1,'loop.h']]],
-  ['loop_5fend_471',['loop_end',['../group__loop.html#ga1085ce4bc5679e3f00be198ee094f2b3',1,'loop.h']]],
-  ['loop_5ffunc_5fadd_472',['loop_func_add',['../group__loop.html#ga063359b6f53ca8e491c41807cd4d5760',1,'loop.h']]],
-  ['loop_5ffunc_5fdel_473',['loop_func_del',['../group__loop.html#gaa03956cab3336c7c1b458fdb1230c541',1,'loop.h']]],
-  ['loop_5ffunc_5fdisable_474',['loop_func_disable',['../group__loop.html#ga2679bfecd7f56ed43e8c4be04904775d',1,'loop.h']]],
-  ['loop_5ffunc_5fenable_475',['loop_func_enable',['../group__loop.html#ga49daecd35fdba2e41b87c39b7db4e06d',1,'loop.h']]],
-  ['loop_5finit_476',['loop_init',['../group__loop.html#ga40d4c3a2cbefafdbb454f68cdaf9129d',1,'loop.h']]],
-  ['loop_5fpend_477',['loop_pend',['../group__loop.html#ga3fc77f30d1e96e3c6a535cb34fbc5e51',1,'loop.h']]],
-  ['loop_5fpost_478',['loop_post',['../group__loop.html#ga68b578220b5354b83cd9ecca21c251ca',1,'loop.h']]],
-  ['loop_5ftimer_5fadd_479',['loop_timer_add',['../group__loop.html#ga6d6f6f4f4f9ac838b05f02517098f414',1,'loop.h']]],
-  ['loop_5ftimer_5fdel_480',['loop_timer_del',['../group__loop.html#ga604a3914b75017ad305742aff729d326',1,'loop.h']]],
-  ['loop_5ftimer_5fstart_481',['loop_timer_start',['../group__loop.html#gae0f4f5d0561b404b5dccbd4b164eaeaf',1,'loop.h']]],
-  ['loop_5ftimer_5fstop_482',['loop_timer_stop',['../group__loop.html#gaddd1fcd3fc3d69690e7925b6c2e44ee2',1,'loop.h']]]
+  ['json_5fbool_5fget_535',['json_bool_get',['../group__json.html#gadaa675b6f8a88b4e42513d6733a58b7c',1,'json.h']]],
+  ['json_5fis_5fkey_536',['json_is_key',['../group__json.html#ga0672066146c33a0a3a230c5ead8f7edf',1,'json.h']]],
+  ['json_5fkey_5fnext_537',['json_key_next',['../group__json.html#gace415734c88d6a1dcaa47f0dbe66fcea',1,'json.h']]],
+  ['json_5fkey_5fsearch_538',['json_key_search',['../group__json.html#gab5065e3d03569747c6e18c74e61f680b',1,'json.h']]],
+  ['json_5fnull_5fterminate_539',['json_null_terminate',['../group__json.html#ga063223d002548fae2554d262ab07e141',1,'json.h']]],
+  ['json_5fobject_5fnext_540',['json_object_next',['../group__json.html#gaf575befb45fa905f2bcbcc191f227487',1,'json.h']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['to_5fupper_555',['to_upper',['../group__util.html#gac0417a833ac454efa44c61ee8bccd55d',1,'util.h']]]
+  ['str_5fis_5fuint8_626',['str_is_uint8',['../group__util.html#gaefdeee0521aeffc3705d9e36bd9047a0',1,'util.h']]],
+  ['str_5fto_5fuint8_627',['str_to_uint8',['../group__util.html#ga1592ef63a7bfa19eed825eb2a90e80d0',1,'util.h']]]
 ];

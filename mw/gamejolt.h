@@ -360,14 +360,14 @@ char *gj_data_store_keys_fetch(const char *pattern, bool user_store);
  * On successive calls, set pos to the last non-NULL returned value by this
  * function.
  *
- * \param[inout] pos         Position of the key to extract. Note that input
- *                           raw data is modified to add null terminations.
- * \param[out]   score_table Decoded key data.
+ * \param[inout] pos Position of the key to extract. Note that input raw data
+ *                   is modified to add null terminations.
+ * \param[out]   key Decoded key data.
  *
  * \return Position of the next score to decode (to be used on next call
  * to this function), or NULL if the current key could not be decoded.
  ****************************************************************************/
-char *gj_data_store_key_next(char *pos, char **output);
+char *gj_data_store_key_next(char *pos, char **key);
 
 /************************************************************************//**
  * \brief Retrieve data from the data store.
