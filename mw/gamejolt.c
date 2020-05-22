@@ -669,3 +669,64 @@ bool gj_data_store_remove(const char *key, bool user_store)
 	return !gj_request(path, 2, key_arr, val_arr, kv_idx, &reply_len);
 }
 
+bool gj_sessions_open(void)
+{
+	const char *path[2] = {"sessions", "open"};
+	const char *key[2] = {"username", "user_token"};
+	const char *val[2] = {gj.username, gj.user_token};
+	uint32_t reply_len;
+
+	return !gj_request(path, 2, key, val, 2, &reply_len);
+}
+
+bool gj_sessions_ping(bool active)
+{
+	const char *path[2] = {"sessions", "ping"};
+	const char *key[3] = {"username", "user_token", "status"};
+	const char *val[3] = {gj.username, gj.user_token};
+	uint32_t reply_len;
+
+	val[2] = active ? "active" : "idle";
+
+	return !gj_request(path, 2, key, val, 3, &reply_len);
+}
+
+bool gj_sessions_check(const char *username, const char *user_token)
+{
+	const char *path[2] = {"sessions", "check"};
+	const char *key[2] = {"username", "user_token"};
+	const char *val[2];
+	uint32_t reply_len;
+	bool open_session = false;
+	char *result;
+
+	if (!username || !user_token) {
+		key[0] = gj.username;
+		key[1] = gj.user_token;
+	} else {
+		key[0] = username;
+		key[1] = user_token;
+	}
+
+	result = gj_request(path, 2, key, val, 2, &reply_len);
+	if (result) {
+		open_session = true;
+	} else {
+		if (GJ_ERR_RESPONSE == gj.error) {
+			gj.error = GJ_ERR_NONE;
+		}
+	}
+
+	return open_session;
+}
+
+bool gj_sessions_close(void)
+{
+	const char *path[2] = {"sessions", "close"};
+	const char *key[2] = {"username", "user_token"};
+	const char *val[2] = {gj.username, gj.user_token};
+	uint32_t reply_len;
+
+	return !gj_request(path, 2, key, val, 2, &reply_len);
+}
+

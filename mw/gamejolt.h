@@ -9,7 +9,8 @@
  * \brief GameJolt Game API implementation for MegaWiFi.
  *
  * Implementation of the version 1.2 of the GameJolt Game API, supporting
- * scoreboards, trophies, friends, etc.
+ * scoreboards, trophies, friends, etc. For more information, read the original
+ * GameJolt Game API documentation: https://gamejolt.com/game-api/doc
  *
  * \author Jesus Alonso (doragasu)
  * \date 2020
@@ -382,6 +383,43 @@ char *gj_data_store_update(const char *key,
  * \return false on success, true on error.
  ****************************************************************************/
 bool gj_data_store_remove(const char *key, bool user_store);
+
+/************************************************************************//**
+ * \brief Open a game session for the player.
+ *
+ * \return false on success, true on error.
+ ****************************************************************************/
+bool gj_sessions_open(void);
+
+/************************************************************************//**
+ * \brief Ping a session, and allow setting it as active or idle.
+ *
+ * \param[in] active If true, session is marked as active. Otherwise, session
+ *                   is marked as idle.
+ *
+ * \return false on success, true on error.
+ ****************************************************************************/
+bool gj_sessions_ping(bool active);
+
+/************************************************************************//**
+ * \brief Remove data from the data store.
+ *
+ * \param[in] username   (optional) username to check for open session.
+ * \param[in] user_token (optional) user token to check for open session.
+ *
+ * \return true if session is active. false is session is not active or other
+ * error has occurred.
+ * \note To make sure a session is not active, and no error has occurred, when
+ * this function returns false, gj_get_error() must return GJ_ERR_NONE.
+ ****************************************************************************/
+bool gj_sessions_check(const char *username, const char *user_token);
+
+/************************************************************************//**
+ * \brief Close a previously opened session.
+ *
+ * \return false on success, true on error.
+ ****************************************************************************/
+bool gj_sessions_close(void);
 
 /************************************************************************//**
  * \brief Generic GameJolt Game API request.
