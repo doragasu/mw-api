@@ -39,17 +39,6 @@ struct {
 	enum gj_error error;
 } gj = {};
 
-static char *line_next(const char *data)
-{
-	char *next = strchr(data, '\n');
-
-	if (next) {
-		next++;
-	}
-
-	return next;
-}
-
 // If there is a match, *value is set to the match, and the pointer to the next
 // line is returned. If the match is on last line, NULL is returned. If there
 // is no match, or there is an error, *value is set to NULL and NULL is
@@ -85,27 +74,6 @@ static char *val_get(char *line, const char *key, char **value)
 out:
 	*value = val;
 	return endval;
-}
-
-static char *key_val_check(char *line, const char *key,
-		const char *value, bool *match)
-{
-	char *next;
-	char *val;
-
-	*match = false;
-	next = val_get(line, key, &val);
-
-	if (!val) {
-		goto out;
-	}
-
-	if (!strcmp(value, val)) {
-		*match = true;
-	}
-
-out:
-	return next;
 }
 
 static char *key_bool_get(char *line, const char *key, enum boolean *result)
@@ -290,28 +258,6 @@ static char *decode_trophy_difficulty(char *data, const char *key,
 	if (GJ_TROPHY_TYPE_UNKNOWN == *output) {
 		gj.error = GJ_ERR_PARSE;
 		return NULL;
-	}
-
-	return data;
-}
-
-static char *decode_boolean(char *data, const char *key, bool *output)
-{
-	char *value;
-
-	data = decode_string(data, key, &value);
-	if (!data) {
-		return NULL;
-	}
-
-	if (!strcmp(value, "false")) {
-		*output = BOOL_FALSE;
-	} else if (!strcmp(value, "true")) {
-		*output = BOOL_TRUE;
-	} else {
-		*output = BOOL_ERROR;
-		gj.error = GJ_ERR_PARSE;
-		data = NULL;
 	}
 
 	return data;
@@ -728,5 +674,76 @@ bool gj_sessions_close(void)
 	uint32_t reply_len;
 
 	return !gj_request(path, 2, key, val, 2, &reply_len);
+}
+
+char *gj_users_fetch(const char *username, const char *user_id)
+{
+	const char *path = "users";
+	const char *key;
+	const char *val;
+	uint32_t reply_len;
+
+	if (username) {
+		key = "username";
+		val = username;
+	} else if (user_id) {
+		key = "user_id";
+		val = user_id;
+	} else {
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
+	}
+
+	return gj_request(&path, 1, &key, &val, 1, &reply_len);
+
+}
+
+char *gj_user_get_next(char *pos, struct gj_user *output)
+{
+	if (!pos || !pos[0]) {
+		gj.error = GJ_ERR_PARAM;
+		return NULL;
+	}
+
+	GJ_USER_RESPONSE_TABLE(X_AS_DECODER);
+
+	return pos;
+}
+
+
+bool gj_users_auth(void)
+{
+	const char *path[2] = {"users", "auth"};
+	const char *key[2] = {"username", "user_token"};
+	const char *val[2] = {gj.username, gj.user_token};
+	uint32_t reply_len;
+	bool user_auth = false;
+	char *result;
+
+	result = gj_request(path, 2, key, val, 2, &reply_len);
+	if (result) {
+		user_auth = true;
+	} else {
+		if (GJ_ERR_RESPONSE == gj.error) {
+			gj.error = GJ_ERR_NONE;
+		}
+	}
+
+	return user_auth;
+}
+
+char *gj_friends_fetch(void)
+{
+	const char *path = "friends";
+	const char *key[2] = {"username", "user_token"};
+	const char *val[2] = {gj.username, gj.user_token};
+	uint32_t reply_len;
+
+	return gj_request(&path, 1, key, val, 2, &reply_len);
+}
+
+char *gj_friend_get_next(char *pos, char **user_id)
+{
+	return decode_string(pos, "friend_id", user_id);
 }
 

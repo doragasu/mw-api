@@ -87,15 +87,32 @@ enum gj_data_store_update_operation {
 	X_MACRO(stored,           string, char*) \
 	X_MACRO(stored_timestamp, string, char*)
 
+/// Reply fields to a scores tables request.
 #define GJ_SCORE_TABLE_RESPONSE_TABLE(X_MACRO) \
 	X_MACRO(id,          string, char*) \
 	X_MACRO(name,        string, char*) \
 	X_MACRO(description, string, char*) \
 	X_MACRO(primary,     bool_num, bool)
 
+/// Reply fields to a scores get-rank request.
 #define GJ_SCORE_GETRANK_RESPONSE_TABLE(X_MACRO) \
 	X_MACRO(message, string, char*) \
 	X_MACRO(rank,    string, char*)
+
+/// Reply fields to a users fetch request
+#define GJ_USER_RESPONSE_TABLE(X_MACRO) \
+	X_MACRO(id,                       string, char*) \
+	X_MACRO(type,                     string, char*) \
+	X_MACRO(username,                 string, char*) \
+	X_MACRO(avatar_url,               string, char*) \
+	X_MACRO(signed_up,                string, char*) \
+	X_MACRO(signed_up_timestamp,      string, char*) \
+	X_MACRO(last_logged_in,           string, char*) \
+	X_MACRO(last_logged_in_timestamp, string, char*) \
+	X_MACRO(status,                   string, char*) \
+	X_MACRO(developer_name,           string, char*) \
+	X_MACRO(developer_website,        string, char*) \
+	X_MACRO(developer_description,    string, char*)
 
 /// Expands a response table as a structure with its fields
 #define X_AS_STRUCT(field, decoder, type) \
@@ -120,6 +137,11 @@ struct gj_score {
 /// Holds data of a single score table.
 struct gj_score_table {
 	GJ_SCORE_TABLE_RESPONSE_TABLE(X_AS_STRUCT);
+};
+
+/// Holds user data
+struct gj_user {
+	GJ_USER_RESPONSE_TABLE(X_AS_STRUCT);
 };
 
 /************************************************************************//**
@@ -402,14 +424,17 @@ bool gj_sessions_open(void);
 bool gj_sessions_ping(bool active);
 
 /************************************************************************//**
- * \brief Remove data from the data store.
+ * \brief Checks if a user session is active in the game.
  *
- * \param[in] username   (optional) username to check for open session.
- * \param[in] user_token (optional) user token to check for open session.
+ * \param[in] username   (Optional) username to check for open session.
+ * \param[in] user_token (Optional) user token to check for open session.
  *
  * \return true if session is active. false is session is not active or other
  * error has occurred.
- * \note To make sure a session is not active, and no error has occurred, when
+ *
+ * \note If username or user_token is NULL, the session check is performed
+ * against the user configured in gj_init() call.
+ * \note To make sure a session is not active and no error has occurred, when
  * this function returns false, gj_get_error() must return GJ_ERR_NONE.
  ****************************************************************************/
 bool gj_sessions_check(const char *username, const char *user_token);
@@ -420,6 +445,72 @@ bool gj_sessions_check(const char *username, const char *user_token);
  * \return false on success, true on error.
  ****************************************************************************/
 bool gj_sessions_close(void);
+
+/************************************************************************//**
+ * \brief Get user data
+ *
+ * \param[in]  username (Optional) User name to get data from.
+ * \param[in]  user_id  (Optional) user token to check for open session.
+ *
+ * \return Raw user data on success, NULL if error has occurred.
+ *
+ * \note You can pass multiple user ids by separating them with commas (',').
+ * If you do it, be careful not to overflow the receive buffer!
+ * \note Only one of the optional parameters (username, user_id) must be
+ * specified. Set the other to NULL.
+ ****************************************************************************/
+char *gj_users_fetch(const char *username, const char *user_id);
+
+/************************************************************************//**
+ * \brief Decode the user raw data for the next entry.
+ *
+ * On first call, set pos to the value returned by gj_users_fetch(). On
+ * successive calls, set pos to the last non-NULL returned value of this
+ * function.
+ *
+ * \param[inout] pos  Position of the user to extract. Note that input raw
+ *                    data is modified to add null terminations for fields
+ * \param[out]   user Decoded user data
+ *
+ * \return Position of the next user to decode (to be used on next call
+ * to this function), or NULL if the current user could not be decoded.
+ ****************************************************************************/
+char *gj_user_get_next(char *pos, struct gj_user *user);
+
+/************************************************************************//**
+ * \brief Check user credentials.
+ *
+ * \return true if credentials are correct, false if credentials do not match
+ * or error has occurred.
+ *
+ * \note To make sure credentials are not valid and no error has occurred, when
+ * this function returns false, gj_get_error() must return GJ_ERR_NONE.
+ ****************************************************************************/
+bool gj_users_auth(void);
+
+/************************************************************************//**
+ * \brief Get friends list.
+ *
+ * \return Raw user data on success, NULL if error has occurred. Use
+ * gj_friend_get_next() to decode the raw data and get friend user_ids.
+ ****************************************************************************/
+char *gj_friends_fetch(void);
+
+/************************************************************************//**
+ * \brief Decode the friend raw data for the next entry.
+ *
+ * On first call, set pos to the value returned by gj_friends_fetch(). On
+ * successive calls, set pos to the last non-NULL returned value of this
+ * function.
+ *
+ * \param[inout] pos     Position of the friend to extract. Note that input raw
+ *                       data is modified to add null terminations for fields
+ * \param[out]   user_id Decoded friend user_id.
+ *
+ * \return Position of the next friend to decode (to be used on next call
+ * to this function), or NULL if the current friend could not be decoded.
+ ****************************************************************************/
+char *gj_friend_get_next(char *pos, char **user_id);
 
 /************************************************************************//**
  * \brief Generic GameJolt Game API request.
