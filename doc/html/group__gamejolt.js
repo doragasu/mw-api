@@ -10,16 +10,42 @@ var group__gamejolt =
       [ "title", "structgj__trophy.html#a1dbf7cbe000f7ae145d94dbd586086bd", null ]
     ] ],
     [ "gj_time", "structgj__time.html", [
-      [ "GJ_TIME_RESPONSE_TABLE", "structgj__time.html#ad6b2a04af2e6fb7b2b96efe9e411d2e6", null ]
+      [ "day", "structgj__time.html#a7bb04d2abd023196ca95703deca6bcf5", null ],
+      [ "hour", "structgj__time.html#ae832b2f714a997edc3ff97fd30d9e4f6", null ],
+      [ "minute", "structgj__time.html#a87e6564bc1bdc222d1a94abfbab31f34", null ],
+      [ "second", "structgj__time.html#adc1021640aee5d885467826e6c14ba0c", null ],
+      [ "timestamp", "structgj__time.html#a79de0cca86ab582f1b499fb151fe7d90", null ],
+      [ "timezone", "structgj__time.html#ac934d641d518d2b8f3be49c326276ada", null ]
     ] ],
     [ "gj_score", "structgj__score.html", [
-      [ "GJ_SCORE_RESPONSE_TABLE", "structgj__score.html#a1c33f72e6bf97efe13bfbee88f24727b", null ]
+      [ "extra_data", "structgj__score.html#a0658496ea3846586f4e18dcbbafeedf3", null ],
+      [ "guest", "structgj__score.html#a9c5d93d44716512a73a8cad4529346dc", null ],
+      [ "score", "structgj__score.html#a293cbec4a4b372916f19a584c87fa697", null ],
+      [ "sort", "structgj__score.html#a4f2d006ccd6151bca61573d9ece2f7ea", null ],
+      [ "stored", "structgj__score.html#ab0abc953c24c740dc76ccd77d15498fd", null ],
+      [ "stored_timestamp", "structgj__score.html#a9f24c3ca592da1b8d645ad05bf587777", null ],
+      [ "user", "structgj__score.html#a21561203121ba865b0dcd5bc71fb0da0", null ],
+      [ "user_id", "structgj__score.html#af9e3d62120a7c50ff667994cb17aff4d", null ]
     ] ],
     [ "gj_score_table", "structgj__score__table.html", [
-      [ "GJ_SCORE_TABLE_RESPONSE_TABLE", "structgj__score__table.html#ac3244011ec658abba47ad64ba4a2faf5", null ]
+      [ "description", "structgj__score__table.html#a152212b07c5820e653dfb26f70dd3287", null ],
+      [ "id", "structgj__score__table.html#a0ff826511187e5330d2da00d31029cc8", null ],
+      [ "name", "structgj__score__table.html#a5c309ac87306adf0d7f5a7f36a42475b", null ],
+      [ "primary", "structgj__score__table.html#a6eb099bfa5f6d1bcd4e8ddf6d194a0c7", null ]
     ] ],
     [ "gj_user", "structgj__user.html", [
-      [ "GJ_USER_RESPONSE_TABLE", "structgj__user.html#a2bc017a1c62296ccf7703d17e66c8f3d", null ]
+      [ "avatar_url", "structgj__user.html#a81d4703ed39052acf610267b6ef7fa86", null ],
+      [ "developer_description", "structgj__user.html#a05243feef8387112559601e3e9a6ed6f", null ],
+      [ "developer_name", "structgj__user.html#ab49178adf93b2ca2cbebaefb6ece353b", null ],
+      [ "developer_website", "structgj__user.html#a50452aefa92f5f517373114cb68ee506", null ],
+      [ "id", "structgj__user.html#a119d6180768abe8257a61bb6eedf58a0", null ],
+      [ "last_logged_in", "structgj__user.html#a6bb2bc281b382ae62734319240949f72", null ],
+      [ "last_logged_in_timestamp", "structgj__user.html#a946e5ef00dcf40685714d0f80dc3c76a", null ],
+      [ "signed_up", "structgj__user.html#a6aa4e4f88c63d24c038c5ae0ae0efd2a", null ],
+      [ "signed_up_timestamp", "structgj__user.html#aba05a91b0969d9555c77d8af6cf63608", null ],
+      [ "status", "structgj__user.html#a4b7b247bf6bf8d3695acbf1230f05574", null ],
+      [ "type", "structgj__user.html#abb450fe9fb07c1bb47e96d760e272b83", null ],
+      [ "username", "structgj__user.html#aff55501240f66cf40fe16436d0441894", null ]
     ] ],
     [ "GJ_SCORE_GETRANK_RESPONSE_TABLE", "group__gamejolt.html#ga467bad82d54a09b0e7b9650e38e1c818", null ],
     [ "GJ_SCORE_RESPONSE_TABLE", "group__gamejolt.html#ga48762648e27d258f91285d647c51c9c0", null ],

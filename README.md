@@ -22,6 +22,7 @@ The MegaWiFi API consists of the following modules:
 * megawifi: Communications with the WiFi module and the Internet, including sockets and HTTP/HTTPS.
 * mw-msg: MegaWiFi command message definitions.
 * util: General purpose utility functions and macros.
+* gamejolt: [Gamejolt Game API implementation](https://gamejolt.com/game-api/doc), allowing to easily add online trophies and scoreboards to your game, manage friends, sessions, etc.
 
 The `mw-msg` module contains the message definitions for the different MegaWiFi commands and command replies. Fear not because usually you do not need to use this module, unless you are doing something pretty advanced not covered by the `megawifi` module API.
 
@@ -33,12 +34,12 @@ There is also a `json` module wich includes `jsmn` library along with some helpe
 
 ### Loop module
 
-This module implements the main loop of the program. It allows easily adding and removing functions to be run on the main loop, as well as timers based on the frame counter. It also provides a hacky interface to perform pseudo syncrhonous calls (through the `loop_pend()` and `loop_post()` semantics) without disturbing the loop execution.
+This module implements the main loop of the program. It allows easily adding and removing functions to be run on the main loop, as well as timers based on the frame counter. It also provides a hacky interface to perform pseudo synchronous calls (through the `loop_pend()` and `loop_post()` semantics) without disturbing the loop execution.
 
 A typical Megadrive game contains a main loop with a structure similar to this:
 
 ```C
-void main(void)
+void main()
 {
 	// Perform initialization
 	init();
@@ -105,7 +106,7 @@ static void init(void)
 	main_loop_init();
 }
 
-void main(void)
+void main()
 {
 	// Initialization
 	init();
@@ -333,7 +334,7 @@ static void init(void)
 }
 
 /// Entry point
-void main(void)
+void main()
 {
 	// Initialization
 	init();
@@ -361,7 +362,7 @@ Once configured, associating to an AP is easy. Just call `mw_ap_assoc()` with th
 	}
 ```
 
-Once association has succeeded, you can try connecting to a server, or creating a server socket. DNS service will also start automatically after associating to the AP, but it takes a little bit more time. So if you need to use DNS just after associating to an AP, you should wait an additional second, e.g. by calling `mw_sleep(MS_TO_FRAMES(1000))`.
+Once association has succeeded, you can try connecting to a server, or creating a server socket. DNS service will also start automatically after associating to the AP, but it takes a little bit more time.
 
 ### Connecting to a TCP server
 
@@ -370,7 +371,7 @@ Connecting to a server is straightforward: just call `mw_tcp_connect()` with the
 ```C
 	enum mw_err err;
 
-	err = mw_tcp_connect(1, "www.duck.com", "443", NULL);
+	err = mw_tcp_connect(1, "www.example.com", "443", NULL);
 	if (MW_ERR_NONE == err) {
 		// Connection succeeded
 	} else {
@@ -439,7 +440,7 @@ void send_example(void)
 }
 ```
 
-When using the asynchronous API, sometimes you do not need confirmation about when data has been sent. In that case, you do not need to use a completion callback, and can call `mw_send()` with this parameter set to NULL.
+When using the asynchronous API, sometimes you do not need confirmation about when data has been sent. In that case, you do not need to use a completion callback, you can call `mw_send()` with this parameter set to NULL.
 
 ### Receiving data
 
@@ -488,9 +489,9 @@ void recv_example(void)
 
 ### Performing an HTTP/HTTPS request
 
-`megawifi` module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that setting an SSL certificate is required only if you want to use HTTPS. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.
+`megawifi` module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that setting an when using HTTPS, you can set an SSL certificate for the server identity to be verified. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.
 
-1. (**Optional**) Set the SSL certificate. This is only required when using HTTPS. You can retrieve the x509 hash of the currently stored certificate by calling `mw_http_cert_query()`. To set a different certificate, call `mw_http_cert_set()`. Once set, the certificate is stored on the non volatile memory, and will remain until replaced with a new one. Only one certificate can be stored at a time. Note you should not use this function unless required, because as it writes to Flash memory, it can wear the storage if used too often.
+1. (**Optional**) Set the SSL certificate. You can skip this step when using HTTP, or if you do not need to verify the server identity. You can retrieve the x509 hash of the currently stored certificate by calling `mw_http_cert_query()`. To set a different certificate, call `mw_http_cert_set()`. Once set, the certificate is stored on the non volatile memory, and will remain until replaced with a new one. Only one certificate can be stored at a time. Note you should not use this function unless required, because as it writes to Flash memory, it can wear the storage if used too often.
 2. Set the URL (e.g. https://www.example.com). Use `mw_http_url_set()` for this purpose.
 3. Set the HTTP method. Most commonly used ones are `MW_HTTP_METHOD_GET` and `MW_HTTP_METHOD_POST`. Use `mw_http_method_set()` to set it.
 4. (**Optional**) add HTTP headers to the request. Many aspects of the requests can be controlled via headers. E.g. you can define the formatting of the data you are posting by adding the header "Content-type" with the mime type "text/html", "application/json", etc.
@@ -562,7 +563,7 @@ static int http_finish(char *recv_buf, unsigned int *len)
 	return err;
 }
 
-/************************************************************************//**
+/****************************************************************************
  * \brief Generic HTTP GET request without data payload.
  *
  * \param[in]  url      URL for the request.
@@ -583,7 +584,7 @@ int http_get(const char *url, char *recv_buf, unsigned int *len)
 	return err;
 }
 
-/************************************************************************//**
+/****************************************************************************
  * \brief Generic POST request with JSON data payload.
  *
  * \param[in]    url          URL for the request.
@@ -629,7 +630,7 @@ void http_cert_set(const char *cert, int cert_len, uint32_t cert_hash)
 }
 ```
 
-This function only sets the certificate if it has not been previously stored, avoiding to innecesarily wear the Flash memory. To obtain a correct certificate hash, you can use openssl:
+This function only sets the certificate if it has not been previously stored, avoiding to unnecessarily wear the Flash memory. To obtain a correct certificate hash, you can use openssl:
 
 ```
 $ openssl x509 -hash in <cert_file_name> -noout
@@ -736,13 +737,202 @@ In addition to the standard 32 megabits of Flash ROM memory connected to the Meg
 * Program: call `mw_flash_write()` to write the specified data buffer to the indicated address. Prior to programming, **make sure the programmed address range is previously erased**, otherwise operation will fail.
 * Read: call `mw_flash_read()` to read the specified amount of data from the indicated address.
 
-This functions can be used e.g. for highscore keeping or DLCs. When using these functions, you have to keep in mind that flash can only be erased in a 1 sector (i.e. 4 KiB) granularity, and thus if e.g. you want to keep highscores, to update one of the high scores, you will have to erase the complete sector, and write it again in its entirety.
+This functions can be used e.g. for high score keeping or DLCs. When using these functions, you have to keep in mind that flash can only be erased in a 1 sector (i.e. 4 KiB) granularity, and thus if e.g. you want to keep high scores, to update one of the high scores, you will have to erase the complete sector, and write it again in its entirety.
 
 Also keep in mind that flash memory suffers from wearing, so do not perform more writes than necessary.
 
+### GameJolt Game API
+
+GameJolt API is implemented on top of the HTTP APIs, so the HTTP reserved channel is used to receive data when using the GameJolt API module. The current version 1.2 is fully supported, excepting the batch function, that maybe will not be very useful on the Megadrive, because of the tight memory restrictions. It is recommended you complement this documentation with the [official documentation of the API](https://gamejolt.com/game-api/doc). You will find additional details there.
+
+The first thing you need to know is that the GameJolt API implementation for MegaWiFi has the following restrictions:
+
+ * On initialization (`gj_init()`), the receive buffer is configured. To avoid wasting RAM, usually you will want to use the same buffer used for all other communication routines (the one specified on `mw_init()` invocation for example). When an API call returns pointers to data received from server, they point directly to different regions of this buffer. This means that before reusing the buffer again (i.e. before doing any other MegaWiFi call), you must copy all the data you want to preserve, or it will vanish before your eyes.
+ * The maximum reply of the server you will be able to receive, is currently limited by the size of the buffer set on initialization. I would recommend using at least 2 KiB, because some calls can return a bunch of data (for example the `gj_trophies_fetch()` and `gj_users_fetch()` if you get data for several users in a row). It is the developer work to make sure the data will fit in the buffer (otherwise the API call will fail). For example if you create a lot of trophies for your game, you have to set the buffer length accordingly. Pay very careful attention to this, or your game online functions might fail unexpectedly.
+ * The official API defines some input and output parameters as integers. But the implementation on the Megadrive uses the string representation of the integers for input parameters and output data. This has been done on purpose to avoid as much as possible conversions between strings and integers, that can be slow on the m68k side.
+ * As mentioned earlier, `Batch` command is not supported.
+
+Other than these, the API is full featured, and I'm sure you will be able to do really cool things with it!
+
+Here are some examples on using the API. Not all the supported features are shown, but for sure you will get an idea on how to use them. As mentioned earlier, do not forget to also check the [official API documentation](https://gamejolt.com/game-api/doc).
+
+#### Initialization
+
+To initialize the API, you have to pass the endpoint, the game and user credentials, the buffer and the timeout to use for requests. It is recommended to let user configure the credentials in the gamertag slots, and get them from there using `mw_gamertag_get()` before calling `gj_init()`.
+
+```C
+	if (gj_init("https://api.gamejolt.com/api/game/v1_2/", GJ_GAME_ID,
+				GJ_PRIV_KEY, username, user_token,
+				cmd_buf, MW_BUFLEN, MS_TO_FRAMES(30000))) {
+		// Handle init error
+	}
+```
+
+Make sure you store the credentials in a safe place, specially the game private key.
+
+#### Achieving a trophy
+
+Trophies are added using in the GameJolt Web UI. Once added, to make the player achieve a trophy, just call `gj_trophy_add_achieved()` with the trophy id:
+
+```C
+	if (gj_trophy_add_achieved("121457")) {
+		// Something went wrong, trophy not achieved!
+	}
+```
+
+#### Getting game trophies
+
+You can get all the available trophies, the ones achieved by the player, or a single one by id. Then you have to iterate on the returned data to get the trophy data one by one:
+
+```C
+	char *trophy_data;
+	struct gj_trophy trophy;
+
+	trophy_data = gj_trophies_fetch(false, NULL);
+	if (!trophy_data) {
+		// Treat error
+		return;
+	}
+	while (trophy_data && *trophy_data) {
+		trophy_data = gj_trophy_get_next(trophy_data, &trophy);
+		if (!trophy_data) {
+			// Error formatting trophy
+			return;
+		}
+		beautifully_print_the_trophy(&trophy);
+	}
+```
+
+#### Posting a score
+
+When posting scores, you can put them on the global game score table, or on any other additional table the developer has created for the game. You can also post them as the user, or as a guest (when allowed), and you must post both a textual representation of the score and a numeric sort value (but both can be the same). Also optionally, extra data can be added with the score:
+
+```C
+	if (gj_scores_add("500 midi-chlorians", "500", NULL, NULL, NULL)) {
+		// Error, score not added
+	}
+```
+
+#### Getting scores
+
+You can retrieve scores from the main game table, or from any other additional tables the developer has created (using the GameJolt Web UI). First you get the raw table data, and then you iterate on scores one by one. When requesting the data, there are also some options to filter the values you get, read the documentation if you need to use them:
+
+```C
+	char *score_data;
+	struct gj_score score;
+
+	score_data = gj_scores_fetch(NULL, NULL, NULL, NULL, NULL, false);
+	if (!score_data) {
+		// Error fetching data
+		return;
+	}
+	while (score_data && *score_data) {
+		score_data = gj_score_get_next(score_data, &score);
+		if (!score_data) {
+			// Error formatting data
+			return;
+		}
+		beatifully_print_score(&score);
+	}
+```
+
+#### Updating sessions
+
+Sessions allow to track who is playing the game and how much time. Basically you open a session, and have to periodically ping it. If you spend 120 seconds without pinging the session, it will be automatically closed, so the recommendation is to ping each 30 seconds.
+
+```C
+	// Do this just once to open the session
+	if (gj_sessions_open()) {
+		// Something went wrong, session not opened
+	}
+
+	// [...]
+
+	// Do this every 30 seconds approximately
+	if (gj_sessions_ping(true)) {
+		// Something went wrong, ping failed
+	}
+```
+
+#### Listing users and friends
+
+You can list friends, and get detailed data of each user. To list friends, request the raw data, and then iterate on the results, one by one:
+
+```C
+	char *data, *friend_id;
+
+	if (!(data = gj_friends_fetch())) {
+		// Failed to fetch friends data
+		return;
+	}
+	while (data && *data) {
+		data = gj_friend_get_next(data, &friend_id);
+		if (!data || !friend_id) {
+			// Failed to iterate on friends data
+			return;
+		}
+		use_friend_id_for_whatever(friend_id);
+	}
+```
+
+And you can get user data from username or user\_id as follows:
+
+```C
+	struct gj_user user;
+	char *data;
+
+	if (!(data = gj_users_fetch("doragasu", NULL))) {
+		// Fetching user failed
+		return;
+	}
+	while (data && *data) {
+		data = gj_user_get_next(data, &user);
+		if (!data) {
+			// Formatting user data failed
+			return;
+		}
+		print_user_data_with_great_fx(&user);
+	}
+```
+
+#### Storing and retrieving data from the cloud
+
+You can upload data to retrieve it later. And you can even make the cloud perform basic operations on the uploaded data. This can have many uses, such as saving detailed statistics, implement cloud save game functions, make turn based multiplayer games, etc. The data can be stored on the global game store, or on the user store. An example to store data is as follows:
+
+```C
+	if (gj_data_store_set("the_meaining_of_life", "41", false)) {
+		// Record on global game store failed
+	}
+```
+
+To update data and perform operations on it, you can for example:
+
+```C
+	if (!gj_data_store_update("the_meaning_of_life", GJ_OP_ADD, "1", false)) {
+		// Data store update failed
+	}
+```
+
+You can match keys to retrieve them using the wildcard character ('\*'):
+
+```C
+	char *data;
+
+	data = data_store_fetch("the_meaning_*", false);
+	if (!data) {
+		// Error fetching data
+		return;
+	}
+	cloud_computed_meaning_of_life_is(data);
+```
+
+#### Getting error information
+
+Most API functions return an error either via a bool value (error if true), or a data pointer (error if NULL). Internally the functions track the error with greater detail. If you want to know what caused the error, after a function fails, call `gj_get_error()`. This will allow you to know if the error was caused because of a parameter error, a request error, a server error, etc. As the internally tracked error is updated after each GameJolt API call, you have to call this function just after the one that failed.
+
 ### Test program
 
-The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, connects to `https://www.example.com` using both a TCP socket and an HTTPS request, displays the synchronized date/time, sends and receives using a client UDP socket, and echoes UDP data on port 7.
+The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, connects to `https://www.example.com` using both a TCP socket and an HTTPS request, displays the synchronized date/time, sends and receives using a client UDP socket, and echoes UDP data on port 8007.
 
 ## Author
 
@@ -754,5 +944,5 @@ Contributions are welcome. If you find a bug please open an issue, and if you ha
 
 ## License
 
-This program is provided with NO WARRANTY, under the [Mozilla Public License (MPL)](https://www.mozilla.org/en-US/MPL/).
+The code and documentation in this repository is provided with NO WARRANTY, under the [Mozilla Public License (MPL)](https://www.mozilla.org/en-US/MPL/).
 

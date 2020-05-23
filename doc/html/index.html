@@ -101,15 +101,16 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <li>megawifi: Communications with the WiFi module and the Internet, including sockets and HTTP/HTTPS.</li>
 <li>mw-msg: MegaWiFi command message definitions.</li>
 <li>util: General purpose utility functions and macros.</li>
+<li>gamejolt: <a href="https://gamejolt.com/game-api/doc">Gamejolt Game API implementation</a>, allowing to easily add online trophies and scoreboards to your game, manage friends, sessions, etc.</li>
 </ul>
 <p>The <code>mw-msg</code> module contains the message definitions for the different MegaWiFi commands and command replies. Fear not because usually you do not need to use this module, unless you are doing something pretty advanced not covered by the <code>megawifi</code> module API.</p>
 <p>The <code>util</code> module contains general purpose functions and macros not fitting in the other modules, such as <code><a class="el" href="group__util.html#ga851ec0ef4a4c9ca0cf855fe0925946b5" title="This function evaluates the data entered on the input Menu structure, to guess if it corresponds to a...">ip_validate()</a></code> to check if a string is a valid IP address, <code><a class="el" href="group__util.html#ga1592ef63a7bfa19eed825eb2a90e80d0" title="Converts a character string representing an 8-bit unsigned number, to its binary (uint8_t) representa...">str_to_uint8()</a></code> to convert a string to an 8-bit number, etc.</p>
 <p>The other modules (<code>loop</code>, <code>mpool</code>, <code>megawifi</code>) are covered in depth below.</p>
 <p>There is also a <code>json</code> module wich includes <code>jsmn</code> library along with some helper functions to parse JSON formatted strings. Please read <code>jsmn</code> documentation to learn how its tokenizer works.</p>
 <h2>Loop module</h2>
-<p>This module implements the main loop of the program. It allows easily adding and removing functions to be run on the main loop, as well as timers based on the frame counter. It also provides a hacky interface to perform pseudo syncrhonous calls (through the <code><a class="el" href="group__loop.html#ga3fc77f30d1e96e3c6a535cb34fbc5e51" title="This function does not return until a loop_post() is executed.">loop_pend()</a></code> and <code><a class="el" href="group__loop.html#ga68b578220b5354b83cd9ecca21c251ca" title="Causes a previously invoked loop_pend() function to return.">loop_post()</a></code> semantics) without disturbing the loop execution.</p>
+<p>This module implements the main loop of the program. It allows easily adding and removing functions to be run on the main loop, as well as timers based on the frame counter. It also provides a hacky interface to perform pseudo synchronous calls (through the <code><a class="el" href="group__loop.html#ga3fc77f30d1e96e3c6a535cb34fbc5e51" title="This function does not return until a loop_post() is executed.">loop_pend()</a></code> and <code><a class="el" href="group__loop.html#ga68b578220b5354b83cd9ecca21c251ca" title="Causes a previously invoked loop_pend() function to return.">loop_post()</a></code> semantics) without disturbing the loop execution.</p>
 <p>A typical Megadrive game contains a main loop with a structure similar to this:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> main(<span class="keywordtype">void</span>)</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> main()</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// Perform initialization</span></div>
 <div class="line">    init();</div>
@@ -171,7 +172,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">    main_loop_init();</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> main(<span class="keywordtype">void</span>)</div>
+<div class="line"><span class="keywordtype">void</span> main()</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// Initialization</span></div>
 <div class="line">    init();</div>
@@ -362,7 +363,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">    main_loop_init();</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> main(<span class="keywordtype">void</span>)</div>
+<div class="line"><span class="keywordtype">void</span> main()</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// Initialization</span></div>
 <div class="line">    init();</div>
@@ -383,12 +384,12 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">} <span class="keywordflow">else</span> {</div>
 <div class="line">    <span class="comment">// Association failed</span></div>
 <div class="line">}</div>
-</div><!-- fragment --><p>Once association has succeeded, you can try connecting to a server, or creating a server socket. DNS service will also start automatically after associating to the AP, but it takes a little bit more time. So if you need to use DNS just after associating to an AP, you should wait an additional second, e.g. by calling <code>mw_sleep(MS_TO_FRAMES(1000))</code>.</p>
+</div><!-- fragment --><p>Once association has succeeded, you can try connecting to a server, or creating a server socket. DNS service will also start automatically after associating to the AP, but it takes a little bit more time.</p>
 <h2>Connecting to a TCP server</h2>
 <p>Connecting to a server is straightforward: just call <code><a class="el" href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b" title="Tries establishing a TCP connection with specified server.">mw_tcp_connect()</a></code> with the channel to use, the destination address (both IPv4 addresses and domain names are supported), the destination port, and optionally the origin port (if NULL, it will be automatically set):</p>
 <div class="fragment"><div class="line"><span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
 <div class="line"> </div>
-<div class="line">err = <a class="code" href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">mw_tcp_connect</a>(1, <span class="stringliteral">&quot;www.duck.com&quot;</span>, <span class="stringliteral">&quot;443&quot;</span>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line">err = <a class="code" href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">mw_tcp_connect</a>(1, <span class="stringliteral">&quot;www.example.com&quot;</span>, <span class="stringliteral">&quot;443&quot;</span>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
 <div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__megawifi.html#gga777c2b3caa535d405278734b0f5aad2ea469b336990144c39297268eca750af7f">MW_ERR_NONE</a> == err) {</div>
 <div class="line">    <span class="comment">// Connection succeeded</span></div>
 <div class="line">} <span class="keywordflow">else</span> {</div>
@@ -440,7 +441,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">        <span class="comment">// Sending failed</span></div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><p>When using the asynchronous API, sometimes you do not need confirmation about when data has been sent. In that case, you do not need to use a completion callback, and can call <code><a class="el" href="group__megawifi.html#gab99864c90151e2bffe5d685cd6e1b241" title="Sends data through a socket, using a previously allocated channel. Asynchronous interface.">mw_send()</a></code> with this parameter set to NULL.</p>
+</div><!-- fragment --><p>When using the asynchronous API, sometimes you do not need confirmation about when data has been sent. In that case, you do not need to use a completion callback, you can call <code><a class="el" href="group__megawifi.html#gab99864c90151e2bffe5d685cd6e1b241" title="Sends data through a socket, using a previously allocated channel. Asynchronous interface.">mw_send()</a></code> with this parameter set to NULL.</p>
 <h2>Receiving data</h2>
 <p>You can receive data once a connection has been established. The easiest way is using the synchronous variant, but as it suspends the execution of the calling function until data is received, sometimes the asynchronous version is more convenient. The following code shows how to receive <em>data</em> buffer of <em>buf_length</em> maximum length using channel 1, with a 30 second timeout:</p>
 <div class="fragment"><div class="line"><span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
@@ -477,9 +478,9 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --><h2>Performing an HTTP/HTTPS request</h2>
-<p><code>megawifi</code> module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that setting an SSL certificate is required only if you want to use HTTPS. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.</p>
+<p><code>megawifi</code> module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that setting an when using HTTPS, you can set an SSL certificate for the server identity to be verified. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.</p>
 <ol type="1">
-<li>(<b>Optional</b>) Set the SSL certificate. This is only required when using HTTPS. You can retrieve the x509 hash of the currently stored certificate by calling <code><a class="el" href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7" title="Query the X.509 hash of the installed PEM certificate.">mw_http_cert_query()</a></code>. To set a different certificate, call <code><a class="el" href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904" title="Set the PEM certificate to use on HTTPS requests.">mw_http_cert_set()</a></code>. Once set, the certificate is stored on the non volatile memory, and will remain until replaced with a new one. Only one certificate can be stored at a time. Note you should not use this function unless required, because as it writes to Flash memory, it can wear the storage if used too often.</li>
+<li>(<b>Optional</b>) Set the SSL certificate. You can skip this step when using HTTP, or if you do not need to verify the server identity. You can retrieve the x509 hash of the currently stored certificate by calling <code><a class="el" href="group__megawifi.html#ga6cffe37fa4e2b2ae0e177a021fab3aa7" title="Query the X.509 hash of the installed PEM certificate.">mw_http_cert_query()</a></code>. To set a different certificate, call <code><a class="el" href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904" title="Set the PEM certificate to use on HTTPS requests.">mw_http_cert_set()</a></code>. Once set, the certificate is stored on the non volatile memory, and will remain until replaced with a new one. Only one certificate can be stored at a time. Note you should not use this function unless required, because as it writes to Flash memory, it can wear the storage if used too often.</li>
 <li>Set the URL (e.g. <a href="https://www.example.com">https://www.example.com</a>). Use <code><a class="el" href="group__megawifi.html#ga8f58b6f745739c2b58279c616fe8645e" title="Set URL for HTTP requests.">mw_http_url_set()</a></code> for this purpose.</li>
 <li>Set the HTTP method. Most commonly used ones are <code>MW_HTTP_METHOD_GET</code> and <code>MW_HTTP_METHOD_POST</code>. Use <code><a class="el" href="group__megawifi.html#ga5c6bfb81f8fe1c6c6a294f36765b3936" title="Set method for HTTP requests.">mw_http_method_set()</a></code> to set it.</li>
 <li>(<b>Optional</b>) add HTTP headers to the request. Many aspects of the requests can be controlled via headers. E.g. you can define the formatting of the data you are posting by adding the header "Content-type" with the mime type "text/html", "application/json", etc.</li>
@@ -549,7 +550,15 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">    <span class="keywordflow">return</span> err;</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">/************************************************************************/</span></div>
+<div class="line"><span class="comment">/****************************************************************************</span></div>
+<div class="line"><span class="comment"> * \brief Generic HTTP GET request without data payload.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * \param[in]  url      URL for the request.</span></div>
+<div class="line"><span class="comment"> * \param[out] recv_buf Buffer used for HTTP response data.</span></div>
+<div class="line"><span class="comment"> * \param[out] len      Length of the response.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * \return HTTP status code, or -1 if request was not completed.</span></div>
+<div class="line"><span class="comment"> ****************************************************************************/</span></div>
 <div class="line"><span class="keywordtype">int</span> http_get(<span class="keyword">const</span> <span class="keywordtype">char</span> *url, <span class="keywordtype">char</span> *recv_buf, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *len)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keyword">enum</span> <a class="code" href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a> err;</div>
@@ -562,7 +571,19 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">    <span class="keywordflow">return</span> err;</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">/************************************************************************/</span></div>
+<div class="line"><span class="comment">/****************************************************************************</span></div>
+<div class="line"><span class="comment"> * \brief Generic POST request with JSON data payload.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * \param[in]    url          URL for the request.</span></div>
+<div class="line"><span class="comment"> * \param[in]    data         Data to send in the POST data payload.</span></div>
+<div class="line"><span class="comment"> * \param[in]    length       Length of the data to send.</span></div>
+<div class="line"><span class="comment"> * \param[in]    content_type Content-Type HTTP header for the data payload.</span></div>
+<div class="line"><span class="comment"> * \param[out]   recv_buf     Buffer used to receive reply data.</span></div>
+<div class="line"><span class="comment"> * \param[inout] recv_len     On input, length of recv_buf. On output, length</span></div>
+<div class="line"><span class="comment"> *                            of the received reply data.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * \return HTTP status code or -1 if the request was not completed.</span></div>
+<div class="line"><span class="comment"> ****************************************************************************/</span></div>
 <div class="line"><span class="keywordtype">int</span> http_post(<span class="keyword">const</span> <span class="keywordtype">char</span> *url, <span class="keyword">const</span> <span class="keywordtype">char</span> *data, <span class="keywordtype">int</span> length,</div>
 <div class="line">        <span class="keyword">const</span> <span class="keywordtype">char</span> *content_type, <span class="keywordtype">char</span> *recv_buf,</div>
 <div class="line">        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *recv_len)</div>
@@ -590,7 +611,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="line">        <a class="code" href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904">mw_http_cert_set</a>(cert_hash, cert, cert_len);</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><p>This function only sets the certificate if it has not been previously stored, avoiding to innecesarily wear the Flash memory. To obtain a correct certificate hash, you can use openssl:</p>
+</div><!-- fragment --><p>This function only sets the certificate if it has not been previously stored, avoiding to unnecessarily wear the Flash memory. To obtain a correct certificate hash, you can use openssl:</p>
 <div class="fragment"><div class="line">$ openssl x509 -hash in &lt;cert_file_name&gt; -noout</div>
 </div><!-- fragment --><h2>Getting the date and time</h2>
 <p>MegaWiFi allows to synchronize the date and time to NTP servers. It is important to note that on console power up, the module date and time will be incorrect and should not be used. For the date and time to be synchronized, the module must be associated to an AP with Internet connectivity. Once associated, the date and time is automatically synchronized. The synchronization procedure usually takes only a few seconds, and once completed, date/time should be usable until the console is powered off.</p>
@@ -663,39 +684,177 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <li>Program: call <code><a class="el" href="group__megawifi.html#gad2c3c09a3e99be8893cba9ad867fc4e9" title="Write data to specified flash address.">mw_flash_write()</a></code> to write the specified data buffer to the indicated address. Prior to programming, <b>make sure the programmed address range is previously erased</b>, otherwise operation will fail.</li>
 <li>Read: call <code><a class="el" href="group__megawifi.html#gae2183be207f9ef7fa2c14932aa87269d" title="Read data from specified flash address.">mw_flash_read()</a></code> to read the specified amount of data from the indicated address.</li>
 </ul>
-<p>This functions can be used e.g. for highscore keeping or DLCs. When using these functions, you have to keep in mind that flash can only be erased in a 1 sector (i.e. 4 KiB) granularity, and thus if e.g. you want to keep highscores, to update one of the high scores, you will have to erase the complete sector, and write it again in its entirety.</p>
+<p>This functions can be used e.g. for high score keeping or DLCs. When using these functions, you have to keep in mind that flash can only be erased in a 1 sector (i.e. 4 KiB) granularity, and thus if e.g. you want to keep high scores, to update one of the high scores, you will have to erase the complete sector, and write it again in its entirety.</p>
 <p>Also keep in mind that flash memory suffers from wearing, so do not perform more writes than necessary.</p>
+<h2>GameJolt Game API</h2>
+<p>GameJolt API is implemented on top of the HTTP APIs, so the HTTP reserved channel is used to receive data when using the GameJolt API module. The current version 1.2 is fully supported, excepting the batch function, that maybe will not be very useful on the Megadrive, because of the tight memory restrictions. It is recommended you complement this documentation with the <a href="https://gamejolt.com/game-api/doc">official documentation of the API</a>. You will find additional details there.</p>
+<p>The first thing you need to know is that the GameJolt API implementation for MegaWiFi has the following restrictions:</p>
+<ul>
+<li>On initialization (<code><a class="el" href="group__gamejolt.html#gaffb4d40b73036ae8db0cbd6e6effe6a1" title="Initialize the GameJolt API.">gj_init()</a></code>), the receive buffer is configured. To avoid wasting RAM, usually you will want to use the same buffer used for all other communication routines (the one specified on <code><a class="el" href="group__megawifi.html#ga50526e0ea48208cd7ce658408e6777ab" title="Module initialization. Must be called once before using any other function. It also initializes de UA...">mw_init()</a></code> invocation for example). When an API call returns pointers to data received from server, they point directly to different regions of this buffer. This means that before reusing the buffer again (i.e. before doing any other MegaWiFi call), you must copy all the data you want to preserve, or it will vanish before your eyes.</li>
+<li>The maximum reply of the server you will be able to receive, is currently limited by the size of the buffer set on initialization. I would recommend using at least 2 KiB, because some calls can return a bunch of data (for example the <code><a class="el" href="group__gamejolt.html#gaecfbaa3e443ede9ed5c93e60aac484bf" title="Fetch player trophies.">gj_trophies_fetch()</a></code> and <code><a class="el" href="group__gamejolt.html#ga7fb81728bd93108cad4eb99f4459c756" title="Get user data.">gj_users_fetch()</a></code> if you get data for several users in a row). It is the developer work to make sure the data will fit in the buffer (otherwise the API call will fail). For example if you create a lot of trophies for your game, you have to set the buffer length accordingly. Pay very careful attention to this, or your game online functions might fail unexpectedly.</li>
+<li>The official API defines some input and output parameters as integers. But the implementation on the Megadrive uses the string representation of the integers for input parameters and output data. This has been done on purpose to avoid as much as possible conversions between strings and integers, that can be slow on the m68k side.</li>
+<li>As mentioned earlier, <code>Batch</code> command is not supported.</li>
+</ul>
+<p>Other than these, the API is full featured, and I'm sure you will be able to do really cool things with it!</p>
+<p>Here are some examples on using the API. Not all the supported features are shown, but for sure you will get an idea on how to use them. As mentioned earlier, do not forget to also check the <a href="https://gamejolt.com/game-api/doc">official API documentation</a>.</p>
+<h3>Initialization</h3>
+<p>To initialize the API, you have to pass the endpoint, the game and user credentials, the buffer and the timeout to use for requests. It is recommended to let user configure the credentials in the gamertag slots, and get them from there using <code><a class="el" href="group__megawifi.html#ga635b2e45820d9872badae382a7730153" title="Get gamertag information for one slot.">mw_gamertag_get()</a></code> before calling <code><a class="el" href="group__gamejolt.html#gaffb4d40b73036ae8db0cbd6e6effe6a1" title="Initialize the GameJolt API.">gj_init()</a></code>.</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__gamejolt.html#gaffb4d40b73036ae8db0cbd6e6effe6a1">gj_init</a>(<span class="stringliteral">&quot;https://api.gamejolt.com/api/game/v1_2/&quot;</span>, GJ_GAME_ID,</div>
+<div class="line">            GJ_PRIV_KEY, username, user_token,</div>
+<div class="line">            cmd_buf, MW_BUFLEN, <a class="code" href="group__loop.html#ga604f92993b6bdd4d21fedbc88b1293d3">MS_TO_FRAMES</a>(30000))) {</div>
+<div class="line">    <span class="comment">// Handle init error</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><p>Make sure you store the credentials in a safe place, specially the game private key.</p>
+<h3>Achieving a trophy</h3>
+<p>Trophies are added using in the GameJolt Web UI. Once added, to make the player achieve a trophy, just call <code><a class="el" href="group__gamejolt.html#gaeb99d3632a00bd5bfcf7669ae30fca05" title="Mark a trophy as achieved.">gj_trophy_add_achieved()</a></code> with the trophy id:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__gamejolt.html#gaeb99d3632a00bd5bfcf7669ae30fca05">gj_trophy_add_achieved</a>(<span class="stringliteral">&quot;121457&quot;</span>)) {</div>
+<div class="line">    <span class="comment">// Something went wrong, trophy not achieved!</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><h3>Getting game trophies</h3>
+<p>You can get all the available trophies, the ones achieved by the player, or a single one by id. Then you have to iterate on the returned data to get the trophy data one by one:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">char</span> *trophy_data;</div>
+<div class="line"><span class="keyword">struct </span><a class="code" href="structgj__trophy.html">gj_trophy</a> trophy;</div>
+<div class="line"> </div>
+<div class="line">trophy_data = <a class="code" href="group__gamejolt.html#gaecfbaa3e443ede9ed5c93e60aac484bf">gj_trophies_fetch</a>(<span class="keyword">false</span>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>);</div>
+<div class="line"><span class="keywordflow">if</span> (!trophy_data) {</div>
+<div class="line">    <span class="comment">// Treat error</span></div>
+<div class="line">    <span class="keywordflow">return</span>;</div>
+<div class="line">}</div>
+<div class="line"><span class="keywordflow">while</span> (trophy_data &amp;&amp; *trophy_data) {</div>
+<div class="line">    trophy_data = <a class="code" href="group__gamejolt.html#ga2470d73269e0912debaf32324380ef80">gj_trophy_get_next</a>(trophy_data, &amp;trophy);</div>
+<div class="line">    <span class="keywordflow">if</span> (!trophy_data) {</div>
+<div class="line">        <span class="comment">// Error formatting trophy</span></div>
+<div class="line">        <span class="keywordflow">return</span>;</div>
+<div class="line">    }</div>
+<div class="line">    beautifully_print_the_trophy(&amp;trophy);</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3>Posting a score</h3>
+<p>When posting scores, you can put them on the global game score table, or on any other additional table the developer has created for the game. You can also post them as the user, or as a guest (when allowed), and you must post both a textual representation of the score and a numeric sort value (but both can be the same). Also optionally, extra data can be added with the score:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__gamejolt.html#ga22304f57274d6c1e5808a36eb1ce17b4">gj_scores_add</a>(<span class="stringliteral">&quot;500 midi-chlorians&quot;</span>, <span class="stringliteral">&quot;500&quot;</span>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>)) {</div>
+<div class="line">    <span class="comment">// Error, score not added</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><h3>Getting scores</h3>
+<p>You can retrieve scores from the main game table, or from any other additional tables the developer has created (using the GameJolt Web UI). First you get the raw table data, and then you iterate on scores one by one. When requesting the data, there are also some options to filter the values you get, read the documentation if you need to use them:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">char</span> *score_data;</div>
+<div class="line"><span class="keyword">struct </span><a class="code" href="structgj__score.html">gj_score</a> score;</div>
+<div class="line"> </div>
+<div class="line">score_data = <a class="code" href="group__gamejolt.html#ga1f0d598de139a62c498a2809047f37b6">gj_scores_fetch</a>(<a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, <span class="keyword">false</span>);</div>
+<div class="line"><span class="keywordflow">if</span> (!score_data) {</div>
+<div class="line">    <span class="comment">// Error fetching data</span></div>
+<div class="line">    <span class="keywordflow">return</span>;</div>
+<div class="line">}</div>
+<div class="line"><span class="keywordflow">while</span> (score_data &amp;&amp; *score_data) {</div>
+<div class="line">    score_data = <a class="code" href="group__gamejolt.html#ga496d1692fc7830d239eb3e21921ca866">gj_score_get_next</a>(score_data, &amp;score);</div>
+<div class="line">    <span class="keywordflow">if</span> (!score_data) {</div>
+<div class="line">        <span class="comment">// Error formatting data</span></div>
+<div class="line">        <span class="keywordflow">return</span>;</div>
+<div class="line">    }</div>
+<div class="line">    beatifully_print_score(&amp;score);</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3>Updating sessions</h3>
+<p>Sessions allow to track who is playing the game and how much time. Basically you open a session, and have to periodically ping it. If you spend 120 seconds without pinging the session, it will be automatically closed, so the recommendation is to ping each 30 seconds.</p>
+<div class="fragment"><div class="line"><span class="comment">// Do this just once to open the session</span></div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__gamejolt.html#gae0b7309202224ee02d5215fa236fcbe1">gj_sessions_open</a>()) {</div>
+<div class="line">    <span class="comment">// Something went wrong, session not opened</span></div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// [...]</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Do this every 30 seconds approximately</span></div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__gamejolt.html#ga2c637c2bf48d697901bbfdc383f1a8e2">gj_sessions_ping</a>(<span class="keyword">true</span>)) {</div>
+<div class="line">    <span class="comment">// Something went wrong, ping failed</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><h3>Listing users and friends</h3>
+<p>You can list friends, and get detailed data of each user. To list friends, request the raw data, and then iterate on the results, one by one:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">char</span> *data, *friend_id;</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">if</span> (!(data = <a class="code" href="group__gamejolt.html#ga754a0374c0e8b2421aad306d81947204">gj_friends_fetch</a>())) {</div>
+<div class="line">    <span class="comment">// Failed to fetch friends data</span></div>
+<div class="line">    <span class="keywordflow">return</span>;</div>
+<div class="line">}</div>
+<div class="line"><span class="keywordflow">while</span> (data &amp;&amp; *data) {</div>
+<div class="line">    data = <a class="code" href="group__gamejolt.html#ga0ef1a17f3ef6ba495c74ab9ccb4eac83">gj_friend_get_next</a>(data, &amp;friend_id);</div>
+<div class="line">    <span class="keywordflow">if</span> (!data || !friend_id) {</div>
+<div class="line">        <span class="comment">// Failed to iterate on friends data</span></div>
+<div class="line">        <span class="keywordflow">return</span>;</div>
+<div class="line">    }</div>
+<div class="line">    use_friend_id_for_whatever(friend_id);</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>And you can get user data from username or user_id as follows:</p>
+<div class="fragment"><div class="line"><span class="keyword">struct </span><a class="code" href="structgj__user.html">gj_user</a> user;</div>
+<div class="line"><span class="keywordtype">char</span> *data;</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">if</span> (!(data = <a class="code" href="group__gamejolt.html#ga7fb81728bd93108cad4eb99f4459c756">gj_users_fetch</a>(<span class="stringliteral">&quot;doragasu&quot;</span>, <a class="code" href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>))) {</div>
+<div class="line">    <span class="comment">// Fetching user failed</span></div>
+<div class="line">    <span class="keywordflow">return</span>;</div>
+<div class="line">}</div>
+<div class="line"><span class="keywordflow">while</span> (data &amp;&amp; *data) {</div>
+<div class="line">    data = <a class="code" href="group__gamejolt.html#gad6e250924b4cde665d6545181658d24d">gj_user_get_next</a>(data, &amp;user);</div>
+<div class="line">    <span class="keywordflow">if</span> (!data) {</div>
+<div class="line">        <span class="comment">// Formatting user data failed</span></div>
+<div class="line">        <span class="keywordflow">return</span>;</div>
+<div class="line">    }</div>
+<div class="line">    print_user_data_with_great_fx(&amp;user);</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3>Storing and retrieving data from the cloud</h3>
+<p>You can upload data to retrieve it later. And you can even make the cloud perform basic operations on the uploaded data. This can have many uses, such as saving detailed statistics, implement cloud save game functions, make turn based multiplayer games, etc. The data can be stored on the global game store, or on the user store. An example to store data is as follows:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__gamejolt.html#gafa5891f16cecc8c691cfeb3177f25924">gj_data_store_set</a>(<span class="stringliteral">&quot;the_meaining_of_life&quot;</span>, <span class="stringliteral">&quot;41&quot;</span>, <span class="keyword">false</span>)) {</div>
+<div class="line">    <span class="comment">// Record on global game store failed</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><p>To update data and perform operations on it, you can for example:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (!<a class="code" href="group__gamejolt.html#ga46e2877615c23f279722a5af307d5443">gj_data_store_update</a>(<span class="stringliteral">&quot;the_meaning_of_life&quot;</span>, <a class="code" href="group__gamejolt.html#gga6205046bb80aa986f74041e3d1f90ff7a76b1c9986a21c73eb08f03c57f2cecae">GJ_OP_ADD</a>, <span class="stringliteral">&quot;1&quot;</span>, <span class="keyword">false</span>)) {</div>
+<div class="line">    <span class="comment">// Data store update failed</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><p>You can match keys to retrieve them using the wildcard character ('*'):</p>
+<div class="fragment"><div class="line"><span class="keywordtype">char</span> *data;</div>
+<div class="line"> </div>
+<div class="line">data = <a class="code" href="group__gamejolt.html#ga785396eb2982ac8de62d35cb464fd14d">data_store_fetch</a>(<span class="stringliteral">&quot;the_meaning_*&quot;</span>, <span class="keyword">false</span>);</div>
+<div class="line"><span class="keywordflow">if</span> (!data) {</div>
+<div class="line">    <span class="comment">// Error fetching data</span></div>
+<div class="line">    <span class="keywordflow">return</span>;</div>
+<div class="line">}</div>
+<div class="line">cloud_computed_meaning_of_life_is(data);</div>
+</div><!-- fragment --><h3>Getting error information</h3>
+<p>Most API functions return an error either via a bool value (error if true), or a data pointer (error if NULL). Internally the functions track the error with greater detail. If you want to know what caused the error, after a function fails, call <code><a class="el" href="group__gamejolt.html#ga45c1b7da8da6630820cbd4dd1e642d6a" title="Return the last error code.">gj_get_error()</a></code>. This will allow you to know if the error was caused because of a parameter error, a request error, a server error, etc. As the internally tracked error is updated after each GameJolt API call, you have to call this function just after the one that failed.</p>
 <h2>Test program</h2>
-<p>The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, connects to <code><a href="https://www.example.com">https://www.example.com</a></code> using both a TCP socket and an HTTPS request, displays the synchronized date/time, sends and receives using a client UDP socket, and echoes UDP data on port 7.</p>
+<p>The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, connects to <code><a href="https://www.example.com">https://www.example.com</a></code> using both a TCP socket and an HTTPS request, displays the synchronized date/time, sends and receives using a client UDP socket, and echoes UDP data on port 8007.</p>
 <h1>Author</h1>
 <p>This API and documentation has been written by Jesús Alonso (doragasu).</p>
 <h1>Contributions</h1>
 <p>Contributions are welcome. If you find a bug please open an issue, and if you have implemented a cool feature/improvement, please send a pull request.</p>
 <h1>License</h1>
-<p>This program is provided with NO WARRANTY, under the <a href="https://www.mozilla.org/en-US/MPL/">Mozilla Public License (MPL)</a>. </p>
+<p>The code and documentation in this repository is provided with NO WARRANTY, under the <a href="https://www.mozilla.org/en-US/MPL/">Mozilla Public License (MPL)</a>. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div class="ttc" id="agroup__megawifi_html_ga588168f2a7af5ec48b0ac0749f2c4587"><div class="ttname"><a href="group__megawifi.html#ga588168f2a7af5ec48b0ac0749f2c4587">mw_http_header_add</a></div><div class="ttdeci">enum mw_err mw_http_header_add(const char *key, const char *value)</div><div class="ttdoc">Add an HTTP header.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_gaeb99d3632a00bd5bfcf7669ae30fca05"><div class="ttname"><a href="group__gamejolt.html#gaeb99d3632a00bd5bfcf7669ae30fca05">gj_trophy_add_achieved</a></div><div class="ttdeci">bool gj_trophy_add_achieved(const char *trophy_id)</div><div class="ttdoc">Mark a trophy as achieved.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gad8a3660c1dda462ca37ac3cb1a61e347"><div class="ttname"><a href="group__megawifi.html#gad8a3660c1dda462ca37ac3cb1a61e347">mw_send_sync</a></div><div class="ttdeci">enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len, uint16_t tout_frames)</div><div class="ttdoc">Sends data through a socket, using a previously allocated channel. Synchronous interface.</div></div>
 <div class="ttc" id="agroup__loop_html_ga6d6f6f4f4f9ac838b05f02517098f414"><div class="ttname"><a href="group__loop.html#ga6d6f6f4f4f9ac838b05f02517098f414">loop_timer_add</a></div><div class="ttdeci">int loop_timer_add(struct loop_timer *timer)</div><div class="ttdoc">Add a timer to the loop.</div></div>
 <div class="ttc" id="aunionmw__msg__sys__stat_html"><div class="ttname"><a href="unionmw__msg__sys__stat.html">mw_msg_sys_stat</a></div><div class="ttdoc">System status.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00272">mw-msg.h:272</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga4d2998fcca3b6cae16f090b902327904"><div class="ttname"><a href="group__megawifi.html#ga4d2998fcca3b6cae16f090b902327904">mw_http_cert_set</a></div><div class="ttdeci">enum mw_err mw_http_cert_set(uint32_t cert_hash, const char *cert, uint16_t cert_len)</div><div class="ttdoc">Set the PEM certificate to use on HTTPS requests.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga44e2e02e52dc70019bd6b13a16386e9f"><div class="ttname"><a href="group__megawifi.html#ga44e2e02e52dc70019bd6b13a16386e9f">MW_HTTP_CH</a></div><div class="ttdeci">#define MW_HTTP_CH</div><div class="ttdoc">Channel used for HTTP requests and cert sets.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00103">megawifi.h:102</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga9ab26dbe9fc804915a4f8b5db4e194ed"><div class="ttname"><a href="group__megawifi.html#ga9ab26dbe9fc804915a4f8b5db4e194ed">mw_gamertag_set</a></div><div class="ttdeci">enum mw_err mw_gamertag_set(uint8_t slot, const struct mw_gamertag *gamertag)</div><div class="ttdoc">Set gamertag information for one slot.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga7fb81728bd93108cad4eb99f4459c756"><div class="ttname"><a href="group__gamejolt.html#ga7fb81728bd93108cad4eb99f4459c756">gj_users_fetch</a></div><div class="ttdeci">char * gj_users_fetch(const char *username, const char *user_id)</div><div class="ttdoc">Get user data.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga2a3299d2d6e2480b714ba880024ab59e"><div class="ttname"><a href="group__megawifi.html#ga2a3299d2d6e2480b714ba880024ab59e">mw_ap_assoc</a></div><div class="ttdeci">enum mw_err mw_ap_assoc(uint8_t slot)</div><div class="ttdoc">Tries associating to an AP. If successful, also configures IPv4.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga5c6bfb81f8fe1c6c6a294f36765b3936"><div class="ttname"><a href="group__megawifi.html#ga5c6bfb81f8fe1c6c6a294f36765b3936">mw_http_method_set</a></div><div class="ttdeci">enum mw_err mw_http_method_set(enum mw_http_method method)</div><div class="ttdoc">Set method for HTTP requests.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_gaffb4d40b73036ae8db0cbd6e6effe6a1"><div class="ttname"><a href="group__gamejolt.html#gaffb4d40b73036ae8db0cbd6e6effe6a1">gj_init</a></div><div class="ttdeci">bool gj_init(const char *endpoint, const char *game_id, const char *private_key, const char *username, const char *user_token, char *reply_buf, uint16_t buf_len, uint16_t tout_frames)</div><div class="ttdoc">Initialize the GameJolt API.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_gae0b7309202224ee02d5215fa236fcbe1"><div class="ttname"><a href="group__gamejolt.html#gae0b7309202224ee02d5215fa236fcbe1">gj_sessions_open</a></div><div class="ttdeci">bool gj_sessions_open(void)</div><div class="ttdoc">Open a game session for the player.</div></div>
 <div class="ttc" id="agroup__util_html_ga070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="group__util.html#ga070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdoc">NULL Pointer.</div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00030">util.h:29</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga9eb5082f2dc47b0c802ba6dc233ada4e"><div class="ttname"><a href="group__megawifi.html#ga9eb5082f2dc47b0c802ba6dc233ada4e">mw_date_time_get</a></div><div class="ttdeci">char * mw_date_time_get(uint32_t dt_bin[2])</div><div class="ttdoc">Get date and time.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gab99864c90151e2bffe5d685cd6e1b241"><div class="ttname"><a href="group__megawifi.html#gab99864c90151e2bffe5d685cd6e1b241">mw_send</a></div><div class="ttdeci">static enum lsd_status mw_send(uint8_t ch, const char *data, int16_t len, void *ctx, lsd_send_cb send_cb)</div><div class="ttdoc">Sends data through a socket, using a previously allocated channel. Asynchronous interface.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00375">megawifi.h:518</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga496d1692fc7830d239eb3e21921ca866"><div class="ttname"><a href="group__gamejolt.html#ga496d1692fc7830d239eb3e21921ca866">gj_score_get_next</a></div><div class="ttdeci">char * gj_score_get_next(char *pos, struct gj_score *score)</div><div class="ttdoc">Decode the score raw data for the next entry.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_gafa5891f16cecc8c691cfeb3177f25924"><div class="ttname"><a href="group__gamejolt.html#gafa5891f16cecc8c691cfeb3177f25924">gj_data_store_set</a></div><div class="ttdeci">bool gj_data_store_set(const char *key, const char *data, bool user_store)</div><div class="ttdoc">Sets a key/value pair in the data store.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga6ddfe7a25cc8615e4f8de5fe00f7c3f8"><div class="ttname"><a href="group__megawifi.html#ga6ddfe7a25cc8615e4f8de5fe00f7c3f8">mw_process</a></div><div class="ttdeci">static void mw_process(void)</div><div class="ttdoc">Processes sends/receives pending data.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00144">megawifi.h:144</a></div></div>
 <div class="ttc" id="amegawifi_8h_html"><div class="ttname"><a href="megawifi_8h.html">megawifi.h</a></div><div class="ttdoc">MegaWiFi API implementation.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gaef95cf26f3656a8ac958475c618569b0"><div class="ttname"><a href="group__megawifi.html#gaef95cf26f3656a8ac958475c618569b0">mw_sys_stat_get</a></div><div class="ttdeci">union mw_msg_sys_stat * mw_sys_stat_get(void)</div><div class="ttdoc">Get system status.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga582e7d40df5994a7c11b24ace5bbe881"><div class="ttname"><a href="group__megawifi.html#ga582e7d40df5994a7c11b24ace5bbe881">mw_detect</a></div><div class="ttdeci">enum mw_err mw_detect(uint8_t *major, uint8_t *minor, char **variant)</div><div class="ttdoc">Performs the startup sequence for the WiFi module, and tries detecting it by requesting the version d...</div></div>
 <div class="ttc" id="agroup__util_html_ga6c7ba74ad57863d1342878d2c703e660"><div class="ttname"><a href="group__util.html#ga6c7ba74ad57863d1342878d2c703e660">UNUSED_PARAM</a></div><div class="ttdeci">#define UNUSED_PARAM(x)</div><div class="ttdoc">Remove compiler warnings when not using a function parameter.</div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00066">util.h:65</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga1f0d598de139a62c498a2809047f37b6"><div class="ttname"><a href="group__gamejolt.html#ga1f0d598de139a62c498a2809047f37b6">gj_scores_fetch</a></div><div class="ttdeci">char * gj_scores_fetch(const char *limit, const char *table_id, const char *guest, const char *better_than, const char *worse_than, bool only_user)</div><div class="ttdoc">Fetch scores data.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gabcab943ad7996de14e41a669a369d2b6"><div class="ttname"><a href="group__megawifi.html#gabcab943ad7996de14e41a669a369d2b6">mw_bssid_get</a></div><div class="ttdeci">uint8_t * mw_bssid_get(enum mw_if_type interface_type)</div><div class="ttdoc">Gets the module BSSID (the MAC address) for the specified interface.</div></div>
 <div class="ttc" id="astructmw__gamertag_html_aef2019230d62535a3035a02853790e0d"><div class="ttname"><a href="structmw__gamertag.html#aef2019230d62535a3035a02853790e0d">mw_gamertag::tagline</a></div><div class="ttdeci">char tagline[MW_GT_TAGLINE_MAX]</div><div class="ttdoc">User defined text tag.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00236">mw-msg.h:236</a></div></div>
 <div class="ttc" id="astructloop__timer_html_a49d20719ecda1051ce798021bd1d5c12"><div class="ttname"><a href="structloop__timer.html#a49d20719ecda1051ce798021bd1d5c12">loop_timer::timer_cb</a></div><div class="ttdeci">loop_timer_cb timer_cb</div><div class="ttdoc">Timer callback function.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00060">loop.h:60</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga22304f57274d6c1e5808a36eb1ce17b4"><div class="ttname"><a href="group__gamejolt.html#ga22304f57274d6c1e5808a36eb1ce17b4">gj_scores_add</a></div><div class="ttdeci">bool gj_scores_add(const char *score, const char *sort, const char *table_id, const char *guest, const char *extra_data)</div><div class="ttdoc">Add a score to a scoreboard.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga79ec1a09ac1748e40b4adfdaf6194ed8"><div class="ttname"><a href="group__megawifi.html#ga79ec1a09ac1748e40b4adfdaf6194ed8">mw_http_open</a></div><div class="ttdeci">enum mw_err mw_http_open(uint32_t content_len)</div><div class="ttdoc">Open HTTP connection.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ga8eae5109b67bbc7d238fc17e9ad02ee7"><div class="ttname"><a href="group__megawifi.html#ga8eae5109b67bbc7d238fc17e9ad02ee7">mw_recv_sync</a></div><div class="ttdeci">enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len, uint16_t tout_frames)</div><div class="ttdoc">Receive data, syncrhonous interface.</div></div>
 <div class="ttc" id="aunionmw__msg__sys__stat_html_a1e0225d35341fd30ae96f0c799233df4"><div class="ttname"><a href="unionmw__msg__sys__stat.html#a1e0225d35341fd30ae96f0c799233df4">mw_msg_sys_stat::sys_stat</a></div><div class="ttdeci">enum mw_state sys_stat</div><div class="ttdoc">System status.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00273">mw-msg.h:276</a></div></div>
@@ -703,6 +862,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="ttc" id="astructmw__gamertag_html_ab0931be9019b21951e3fe40f86d52243"><div class="ttname"><a href="structmw__gamertag.html#ab0931be9019b21951e3fe40f86d52243">mw_gamertag::security</a></div><div class="ttdeci">char security[MW_GT_SECURITY_MAX]</div><div class="ttdoc">User security string.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00234">mw-msg.h:234</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ggaa4508878ae9a945610bbe5109a2ac233a68abd299b9e0c5094cca464d26f1436a"><div class="ttname"><a href="group__megawifi.html#ggaa4508878ae9a945610bbe5109a2ac233a68abd299b9e0c5094cca464d26f1436a">MW_HTTP_METHOD_POST</a></div><div class="ttdeci">@ MW_HTTP_METHOD_POST</div><div class="ttdoc">HTTP POST Method.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00064">megawifi.h:64</a></div></div>
 <div class="ttc" id="astructmw__gamertag_html_ad126e84a77ac1dc74d03b94d1c3f402c"><div class="ttname"><a href="structmw__gamertag.html#ad126e84a77ac1dc74d03b94d1c3f402c">mw_gamertag::nickname</a></div><div class="ttdeci">char nickname[MW_GT_NICKNAME_MAX]</div><div class="ttdoc">User nickname.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00232">mw-msg.h:232</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga754a0374c0e8b2421aad306d81947204"><div class="ttname"><a href="group__gamejolt.html#ga754a0374c0e8b2421aad306d81947204">gj_friends_fetch</a></div><div class="ttdeci">char * gj_friends_fetch(void)</div><div class="ttdoc">Get friends list.</div></div>
 <div class="ttc" id="agroup__mpool_html_gae1b6b14b314e5aedcb6dadcc889c4cec"><div class="ttname"><a href="group__mpool.html#gae1b6b14b314e5aedcb6dadcc889c4cec">mp_init</a></div><div class="ttdeci">void mp_init(int force_init)</div><div class="ttdoc">Pool initialization.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gaaf6aaaa928b6085b6ecf7012e2c6aa1b"><div class="ttname"><a href="group__megawifi.html#gaaf6aaaa928b6085b6ecf7012e2c6aa1b">mw_tcp_connect</a></div><div class="ttdeci">enum mw_err mw_tcp_connect(uint8_t ch, const char *dst_addr, const char *dst_port, const char *src_port)</div><div class="ttdoc">Tries establishing a TCP connection with specified server.</div></div>
 <div class="ttc" id="agroup__loop_html_ga604f92993b6bdd4d21fedbc88b1293d3"><div class="ttname"><a href="group__loop.html#ga604f92993b6bdd4d21fedbc88b1293d3">MS_TO_FRAMES</a></div><div class="ttdeci">#define MS_TO_FRAMES(ms)</div><div class="ttdoc">Converts milliseconds to frames, rounding to the nearest.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00035">loop.h:34</a></div></div>
@@ -715,19 +875,30 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="ttc" id="agroup__megawifi_html_ga777c2b3caa535d405278734b0f5aad2e"><div class="ttname"><a href="group__megawifi.html#ga777c2b3caa535d405278734b0f5aad2e">mw_err</a></div><div class="ttdeci">mw_err</div><div class="ttdoc">Error codes for MegaWiFi API functions.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00051">megawifi.h:51</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga8227c5ef923c4eee7f978ccf80cff9af"><div class="ttname"><a href="group__megawifi.html#ga8227c5ef923c4eee7f978ccf80cff9af">mw_recv</a></div><div class="ttdeci">static enum lsd_status mw_recv(char *buf, int16_t len, void *ctx, lsd_recv_cb recv_cb)</div><div class="ttdoc">Receive data, asyncrhonous interface.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00375">megawifi.h:458</a></div></div>
 <div class="ttc" id="ampool_8h_html"><div class="ttname"><a href="mpool_8h.html">mpool.h</a></div><div class="ttdoc">Memory Pool.</div></div>
+<div class="ttc" id="astructgj__user_html"><div class="ttname"><a href="structgj__user.html">gj_user</a></div><div class="ttdoc">Holds user data.</div><div class="ttdef"><b>Definition:</b> <a href="gamejolt_8h_source.html#l00143">gamejolt.h:143</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga785396eb2982ac8de62d35cb464fd14d"><div class="ttname"><a href="group__gamejolt.html#ga785396eb2982ac8de62d35cb464fd14d">data_store_fetch</a></div><div class="ttdeci">char * data_store_fetch(const char *key, bool user_store)</div><div class="ttdoc">Retrieve data from the data store.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_gad6e250924b4cde665d6545181658d24d"><div class="ttname"><a href="group__gamejolt.html#gad6e250924b4cde665d6545181658d24d">gj_user_get_next</a></div><div class="ttdeci">char * gj_user_get_next(char *pos, struct gj_user *user)</div><div class="ttdoc">Decode the user raw data for the next entry.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ggaa4508878ae9a945610bbe5109a2ac233a155303c76672f6a53899b78394ab361a"><div class="ttname"><a href="group__megawifi.html#ggaa4508878ae9a945610bbe5109a2ac233a155303c76672f6a53899b78394ab361a">MW_HTTP_METHOD_GET</a></div><div class="ttdeci">@ MW_HTTP_METHOD_GET</div><div class="ttdoc">HTTP GET Method.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00063">megawifi.h:63</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga2c637c2bf48d697901bbfdc383f1a8e2"><div class="ttname"><a href="group__gamejolt.html#ga2c637c2bf48d697901bbfdc383f1a8e2">gj_sessions_ping</a></div><div class="ttdeci">bool gj_sessions_ping(bool active)</div><div class="ttdoc">Ping a session, and allow setting it as active or idle.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga0ef1a17f3ef6ba495c74ab9ccb4eac83"><div class="ttname"><a href="group__gamejolt.html#ga0ef1a17f3ef6ba495c74ab9ccb4eac83">gj_friend_get_next</a></div><div class="ttdeci">char * gj_friend_get_next(char *pos, char **user_id)</div><div class="ttdoc">Decode the friend raw data for the next entry.</div></div>
 <div class="ttc" id="agroup__loop_html_ga4c3a8dbc5064a8e7d9baffbe604216f1"><div class="ttname"><a href="group__loop.html#ga4c3a8dbc5064a8e7d9baffbe604216f1">loop</a></div><div class="ttdeci">int loop(void)</div><div class="ttdoc">Loop function.</div></div>
 <div class="ttc" id="agroup__mpool_html_ga6cd611d9987a2d9dacfdf2b0dce737ad"><div class="ttname"><a href="group__mpool.html#ga6cd611d9987a2d9dacfdf2b0dce737ad">mp_alloc</a></div><div class="ttdeci">void * mp_alloc(uint16_t length) __attribute__((malloc))</div><div class="ttdoc">Allocates data from the pool.</div></div>
 <div class="ttc" id="astructloop__timer_html"><div class="ttname"><a href="structloop__timer.html">loop_timer</a></div><div class="ttdoc">Loop timer data structure.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00059">loop.h:59</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga46e2877615c23f279722a5af307d5443"><div class="ttname"><a href="group__gamejolt.html#ga46e2877615c23f279722a5af307d5443">gj_data_store_update</a></div><div class="ttdeci">char * gj_data_store_update(const char *key, enum gj_data_store_update_operation operation, const char *value, bool user_store)</div><div class="ttdoc">Update data in the data store.</div></div>
 <div class="ttc" id="agroup__megawifi_html_ggaa395ab95fb1639b3faea74217972dda9a913ca58caf0372816e9499fa366f1ebb"><div class="ttname"><a href="group__megawifi.html#ggaa395ab95fb1639b3faea74217972dda9a913ca58caf0372816e9499fa366f1ebb">MW_IF_STATION</a></div><div class="ttdeci">@ MW_IF_STATION</div><div class="ttdoc">Station interface.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00120">megawifi.h:120</a></div></div>
 <div class="ttc" id="astructloop__func_html_a53af751bd25418cdb0791f0068959844"><div class="ttname"><a href="structloop__func.html#a53af751bd25418cdb0791f0068959844">loop_func::func_cb</a></div><div class="ttdeci">loop_func_cb func_cb</div><div class="ttdoc">Function callback to run on the loop.</div><div class="ttdef"><b>Definition:</b> <a href="loop_8h_source.html#l00044">loop.h:44</a></div></div>
+<div class="ttc" id="astructgj__score_html"><div class="ttname"><a href="structgj__score.html">gj_score</a></div><div class="ttdoc">Holds data of a single score.</div><div class="ttdef"><b>Definition:</b> <a href="gamejolt_8h_source.html#l00133">gamejolt.h:133</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_ga2470d73269e0912debaf32324380ef80"><div class="ttname"><a href="group__gamejolt.html#ga2470d73269e0912debaf32324380ef80">gj_trophy_get_next</a></div><div class="ttdeci">char * gj_trophy_get_next(char *pos, struct gj_trophy *trophy)</div><div class="ttdoc">Decode the trophy raw data for the next entry.</div></div>
 <div class="ttc" id="aloop_8h_html"><div class="ttname"><a href="loop_8h.html">loop.h</a></div><div class="ttdoc">Loop handling for single threaded Megadrive programs.</div></div>
+<div class="ttc" id="astructgj__trophy_html"><div class="ttname"><a href="structgj__trophy.html">gj_trophy</a></div><div class="ttdoc">Holds the data of a single trophy.</div><div class="ttdef"><b>Definition:</b> <a href="gamejolt_8h_source.html#l00122">gamejolt.h:122</a></div></div>
+<div class="ttc" id="agroup__gamejolt_html_gaecfbaa3e443ede9ed5c93e60aac484bf"><div class="ttname"><a href="group__gamejolt.html#gaecfbaa3e443ede9ed5c93e60aac484bf">gj_trophies_fetch</a></div><div class="ttdeci">char * gj_trophies_fetch(bool achieved, const char *trophy_id)</div><div class="ttdoc">Fetch player trophies.</div></div>
 <div class="ttc" id="agroup__loop_html_ga063359b6f53ca8e491c41807cd4d5760"><div class="ttname"><a href="group__loop.html#ga063359b6f53ca8e491c41807cd4d5760">loop_func_add</a></div><div class="ttdeci">int loop_func_add(struct loop_func *func)</div><div class="ttdoc">Add a function to the loop.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gaa4508878ae9a945610bbe5109a2ac233"><div class="ttname"><a href="group__megawifi.html#gaa4508878ae9a945610bbe5109a2ac233">mw_http_method</a></div><div class="ttdeci">mw_http_method</div><div class="ttdoc">Supported HTTP methods.</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00062">megawifi.h:62</a></div></div>
 <div class="ttc" id="agroup__util_html_gaa8cecfc5c5c054d2875c03e77b7be15d"><div class="ttname"><a href="group__util.html#gaa8cecfc5c5c054d2875c03e77b7be15d">TRUE</a></div><div class="ttdeci">#define TRUE</div><div class="ttdoc">TRUE value for boolean comparisons.</div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00021">util.h:20</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga635b2e45820d9872badae382a7730153"><div class="ttname"><a href="group__megawifi.html#ga635b2e45820d9872badae382a7730153">mw_gamertag_get</a></div><div class="ttdeci">struct mw_gamertag * mw_gamertag_get(uint8_t slot)</div><div class="ttdoc">Get gamertag information for one slot.</div></div>
 <div class="ttc" id="astructmw__gamertag_html_a4d1622737aa1ef49b5cda6c93e3d1036"><div class="ttname"><a href="structmw__gamertag.html#a4d1622737aa1ef49b5cda6c93e3d1036">mw_gamertag::id</a></div><div class="ttdeci">int id</div><div class="ttdoc">Unique gamertag id.</div><div class="ttdef"><b>Definition:</b> <a href="mw-msg_8h_source.html#l00230">mw-msg.h:230</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga027dd5a50045b0d5d33b5fd6d124df2d"><div class="ttname"><a href="group__megawifi.html#ga027dd5a50045b0d5d33b5fd6d124df2d">mw_http_finish</a></div><div class="ttdeci">int mw_http_finish(uint32_t *content_len, int tout_frames)</div><div class="ttdoc">Finish an opened HTTP request.</div></div>
+<div class="ttc" id="agroup__gamejolt_html_gga6205046bb80aa986f74041e3d1f90ff7a76b1c9986a21c73eb08f03c57f2cecae"><div class="ttname"><a href="group__gamejolt.html#gga6205046bb80aa986f74041e3d1f90ff7a76b1c9986a21c73eb08f03c57f2cecae">GJ_OP_ADD</a></div><div class="ttdeci">@ GJ_OP_ADD</div><div class="ttdoc">Adds the value to item.</div><div class="ttdef"><b>Definition:</b> <a href="gamejolt_8h_source.html#l00052">gamejolt.h:52</a></div></div>
 <div class="ttc" id="agroup__megawifi_html_ga82f774de9f50b730de578cb0e7512d16"><div class="ttname"><a href="group__megawifi.html#ga82f774de9f50b730de578cb0e7512d16">mw_tcp_bind</a></div><div class="ttdeci">enum mw_err mw_tcp_bind(uint8_t ch, uint16_t port)</div><div class="ttdoc">Binds a socket to a port, and listens to connections on the port. If a connection request is received...</div></div>
 <div class="ttc" id="autil_8h_html"><div class="ttname"><a href="util_8h.html">util.h</a></div><div class="ttdoc">General purpose utilities.</div></div>
 <div class="ttc" id="agroup__megawifi_html_gga777c2b3caa535d405278734b0f5aad2ea469b336990144c39297268eca750af7f"><div class="ttname"><a href="group__megawifi.html#gga777c2b3caa535d405278734b0f5aad2ea469b336990144c39297268eca750af7f">MW_ERR_NONE</a></div><div class="ttdeci">@ MW_ERR_NONE</div><div class="ttdoc">No error (success)</div><div class="ttdef"><b>Definition:</b> <a href="megawifi_8h_source.html#l00052">megawifi.h:52</a></div></div>
