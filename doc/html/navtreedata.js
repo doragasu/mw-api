@@ -55,8 +55,8 @@ var NAVTREEINDEX =
 [
 "annotated.html",
 "group__megawifi.html#ga41b4ad2e5ecf91a669f662b9f0cebbd3",
-"group__mw__ctrl__pins.html#ga80e0f5c9f48d726abca6673dafbf5ee6",
-"structmw__msg__ap__cfg.html#a429a403ad2e4ecff4d1eee06b263261c"
+"group__mw-msg.html#ggaf53835e2cd96d02aac928c20a6e99547ae877de540a2dae15b55f3eff93666ef4",
+"structmw__ip__cfg.html#a8a7efb4327022c5c818cf11b60cc97ce"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -4,6 +4,8 @@ var megawifi_8h =
     [ "MW__PD", "group__mw__ctrl__pins.html#ga336f8aaec2bfb75c0b9522cdc6dac11d", null ],
     [ "MW__PRG", "group__mw__ctrl__pins.html#gae57fcd38daf57863f2416880ff80153a", null ],
     [ "MW__RESET", "group__mw__ctrl__pins.html#ga80e0f5c9f48d726abca6673dafbf5ee6", null ],
+    [ "MW_API_VERSION_MAJOR", "group__megawifi.html#gaf5dc50c66b9a52166390a302ad4a3ed2", null ],
+    [ "MW_API_VERSION_MINOR", "group__megawifi.html#gacdb7a598fbf73af25065cf32008b9920", null ],
     [ "MW_ASSOC_TOUT_MS", "group__megawifi.html#ga431b9876483f11e3e9d927387d469e4b", null ],
     [ "MW_CMD_MIN_BUFLEN", "group__megawifi.html#gaa2a1c8956ba89554e008d7e877104073", null ],
     [ "MW_COMMAND_TOUT_MS", "group__megawifi.html#ga5b438a27322e5ed73224254e1d0d1489", null ],

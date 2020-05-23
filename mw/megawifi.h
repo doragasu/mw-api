@@ -32,6 +32,12 @@
 #include "mw-msg.h"
 #include "lsd.h"
 
+/// API version implemented, major number
+#define MW_API_VERSION_MAJOR	1
+
+/// API version implemented, minor number
+#define MW_API_VERSION_MINOR	4
+
 /// Timeout for standard commands in milliseconds
 #define MW_COMMAND_TOUT_MS	1000
 /// Timeout for TCP connections

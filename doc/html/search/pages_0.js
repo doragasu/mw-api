@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['megawifi_20api_866',['MegaWiFi API',['../index.html',1,'']]]
+  ['megawifi_20api_868',['MegaWiFi API',['../index.html',1,'']]]
 ];
