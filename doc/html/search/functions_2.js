@@ -15,7 +15,7 @@ var searchData=
   ['gj_5fscores_5fadd_514',['gj_scores_add',['../group__gamejolt.html#ga22304f57274d6c1e5808a36eb1ce17b4',1,'gamejolt.h']]],
   ['gj_5fscores_5ffetch_515',['gj_scores_fetch',['../group__gamejolt.html#ga1f0d598de139a62c498a2809047f37b6',1,'gamejolt.h']]],
   ['gj_5fscores_5fget_5frank_516',['gj_scores_get_rank',['../group__gamejolt.html#ga6b3af8b510e77c9f453b05a1112d3493',1,'gamejolt.h']]],
-  ['gj_5fscores_5ftables_517',['gj_scores_tables',['../group__gamejolt.html#ga4600e57a95ac2cdc93cb9aac15ce7097',1,'gamejolt.h']]],
+  ['gj_5fscores_5ftables_5ffetch_517',['gj_scores_tables_fetch',['../group__gamejolt.html#ga62b91cbbc486c5565bb80716f248bf26',1,'gamejolt.h']]],
   ['gj_5fsessions_5fcheck_518',['gj_sessions_check',['../group__gamejolt.html#ga2e3f2fbe9c925dde7cbfb114cc4a86dd',1,'gamejolt.h']]],
   ['gj_5fsessions_5fclose_519',['gj_sessions_close',['../group__gamejolt.html#gaf1deed8e947f4a17a3bf63e1d6643c42',1,'gamejolt.h']]],
   ['gj_5fsessions_5fopen_520',['gj_sessions_open',['../group__gamejolt.html#gae0b7309202224ee02d5215fa236fcbe1',1,'gamejolt.h']]],

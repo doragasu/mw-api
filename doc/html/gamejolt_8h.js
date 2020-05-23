@@ -47,7 +47,7 @@ var gamejolt_8h =
     [ "gj_scores_add", "group__gamejolt.html#ga22304f57274d6c1e5808a36eb1ce17b4", null ],
     [ "gj_scores_fetch", "group__gamejolt.html#ga1f0d598de139a62c498a2809047f37b6", null ],
     [ "gj_scores_get_rank", "group__gamejolt.html#ga6b3af8b510e77c9f453b05a1112d3493", null ],
-    [ "gj_scores_tables", "group__gamejolt.html#ga4600e57a95ac2cdc93cb9aac15ce7097", null ],
+    [ "gj_scores_tables_fetch", "group__gamejolt.html#ga62b91cbbc486c5565bb80716f248bf26", null ],
     [ "gj_sessions_check", "group__gamejolt.html#ga2e3f2fbe9c925dde7cbfb114cc4a86dd", null ],
     [ "gj_sessions_close", "group__gamejolt.html#gaf1deed8e947f4a17a3bf63e1d6643c42", null ],
     [ "gj_sessions_open", "group__gamejolt.html#gae0b7309202224ee02d5215fa236fcbe1", null ],

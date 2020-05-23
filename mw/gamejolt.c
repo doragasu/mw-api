@@ -424,7 +424,7 @@ char *gj_score_get_next(char *pos, struct gj_score *output)
 	return pos;
 }
 
-char *gj_scores_tables(void)
+char *gj_scores_tables_fetch(void)
 {
 	const char *path[2] = {"scores", "tables"};
 	uint32_t reply_len;

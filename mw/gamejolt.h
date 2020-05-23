@@ -25,7 +25,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/// Module error codes. On success value is 0. On error all values are
+/// \brief Module error codes.
+/// 
+/// On success value is 0. On error all values are
 /// negative, with the exception of the HTTP status error. In this case,
 /// the value reported is the HTTP status code obtained (e.g. 500).
 enum gj_error {
@@ -37,8 +39,7 @@ enum gj_error {
 	GJ_ERR_PARSE     = -5	///< Error while parsing response data
 };
 
-/// Error codes, to use with gj_get_err
-/// Difficulty to achieve the trophy
+/// \brief Difficulty to achieve the trophy
 enum gj_trophy_difficulty {
 	GJ_TROPHY_TYPE_BRONZE = 0,	///< Bronze trophy (easiest)
 	GJ_TROPHY_TYPE_SILVER,		///< Silver trophy (medium)
@@ -47,7 +48,7 @@ enum gj_trophy_difficulty {
 	GJ_TROPHY_TYPE_UNKNOWN		///< Unknown, just for errors
 };
 
-/// Operations supported by gj_data_store_update() function
+/// \brief Operations supported by gj_data_store_update() function
 enum gj_data_store_update_operation {
 	GJ_OP_ADD = 0,	///< Adds the value to item
 	GJ_OP_SUBTRACT,	///< Subtracs the value from item
@@ -163,9 +164,9 @@ struct gj_user {
  *
  * \return false on success, true on error.
  *
- * \note reply_buf length determines the maximum length of the reply to a
+ * \warning reply_buf length determines the maximum length of the reply to a
  * command. If buffer length is small, API will not be able to receive
- * long responses such as trophy lists or long friend lists.
+ * long responses such as trophy lists or long user lists.
  ****************************************************************************/
 bool gj_init(const char *endpoint, const char *game_id, const char *private_key,
 		const char *username, const char *user_token, char *reply_buf,
@@ -254,7 +255,7 @@ bool gj_time(struct gj_time *time);
  * \param[in] guest       Set if you want to get score only from guest player.
  * \param[in] better_than Get only scores better than this sort value.
  * \param[in] worse_than  Get only scores worse than this sort value.
- * \param[in] only_user   Set to true if you want to get the user scores.
+ * \param[in] only_user   Set to true if you want to get only the user scores.
  *
  * \return Raw scores data on success, or NULL on failure.
  * Use gj_score_get_next() to decode the raw score data.
@@ -272,9 +273,9 @@ char *gj_scores_fetch(const char *limit, const char *table_id,
  * successive calls, set pos to the last non-NULL returned value of this
  * function.
  *
- * \param[inout] pos   Position of the trophy to extract. Note that input
+ * \param[inout] pos   Position of the score to extract. Note that input
  *               raw data is modified to add null terminations for fields
- * \param[out]   score Decoded trophy data.
+ * \param[out]   score Decoded score data.
  *
  * \return Position of the next score to decode (to be used on next call
  * to this function), or NULL if the current score could not be decoded.
@@ -287,7 +288,7 @@ char *gj_score_get_next(char *pos, struct gj_score *score);
  * \return Raw score tables data on success, or NULL on failure.
  * Use gj_score_table_get_next() to decode the raw score table data.
  ****************************************************************************/
-char *gj_scores_tables(void);
+char *gj_scores_tables_fetch(void);
 
 /************************************************************************//**
  * \brief Decode the score tables raw data for the next entry.
@@ -346,7 +347,8 @@ bool gj_data_store_set(const char *key, const char *data, bool user_store);
  *
  * \param[in] pattern    Optional. If set, match returned keys with pattern.
  * \param[in] user_store When true, data is retrieved from user storage.
- *                       Otherwise it will be saved in the game global store.
+ *                       Otherwise it will be retrieved from the game global
+ *                       store.
  *
  * \return Raw keys on success, or NULL on failure. Use
  * gj_data_store_key_next() to decode the raw key data.
@@ -364,7 +366,7 @@ char *gj_data_store_keys_fetch(const char *pattern, bool user_store);
  *                   is modified to add null terminations.
  * \param[out]   key Decoded key data.
  *
- * \return Position of the next score to decode (to be used on next call
+ * \return Position of the next key to decode (to be used on next call
  * to this function), or NULL if the current key could not be decoded.
  ****************************************************************************/
 char *gj_data_store_key_next(char *pos, char **key);
@@ -374,7 +376,8 @@ char *gj_data_store_key_next(char *pos, char **key);
  *
  * \param[in] key        Key to use for data retrieval.
  * \param[in] user_store When true, data is retrieved from user storage.
- *                       Otherwise it will be saved in the game global store.
+ *                       Otherwise it will be retrieved from the game global
+ *                       store.
  *
  * \return Data associated with requested key, or NULL on failure.
  ****************************************************************************/
@@ -526,8 +529,7 @@ char *gj_friend_get_next(char *pos, char **user_id);
  * \param[in]  num_kv_pairs Number of elements in key and value arrays.
  * \param[out] out_len      Length of the received reply to request.
  *
- * \return The string corresponding to the specified difficulty. If the input
- * value of difficulty is out of range, "Unknown" string will be returned.
+ * \return The raw reply data to the request, or NULL on error.
  ****************************************************************************/
 char *gj_request(const char **path, uint8_t num_paths, const char **key,
 		const char **value, uint8_t num_kv_pairs, uint32_t *out_len);
