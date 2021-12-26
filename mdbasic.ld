@@ -1,67 +1,65 @@
-/* Linker script for the wflash bootloader.
+/*
+ * Simple linker script for the tasking examples. Grabbed and modified from
+ * MegaWiFi repositories, that was grabbed I do not remember from where
+ * (maybe from SGDK?).
  *
- * The bootloader has a 512 byte header on top of the cartridge (vectors +
- * cartridge header) and a boot sector at the bottom of the 32 Mbit
- * ROM. All the space inbetween is unused.
- *
- * Some code and read-only data from flash module must be copied to RAM
- * to run from there. This is required because these functions handle flash
- * erase and program routines. And while these routines are in progress, the
- * CPU cannot read code/data from ROM/Flash.
- *
- * The flash sector at RAM is placed at the end of the .bss section. The
- * copy from Flash to RAM can be done at startup (by the sega.s code), or
- * alternatively if you want to be able to reuse this chunk of RAM (e.g.
- * for dynamic allocation), the data can be copied dynamically when needed.
- * 
+ * For the tasking experiment, a user stack is needed in addition to the
+ * system stack. So we define __ustack in addition to __stack. These will be
+ * used in the sega.s startup code to configure the stacks.
  */
 
 OUTPUT_ARCH(m68k)
 SEARCH_DIR(.)
 __DYNAMIC  =  0;
 
+PROVIDE (_rom_start = 0x00000000);
+PROVIDE (_ram_start = 0x00FF0000);
+
 MEMORY
 {
-	rom : ORIGIN = 0x00000000, LENGTH = 0x00400000
-	ram : ORIGIN = 0x00FF0000, LENGTH = 0x00010000
+    rom : ORIGIN = _rom_start, LENGTH = 0x00400000
+    ram : ORIGIN = _ram_start, LENGTH = 0x00010000
 }
 
 /*
- * allocate the stack at the top of memory, since the stack
+ * allocate the stacks at the top of memory, since the stack
  * grows down
  */
 
-PROVIDE (__stack = 0x01000000);
+PROVIDE (__ustack = 0x01000000); /* user stack, 512 bytes */
+PROVIDE (__stack = 0x00FFFE00);  /* privileged stack */
 
 
 SECTIONS
 {
   /* Code and read-only data */
-  .text 0x000000 :
+  .text _rom_start :
   {
-	/* Make sure boot sector is not discarded by the linker */
-	KEEP(*(.text.boot)) *(.text .text.*)
-	. = ALIGN(4);
+    /* Make sure boot sector is not discarded by the linker */
+    KEEP(*(.text.boot)) *(.text .text.*)
+    . = ALIGN(4);
     *(.rodata .rodata.*)
 
     . = ALIGN(0x4);
     __INIT_SECTION__ = . ;
     *(.init)
-    SHORT (0x4E75)	/* rts */
+    SHORT (0x4E75)    /* rts */
 
     __FINI_SECTION__ = . ;
     *(.fini)
-    SHORT (0x4E75)	/* rts */
+    SHORT (0x4E75)    /* rts */
 
     _etext = .;
   } > rom
   _stext = SIZEOF(.text);
+  _rom_end = .;
 
-  .data 0xFF0000 :
+  .data _ram_start :
   AT ( ADDR (.text) + _stext )
   {
+    *(.data.dirty)
     *(.data .data.*)
-	. = ALIGN(0x4);
+    . = ALIGN(0x4);
     _edata = . ;
   } > ram
   _sdata = SIZEOF(.data);
@@ -71,19 +69,9 @@ SECTIONS
     _obss = . ;
     *(.bss .bss.*)
     *(COMMON)
-	. = ALIGN(0x4);
+    . = ALIGN(0x4);
     _ebss = . ;
   } > ram
-  /* Code and rodata needed for the flash read/write routines */
-  .flash _ebss :
-  AT ( LOADADDR(.data) + _sdata )
-  {
-	_oflash = . ;
-    *(.flash .flash.*)
-    _eflash = .;
-  } > ram
-  _sflash = SIZEOF(.flash);
-  _lflash = LOADADDR(.flash);
 
   .stab 0 (NOLOAD) :
   {

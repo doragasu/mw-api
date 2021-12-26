@@ -17,7 +17,8 @@ GDB     = cgdb -d $(PREFIX)gdb --
 OBJCOPY = objcopy
 MDMA   ?= $(HOME)/src/github/mw-mdma-cli/mdma
 WFLASH ?= $(HOME)/src/github/mw-wf-cli/src/wflash
-EMU    ?= $(HOME)/src/gendev/blastem/blastem
+DLM_CL ?= $(HOME)/src/github/mw-ch-fw/src/dlm_cli/dlm_cli -s 192.168.10.224
+EMU    ?= blastem
 OBJDIR  = tmp
 
 # List of directories with sources, excluding the boot stuff
@@ -30,6 +31,10 @@ ASRCS = $(foreach DIR, $(DIRS), $(wildcard *.s))
 AOBJECTS := $(patsubst %.s,$(OBJDIR)/%.o,$(ASRCS)) 
 
 all: $(TARGET)
+
+.PHONY: dlm
+dlm:
+	$(DLM_CL) -f $(TARGET)
 
 .PHONY: wflash
 wflash: $(TARGET)

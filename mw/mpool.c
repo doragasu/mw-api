@@ -6,7 +6,7 @@
 
 /// BSS end symbol, defined in linker script. Pool grows from here to the
 /// end of the RAM
-extern uint8_t _eflash;
+extern uint8_t _ebss;
 
 /// End of the memory POOL
 #define MP_POOL_END		((void*)0x01000000)
@@ -30,7 +30,7 @@ void mp_init(int force_init)
 {
 	if (!md.init_done || force_init) {
 		// Ensure the origin is aligned and initialize current position
-		md.floor = MP_ALIGN_COMP(&_eflash);
+		md.floor = MP_ALIGN_COMP(&_ebss);
 		md.pos = md.floor;
 		md.init_done = 1;
 	}
