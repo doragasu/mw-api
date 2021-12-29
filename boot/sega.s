@@ -32,7 +32,7 @@
         dc.l    _vint
         dc.l    _int
         # Traps 0 to 15
-        dc.l    _unlock,_int,_int,_int,_int,_int,_int,_int
+        dc.l    _trap_0,_int,_int,_int,_int,_int,_int,_int
         dc.l    _int,_int,_int,_int,_int,_int,_int,_int
         # FP, MMU and undefined stuff
         dc.l    _int,_int,_int,_int,_int,_int,_int,_int
@@ -170,8 +170,12 @@ tsk_user_set:
         .globl tsk_super_post
 tsk_super_post:
         clr (lock)
+        tst.b   7(sp)
+        beq.s   1f
         # Call supervisor for the context switch
         trap #0
+
+1:
         rts
 
 /************************************************************************//**
@@ -214,30 +218,29 @@ tsk_user_yield:
         rte
 
 /************************************************************************//**
- * Vertical blanking interrupt: if we are running user task, switch back to
- * supervisor task.
+ * Vertical blanking interrupt: if we are running user task, and supervisor
+ * task is not locked, resume it.
  *
- * Also embedded in this routine is the trap #0 that unlocks the supervisor
- * task.
+ * NOTE: almost the same block of code is repeated thrice to save a few CPU
+ * cycles (the unlock code, returning 1 in one variant, returning 0 on other,
+ *,and returning 0 and not executing VINT handler on the last one.
+ * TODO: considere merging the repeated code.
  ****************************************************************************/
 _vint:
         # If we are already at the supervisor task, skip context switch
         btst    #5, (sp)
         bne.s   no_ctx_switch
 
-        # Check if supervisor task is locked
         tst.w   (lock)          | 16
-        # If lock is 0, we are not locked, unlock foreground task
-        beq.s    _unlock        | 8/10
-        # If lock is negative, we are locked and wait is infinite
-        bcs.s    no_ctx_switch  | 8/10
+        # If lock == 0, we have not been locked
+        beq.s   unlock_r0       | 8/10
+        # If lock < 0, we are locked with infinite wait time
+        bcs.s   no_ctx_switch   | 8/10
         subq.w  #1, (lock)      | 20
+        # If count is not zero, timer has not expired, no context switch
+        bne.s   no_ctx_switch   | 8/10
 
-        # Jump to VBLANK routine callback
-        move.l  vint_cb, -(sp)
-        rts
-
-_unlock:
+        # Timer has expired, unlock and return 1
         # Save bg task registers (excepting a7, that is stored in usp)
         move.l  a0, (utsk_regs)
         lea     (utsk_regs + UTSK_REGS_LEN), a0
@@ -250,12 +253,48 @@ _unlock:
         # Restore fg task non clobberable registers
         movem.l (sp)+, d2-d7/a2-a6
 
-        # Resume supervisor task (its pc and sr are in the stack)
+        # We reached here because we are locked and timeout expired. Return 1.
+        moveq   #1, d0
+
 no_ctx_switch:
+        # Jump to VBLANK routine callback
         move.l  vint_cb, -(sp)
         rts
 
-# Vector used as default value for vint_cb
+unlock_r0:
+        move.l  a0, (utsk_regs)
+        lea     (utsk_regs + UTSK_REGS_LEN), a0
+        movem.l d0-d7/a1-a6, -(a0)
+
+        move.w  (sp)+, (utsk_sr)
+        move.l  (sp)+, (utsk_pc)
+
+        movem.l (sp)+, d2-d7/a2-a6
+
+        # Return 0
+        moveq   #0, d0
+        move.l  vint_cb, -(sp)
+        rts
+
+/************************************************************************//**
+ * Trap #0. Unlocks supervisor task. This routine is almost the same as
+ * variants above. Read _vint documentation for the reason.
+ *
+ * Note this does not execute the VBLANK routine callback.
+ ****************************************************************************/
+_trap_0:
+        move.l  a0, (utsk_regs)
+        lea     (utsk_regs + UTSK_REGS_LEN), a0
+        movem.l d0-d7/a1-a6, -(a0)
+
+        move.w  (sp)+, (utsk_sr)
+        move.l  (sp)+, (utsk_pc)
+
+        movem.l (sp)+, d2-d7/a2-a6
+
+        # Return 0
+        moveq   #0, d0
+
 except_return:
         rte
 

@@ -28,11 +28,11 @@ static const uint8_t vdpRegDefaults[19] = {
 	0x04,
 	// Mode 2:
 	// - Display disabled
-	// - VBlank int disabled
+	// - VBlank int enabled
 	// - DMA disabled
 	// - 224 lines
 	// - Megadrive mode
-	0x04,
+	0x24,
 	// Name table for PLANE A
 	VDP_PLANEA_ADDR>>10,
 	// Name table for WINDOW
@@ -61,7 +61,7 @@ static const uint8_t vdpRegDefaults[19] = {
 	// - VSync signal
 	// - HSync signal
 	// - Standard color data generation
-	// - No shadow/highlight mode
+	// - Shadow/highlight disabled
 	// - No interlace
 	0x81,
 	// Horizontal scroll data address
@@ -130,7 +130,7 @@ void VdpInit(void) {
 	// Set auto-increment to 2
 	VdpRegWrite(VDP_REG_INCR, 0x02);
 	// Enable display
-	VdpRegWrite(VDP_REG_MODE2, 0x54);
+	VdpRegWrite(VDP_REG_MODE2, 0x74);
 }
 
 void VdpDrawText(uint16_t planeAddr, uint8_t x, uint8_t y, uint8_t txtColor,

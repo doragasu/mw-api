@@ -1,11 +1,7 @@
 /*
- * Simple linker script for the tasking examples. Grabbed and modified from
- * MegaWiFi repositories, that was grabbed I do not remember from where
- * (maybe from SGDK?).
- *
- * For the tasking experiment, a user stack is needed in addition to the
- * system stack. So we define __ustack in addition to __stack. These will be
- * used in the sega.s startup code to configure the stacks.
+ * Simple linker script supporting multitasking. To do that, two stacks are
+ * defined (__ustack and __stack). These symbols are e used in sega.s to set
+ * up the stacks.
  */
 
 OUTPUT_ARCH(m68k)
@@ -23,7 +19,7 @@ MEMORY
 
 /*
  * allocate the stacks at the top of memory, since the stack
- * grows down
+ * grows down on m68k
  */
 
 PROVIDE (__ustack = 0x01000000); /* user stack, 512 bytes */
@@ -57,7 +53,6 @@ SECTIONS
   .data _ram_start :
   AT ( ADDR (.text) + _stext )
   {
-    *(.data.dirty)
     *(.data .data.*)
     . = ALIGN(0x4);
     _edata = . ;

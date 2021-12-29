@@ -286,16 +286,7 @@ enum lsd_status lsd_send(uint8_t ch, const char *data, int16_t len,
 	d.tx.pos = 0;
 	d.tx.stat = LSD_SEND_STX;
 
-	/// \todo Optimization: start sending data right now. This must be
-	/// carefully evaluated as it can cause a race for very short frames
-	/// completing the transfer before returning from this function.
-//	lsd_process();
-//
-//	if (d.tx.stat <= LSD_SEND_IDLE) {
-//		return LSD_STAT_COMPLETE;
-//	} else {
-		return LSD_STAT_BUSY;
-//	}
+	return LSD_STAT_BUSY;
 }
 
 enum lsd_status lsd_recv(char *buf, int16_t len, void *ctx, lsd_recv_cb recv_cb)
@@ -316,16 +307,7 @@ enum lsd_status lsd_recv(char *buf, int16_t len, void *ctx, lsd_recv_cb recv_cb)
 	d.rx.cb = recv_cb;
 	d.rx.ctx = ctx;
 
-	/// \todo Optimization: start receiving data right now. This must be
-	/// carefully evaluated as it can cause a race for very short frames
-	/// completing the reception before returning from this function.
-//	lsd_process();
-//
-//	if (d.tx.stat <= LSD_SEND_IDLE) {
-//		return LSD_STAT_COMPLETE;
-//	} else {
-		return LSD_STAT_BUSY;
-//	}
+	return LSD_STAT_BUSY;
 }
 
 enum lsd_status lsd_send_sync(uint8_t ch, const char *data, int16_t len)

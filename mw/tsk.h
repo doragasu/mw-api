@@ -8,6 +8,13 @@
 #define __TSK_H__
 
 #include <stdint.h>
+#include <stdbool.h>
+
+/// Frames per second (60 on NTSC consoles, 50 on PAL machines)
+#define FPS	60
+
+/// Converts milliseconds to frames, rounding to the nearest.
+#define MS_TO_FRAMES(ms)	(((ms)*FPS/500 + 1)/2)
 
 #define TSK_PEND_FOREVER -1
 
@@ -46,12 +53,19 @@ void tsk_user_yield(void);
  * \param[in] wait_tout Maximum number of frames to wait while blocking. Use
  *            TSK_PEND_FOREVER for an infinite wait, or a positive number
  *            (greater than 0) for a specific number of frames.
+ *
+ * \return false if task was awakened from user task, or true if timeout
+ * occurred.
  ****************************************************************************/
-void tsk_super_pend(int16_t wait_tout);
+bool tsk_super_pend(int16_t wait_tout);
 
 /************************************************************************//**
  * Resume a blocked supervisor task. Must be called from user task.
+ *
+ * \param[in] force_ctx_sw If true, immediately causes a context switch to
+ *            supervisor task. If false, context switch will not occur until
+ *            the VBLANK interrupt.
  ****************************************************************************/
-void tsk_super_post(void);
+void tsk_super_post(bool force_ctx_sw);
 
 #endif /*__TSK_H__*/

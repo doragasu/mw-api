@@ -1,3 +1,4 @@
+/// FIXME Documentation for infinite timeouts!
 /************************************************************************//**
  * \file
  *
@@ -48,6 +49,8 @@
 #define MW_SCAN_TOUT_MS		10000
 /// Timeout for the AP associate command in milliseconds
 #define MW_ASSOC_TOUT_MS	20000
+/// Time to sleep before waiting for assoc in milliseconds
+#define MW_ASSOC_WAIT_SLEEP_MS	5000
 /// Timeout for upgrade command in milliseconds
 #define MW_UPGRADE_TOUT_MS	180000
 /// Milliseconds between status polls while in wm_ap_assoc_wait()
@@ -137,7 +140,7 @@ enum mw_if_type {
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
-int mw_init(char *cmd_buf, uint16_t buf_len);
+int16_t mw_init(char *cmd_buf, uint16_t buf_len);
 
 /************************************************************************//**
  * \brief Processes sends/receives pending data.
@@ -312,7 +315,7 @@ enum mw_err mw_ip_current(struct mw_ip_cfg **ip);
  * \return Length in bytes of the output data if operation completes
  *         successfully, or -1 if scan fails.
  ****************************************************************************/
-int mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps);
+int16_t mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps);
 
 /************************************************************************//**
  * \brief Parses received AP data and fills information of the AP at "pos".
@@ -330,7 +333,7 @@ int mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps);
  * \note This functions executes locally, does not communicate with the
  *       WiFi module.
  ****************************************************************************/
-int mw_ap_fill_next(const char *ap_data, uint16_t pos,
+int16_t mw_ap_fill_next(const char *ap_data, uint16_t pos,
 		struct mw_ap_data *apd, uint16_t data_len);
 
 /************************************************************************//**
@@ -352,7 +355,7 @@ enum mw_err mw_ap_assoc(uint8_t slot);
  * \return MW_ERR_NONE if device is associated to AP. MW_ERR_NOT_READY if
  * the timeout has expired.
  ****************************************************************************/
-enum mw_err mw_ap_assoc_wait(int tout_frames);
+enum mw_err mw_ap_assoc_wait(int16_t tout_frames);
 
 /************************************************************************//**
  * \brief Sets default AP/IP configuration.
@@ -378,7 +381,7 @@ enum mw_err mw_ap_disassoc(void);
  *
  * \return The default configuration slot, of -1 on error.
  ****************************************************************************/
-int mw_def_ap_cfg_get(void);
+int16_t mw_def_ap_cfg_get(void);
 
 /************************************************************************//**
  * \brief Tries establishing a TCP connection with specified server.
@@ -449,7 +452,7 @@ enum mw_err mw_tcp_bind(uint8_t ch, uint16_t port);
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
-enum mw_err mw_sock_conn_wait(uint8_t ch, int tout_frames);
+enum mw_err mw_sock_conn_wait(uint8_t ch, int16_t tout_frames);
 
 /************************************************************************//**
  * \brief Receive data, asyncrhonous interface.
@@ -542,7 +545,7 @@ static inline enum lsd_status mw_send(uint8_t ch, const char *data, int16_t len,
  * until a syncrhonous call ends to issue another one.
  ****************************************************************************/
 enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
-		uint16_t tout_frames);
+		int16_t tout_frames);
 
 /************************************************************************//**
  * \brief Sends data through a socket, using a previously allocated channel.
@@ -560,7 +563,7 @@ enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
  * until a syncrhonous call ends to issue another one.
  ****************************************************************************/
 enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len,
-		uint16_t tout_frames);
+		int16_t tout_frames);
 
 /************************************************************************//**
  * \brief Get system status.
@@ -718,7 +721,7 @@ void mw_power_off(void);
  *
  * \param[in] frames Number of frames to sleep.
  ****************************************************************************/
-void mw_sleep(uint16_t frames);
+void mw_sleep(int16_t frames);
 
 /************************************************************************//**
  * \brief Set URL for HTTP requests.
@@ -789,7 +792,7 @@ enum mw_err mw_http_open(uint32_t content_len);
  * no errors, if the returned status code is 4xx or 5xx, there is a client
  * side or server side error.
  ****************************************************************************/
-int mw_http_finish(uint32_t *content_len, int tout_frames);
+int16_t mw_http_finish(uint32_t *content_len, int16_t tout_frames);
 
 /************************************************************************//**
  * \brief Query the X.509 hash of the installed PEM certificate.
@@ -824,7 +827,7 @@ enum mw_err mw_http_cert_set(uint32_t cert_hash, const char *cert,
  *
  * \return MW_ERR_NONE on success, other code on failure.
  ****************************************************************************/
-int mw_http_cleanup(void);
+int16_t mw_http_cleanup(void);
 
 /************************************************************************//**
  * \brief Get the default server used for MegaWiFi connections.
@@ -888,7 +891,7 @@ enum mw_err mw_ga_endpoint_set(const char *endpoint, const char *priv_key);
  * internally.
  ****************************************************************************/
 enum mw_err mw_ga_key_value_add(const char **key, const char **value,
-		unsigned int num_pairs);
+		uint16_t num_pairs);
 
 /************************************************************************//**
  * \brief Perform a GameAPI request, with the previously set endpoint and
@@ -920,9 +923,10 @@ enum mw_err mw_ga_key_value_add(const char **key, const char **value,
  * \note path, key and value parameters must not be URL encoded. Encoding is
  * handled internally.
  ****************************************************************************/
-int mw_ga_request(enum mw_http_method method, const char **path,
+int16_t mw_ga_request(enum mw_http_method method, const char **path,
 		uint8_t num_paths, const char **key, const char **value,
-		uint8_t num_kv_pairs, uint32_t *content_len, int tout_frames);
+		uint8_t num_kv_pairs, uint32_t *content_len,
+		int16_t tout_frames);
 
 /************************************************************************//**
  * \brief Over-The-Air upgrade WiFi module firmware.

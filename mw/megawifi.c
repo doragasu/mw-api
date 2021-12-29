@@ -11,14 +11,16 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <stdbool.h>
 #include "megawifi.h"
 #include "util.h"
-#include "loop.h"
+#include "tsk.h"
 
 #define MW_COMMAND_TOUT		MS_TO_FRAMES(MW_COMMAND_TOUT_MS)
 #define MW_CONNECT_TOUT		MS_TO_FRAMES(MW_CONNECT_TOUT_MS)
 #define MW_SCAN_TOUT		MS_TO_FRAMES(MW_SCAN_TOUT_MS)
 #define MW_ASSOC_TOUT		MS_TO_FRAMES(MW_ASSOC_TOUT_MS)
+#define MW_ASSOC_WAIT_SLEEP	MS_TO_FRAMES(MW_ASSOC_WAIT_SLEEP_MS)
 #define MW_STAT_POLL_TOUT	MS_TO_FRAMES(MW_STAT_POLL_MS)
 #define MW_HTTP_OPEN_TOUT	MS_TO_FRAMES(MW_HTTP_OPEN_TOUT_MS)
 #define MW_UPGRADE_TOUT		MS_TO_FRAMES(MW_UPGRADE_TOUT_MS)
@@ -29,8 +31,8 @@
  */
 
 enum cmd_stat {
-	CMD_ERR_PROTO = -2,
-	CMD_ERR_TIMEOUT = -1,
+	CMD_ERR_PROTO = -1,
+	CMD_ERR_TIMEOUT = 0,
 	CMD_OK = 1
 };
 
@@ -39,29 +41,23 @@ struct recv_metadata {
 	uint8_t ch;
 };
 
+/// Data required by the module
 struct mw_data {
 	mw_cmd *cmd;
+	// TODO This callback is never set!
 	lsd_recv_cb cmd_data_cb;
-	struct loop_timer timer;
 	uint16_t buf_len;
-	int16_t tout_frames;
 	union {
 		uint8_t flags;
 		struct {
 			uint8_t mw_ready:1;
-			uint8_t stat_poll:1;
-			uint8_t monitor_ch:4;
 		};
 	};
-};
+} d = {};
 
-/// Data required by the module
-static struct mw_data d = {};
+//void cmd_tout_cb(struct loop_timer *t);
 
-
-void cmd_tout_cb(struct loop_timer *t);
-
-int mw_init(char *cmd_buf, uint16_t buf_len)
+int16_t mw_init(char *cmd_buf, uint16_t buf_len)
 {
 	if (!cmd_buf || buf_len < MW_CMD_MIN_BUFLEN) {
 		return MW_ERR_BUFFER_TOO_SHORT;
@@ -70,8 +66,6 @@ int mw_init(char *cmd_buf, uint16_t buf_len)
 	memset(&d, 0, sizeof(struct mw_data));
 	d.cmd = (mw_cmd*)cmd_buf;
 	d.buf_len = buf_len;
-	d.timer.timer_cb = cmd_tout_cb;
-	loop_timer_add(&d.timer);
 
 	lsd_init();
 
@@ -97,12 +91,12 @@ int mw_init(char *cmd_buf, uint16_t buf_len)
 static void cmd_send_cb(enum lsd_status err, void *ctx)
 {
 	UNUSED_PARAM(ctx);
+	UNUSED_PARAM(err);
 
-	loop_timer_stop(&d.timer);
+	// FIXME: Treat errors!
 	if (!err) {
-		loop_post(CMD_OK);
-	} else {
-		loop_post(CMD_ERR_PROTO);
+		// TODO: Do we always want to force a context switch
+		tsk_super_post(true);
 	}
 }
 
@@ -112,44 +106,27 @@ static void cmd_recv_cb(enum lsd_status err, uint8_t ch,
 	UNUSED_PARAM(data);
 	struct recv_metadata *md = (struct recv_metadata*)ctx;
 
-	loop_timer_stop(&d.timer);
+	// FIXME: Treat errors!
 	if (!err) {
 		md->ch = ch;
 		md->len = len;
-		loop_post(CMD_OK);
-	} else {
-		loop_post(CMD_ERR_PROTO);
+		tsk_super_post(true);
 	}
 }
 
-void cmd_tout_cb(struct loop_timer *t)
-{
-	UNUSED_PARAM(t);
-
-	loop_post(CMD_ERR_TIMEOUT);
-}
-
-static enum mw_err mw_command(int timeout_frames)
+static enum mw_err mw_command(int16_t timeout_frames)
 {
 	struct recv_metadata md;
-	int stat;
-	int done = FALSE;
+	bool tout;
+	bool done = false;
 
-//	mw_cmd_send(d.cmd, NULL, cmd_send_cb);
-	/// \todo Optimization: maybe we do not need to wait for the send
-	/// process to complete, just jump to reception.
+	// Optimization: we do not wait until the command is sent
 	mw_cmd_send(d.cmd, NULL, NULL);
-//	loop_timer_start(&d.timer, timeout_frames);
-//	stat = loop_pend();
-//	if (CMD_OK != stat) {
-//		return MW_ERR_SEND;
-//	}
 
 	while (!done) {
 		mw_cmd_recv(d.cmd, &md, cmd_recv_cb);
-		loop_timer_start(&d.timer, timeout_frames);
-		stat = loop_pend();
-		if (CMD_OK != stat) {
+		tout = tsk_super_pend(timeout_frames);
+		if (tout) {
 			return MW_ERR_RECV;
 		}
 		// We might receive network data while waiting
@@ -169,7 +146,7 @@ static enum mw_err mw_command(int timeout_frames)
 }
 
 static enum mw_err string_based_cmd(enum mw_command cmd, const char *payload,
-		int timeout_frames)
+		int16_t timeout_frames)
 {
 	enum mw_err err;
 	size_t len;
@@ -194,17 +171,14 @@ static enum mw_err string_based_cmd(enum mw_command cmd, const char *payload,
 }
 
 enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
-		uint16_t tout_frames)
+		int16_t tout_frames)
 {
 	struct recv_metadata md;
-	int stat;
+	bool tout;
 
 	lsd_recv(buf, *buf_len, &md, cmd_recv_cb);
-	if (tout_frames) {
-		loop_timer_start(&d.timer, tout_frames);
-	}
-	stat = loop_pend();
-	if (CMD_OK != stat) {
+	tout = tsk_super_pend(tout_frames);
+	if (tout) {
 		return MW_ERR_RECV;
 	}
 
@@ -215,20 +189,17 @@ enum mw_err mw_recv_sync(uint8_t *ch, char *buf, int16_t *buf_len,
 }
 
 enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len,
-		uint16_t tout_frames)
+		int16_t tout_frames)
 {
 	uint16_t to_send;
-	int stat;
+	int16_t tout;
 	uint16_t sent = 0;
 
 	while (sent < len) {
 		to_send = MIN(len - sent, d.buf_len);
 		lsd_send(ch, data + sent, to_send, NULL, cmd_send_cb);
-		if (tout_frames) {
-			loop_timer_start(&d.timer, tout_frames);
-		}
-		stat = loop_pend();
-		if (CMD_OK != stat) {
+		tout = tsk_super_pend(tout_frames);
+		if (tout) {
 			return MW_ERR_SEND;
 		}
 		sent += to_send;
@@ -239,16 +210,14 @@ enum mw_err mw_send_sync(uint8_t ch, const char *data, uint16_t len,
 
 enum mw_err mw_detect(uint8_t *major, uint8_t *minor, char **variant)
 {
-	int retries = 5;
+	int16_t retries = 5;
 	enum mw_err err;
 	uint8_t version[3];
 
 	// Wait a bit and take module out of resest
-	loop_timer_start(&d.timer, MS_TO_FRAMES(30));
-	loop_pend();
+	tsk_super_pend(MS_TO_FRAMES(30));
 	mw_module_start();
-	loop_timer_start(&d.timer, MS_TO_FRAMES(1000));
-	loop_pend();
+	tsk_super_pend(MS_TO_FRAMES(1000));
 
 	do {
 		retries--;
@@ -293,30 +262,6 @@ enum mw_err mw_version_get(uint8_t version[3], char **variant)
 	}
 
 	return MW_ERR_NONE;
-}
-
-char *mw_echo(const char *data, int *len)
-{
-	enum mw_err err;
-
-	if (!d.mw_ready) {
-		return NULL;
-	}
-	if (*len + LSD_OVERHEAD + 4 < d.buf_len) {
-		return NULL;
-	}
-
-	// Try sending and receiving echo
-	d.cmd->cmd = MW_CMD_ECHO;
-	d.cmd->data_len = *len;
-	memcpy(d.cmd->data, data, *len);
-	err = mw_command(MW_COMMAND_TOUT);
-	if (err) {
-		return NULL;
-	}
-	*len = d.cmd->data_len;
-
-	return (char*)d.cmd->data;
 }
 
 enum mw_err mw_default_cfg_set(void)
@@ -475,7 +420,7 @@ enum mw_err mw_ip_current(struct mw_ip_cfg **ip)
 	return MW_ERR_NONE;
 }
 
-int mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps)
+int16_t mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps)
 {
 	enum mw_err err;
 
@@ -498,7 +443,7 @@ int mw_ap_scan(enum mw_phy_type phy_type, char **ap_data, uint8_t *aps)
 	return d.cmd->data_len - 1;
 }
 
-int mw_ap_fill_next(const char *ap_data, uint16_t pos,
+int16_t mw_ap_fill_next(const char *ap_data, uint16_t pos,
 		struct mw_ap_data *apd, uint16_t data_len)
 {
 	if (pos >= data_len) {
@@ -536,63 +481,32 @@ enum mw_err mw_ap_assoc(uint8_t slot)
 	return MW_ERR_NONE;
 }
 
-static void stat_reply_cb(enum lsd_status err, uint8_t ch, char *data,
-		uint16_t len, void *ctx)
+enum mw_err mw_ap_assoc_wait(int16_t tout_frames)
 {
-	UNUSED_PARAM(ctx);
-	UNUSED_PARAM(len);
-	UNUSED_PARAM(data);
+	union mw_msg_sys_stat *stat;
 
-	if (!err && MW_CTRL_CH == ch && d.stat_poll &&
-			d.cmd->sys_stat.sys_stat >= MW_ST_READY) {
-		// We are associated!
-		loop_timer_stop(&d.timer);
-		d.stat_poll = FALSE;
-		loop_post(1);
-	} else {
-		// Query the system status again
-		d.cmd->cmd = MW_CMD_SYS_STAT;
-		d.cmd->data_len = 0;
-		mw_cmd_send(d.cmd, NULL, NULL);
-	}
-}
-
-static void assoc_poll_timer_cb(struct loop_timer *t)
-{
-	if (d.tout_frames) {
-		d.tout_frames -= MW_STAT_POLL_TOUT;
-		if (d.tout_frames <= 0) {
-			d.stat_poll = FALSE;
-			loop_timer_stop(t);
-			loop_post(-1);
-			return;
+	// Workaround: When the MW_CMD_AP_JOIN is run, module seems to freeze
+	// communications for ~3 seconds. This can cause mw_sys_stat_get() to
+	// timeout and this function to fail. Workaround this by sleeping
+	// before trying to poll module for status
+	mw_sleep(MW_ASSOC_WAIT_SLEEP);
+	while (tout_frames > 0) {
+		// FIXME: timing is not accurate because of the time this
+		// command gets to complete
+		stat = mw_sys_stat_get();
+		if (!stat) {
+			// Command failed
+			return MW_ERR_NOT_READY;
 		}
+		if (stat->sys_stat >= MW_ST_READY) {
+			return MW_ERR_NONE;
+		}
+		// Sleep for MW_STAT_POLL_TOUT frames
+		tsk_super_pend(MW_STAT_POLL_TOUT);
+		tout_frames -= MW_STAT_POLL_TOUT;
 	}
-	mw_cmd_recv(d.cmd, NULL, stat_reply_cb);
-}
 
-enum mw_err mw_ap_assoc_wait(int tout_frames)
-{
-	int ret;
-
-	// Send command and do not look back
-	d.cmd->cmd = MW_CMD_SYS_STAT;
-	d.cmd->data_len = 0;
-	mw_cmd_send(d.cmd, NULL, NULL);
-
-	// Carefully reuse the command timer
-	d.tout_frames = tout_frames;
-	d.stat_poll = TRUE;
-	d.timer.timer_cb = assoc_poll_timer_cb;
-	d.timer.auto_reload = TRUE;
-	loop_timer_start(&d.timer, MW_STAT_POLL_TOUT);
-	ret = loop_pend();
-
-	// Restore default timer values
-	d.timer.timer_cb = cmd_tout_cb;
-	d.timer.auto_reload = FALSE;
-
-	return ret < 0?MW_ERR_NOT_READY:MW_ERR_NONE;
+	return MW_ERR_NOT_READY;
 }
 
 enum mw_err mw_ap_disassoc(void)
@@ -632,7 +546,7 @@ enum mw_err mw_def_ap_cfg(uint8_t slot)
 	return MW_ERR_NONE;
 }
 
-int mw_def_ap_cfg_get(void)
+int16_t mw_def_ap_cfg_get(void)
 {
 	enum mw_err err;
 
@@ -646,7 +560,7 @@ int mw_def_ap_cfg_get(void)
 	return d.cmd->data[0];
 }
 
-static int fill_addr(const char *dst_addr, const char *dst_port,
+static int16_t fill_addr(const char *dst_addr, const char *dst_port,
 		const char *src_port, struct mw_msg_in_addr *in_addr)
 {
 	// Zero structure data
@@ -766,66 +680,27 @@ enum mw_err mw_udp_set(uint8_t ch, const char *dst_addr, const char *dst_port,
 	return MW_ERR_NONE;
 }
 
-static void sock_stat_reply_cb(enum lsd_status err, uint8_t ch, char *data,
-		uint16_t len, void *ctx)
+enum mw_err mw_sock_conn_wait(uint8_t ch, int16_t tout_frames)
 {
-	UNUSED_PARAM(ctx);
-	UNUSED_PARAM(len);
-	UNUSED_PARAM(data);
+	enum mw_sock_stat stat;
 
-	if (!err && MW_CTRL_CH == ch && d.stat_poll &&
-			d.cmd->data[0] >= MW_SOCK_TCP_EST) {
-		// Ready to send/receive data
-		loop_timer_stop(&d.timer);
-		d.stat_poll = FALSE;
-		loop_post(1);
-	} else {
-		// Query the system status again
-		d.cmd->cmd = MW_CMD_SOCK_STAT;
-		d.cmd->data_len = 1;
-		d.cmd->data[0] = d.monitor_ch;
-		mw_cmd_send(d.cmd, NULL, NULL);
-	}
-}
-
-static void sock_poll_timer_cb(struct loop_timer *t)
-{
-	if (d.tout_frames) {
-		d.tout_frames -= MW_STAT_POLL_TOUT;
-		if (d.tout_frames <= 0) {
-			d.stat_poll = FALSE;
-			loop_timer_stop(t);
-			loop_post(-1);
-			return;
+	while (tout_frames > 0) {
+		// FIXME: timing is not accurate because of the time this
+		// command gets to complete
+		stat = mw_sock_stat_get(ch);
+		if (stat < 0) {
+			// Command failed
+			return MW_ERR_NOT_READY;
 		}
+		if (stat >= MW_SOCK_TCP_EST) {
+			return MW_ERR_NONE;
+		}
+		// Sleep for MW_STAT_POLL_TOUT frames
+		tsk_super_pend(MW_STAT_POLL_TOUT);
+		tout_frames -= MW_STAT_POLL_MS;
 	}
-	mw_cmd_recv(d.cmd, NULL, sock_stat_reply_cb);
-}
 
-enum mw_err mw_sock_conn_wait(uint8_t ch, int tout_frames)
-{
-	int ret;
-
-	// Send command and do not look back
-	d.monitor_ch = ch;
-	d.cmd->cmd = MW_CMD_SOCK_STAT;
-	d.cmd->data_len = 1;
-	d.cmd->data[0] = ch;
-	mw_cmd_send(d.cmd, NULL, NULL);
-
-	// Carefully reuse the command timer
-	d.tout_frames = tout_frames;
-	d.stat_poll = TRUE;
-	d.timer.timer_cb = sock_poll_timer_cb;
-	d.timer.auto_reload = TRUE;
-	loop_timer_start(&d.timer, MW_STAT_POLL_TOUT);
-	ret = loop_pend();
-
-	// Restore default timer values
-	d.timer.timer_cb = cmd_tout_cb;
-	d.timer.auto_reload = FALSE;
-
-	return ret < 0?MW_ERR_NOT_READY:MW_ERR_NONE;
+	return MW_ERR_NOT_READY;
 }
 
 union mw_msg_sys_stat *mw_sys_stat_get(void)
@@ -869,8 +744,8 @@ enum mw_sock_stat mw_sock_stat_get(uint8_t ch)
 enum mw_err mw_sntp_cfg_set(const char *tz_str, const char *server[3])
 {
 	enum mw_err err;
-	int offset;
-	int len;
+	int16_t offset;
+	int16_t len;
 
 	if (!d.mw_ready) {
 		return MW_ERR_NOT_READY;
@@ -880,7 +755,7 @@ enum mw_err mw_sntp_cfg_set(const char *tz_str, const char *server[3])
 	offset = 1 + strlen(tz_str);
 	memcpy(d.cmd->data, tz_str, offset);
 
-	for (int i = 0; i < 3 && server[i] && *server[i]; i++) {
+	for (int16_t i = 0; i < 3 && server[i] && *server[i]; i++) {
 		len = 1 + strlen(server[i]);
 		memcpy(&d.cmd->data[offset], server[i], len);
 		offset += len;
@@ -895,9 +770,9 @@ enum mw_err mw_sntp_cfg_set(const char *tz_str, const char *server[3])
 	return MW_ERR_NONE;
 }
 
-static int tokens_get(const char *in, char *token[], int token_max)
+static int16_t tokens_get(const char *in, char *token[], int16_t token_max)
 {
-	int i;
+	int16_t i;
 	size_t len;
 
 	token[0] = (char*)in;
@@ -932,7 +807,7 @@ enum mw_err mw_sntp_cfg_get(char **tz_str, char *server[3])
 
 	tokens_get((char*)d.cmd->data, token, 4);
 	*tz_str = token[0];
-	for (int i = 0; i < 3; i++) {
+	for (int16_t i = 0; i < 3; i++) {
 		server[i] = token[i + 1];
 	}
 
@@ -1214,7 +1089,7 @@ enum mw_err mw_http_open(uint32_t content_len)
 	return MW_ERR_NONE;
 }
 
-int mw_http_finish(uint32_t *content_len, int tout_frames)
+int16_t mw_http_finish(uint32_t *content_len, int16_t tout_frames)
 {
 	enum mw_err err;
 
@@ -1278,13 +1153,13 @@ enum mw_err mw_http_cert_set(uint32_t cert_hash, const char *cert,
 
 	lsd_ch_enable(MW_HTTP_CH);
 	// Command succeeded, now send the certificate using MW_CH_HTTP
-	err = mw_send_sync(MW_HTTP_CH, cert, cert_len, 0);
+	err = mw_send_sync(MW_HTTP_CH, cert, cert_len, TSK_PEND_FOREVER);
 	lsd_ch_disable(MW_HTTP_CH);
 
 	return MW_ERR_NONE;
 }
 
-int mw_http_cleanup(void)
+int16_t mw_http_cleanup(void)
 {
 	enum mw_err err;
 
@@ -1359,10 +1234,9 @@ void mw_power_off(void)
 	mw_cmd_send(d.cmd, NULL, NULL);
 }
 
-void mw_sleep(uint16_t frames)
+void mw_sleep(int16_t frames)
 {
-	loop_timer_start(&d.timer, frames);
-	loop_pend();
+	tsk_super_pend(frames);
 }
 
 enum mw_err mw_cfg_save(void)
@@ -1450,7 +1324,7 @@ enum mw_err mw_ga_endpoint_set(const char *endpoint, const char *priv_key)
 }
 
 enum mw_err mw_ga_key_value_add(const char **key, const char **value,
-		unsigned int num_pairs)
+		uint16_t num_pairs)
 {
 	uint16_t pos;
 	enum mw_err err;
@@ -1476,9 +1350,10 @@ enum mw_err mw_ga_key_value_add(const char **key, const char **value,
 	return MW_ERR_NONE;
 }
 
-int mw_ga_request(enum mw_http_method method, const char **path,
+int16_t mw_ga_request(enum mw_http_method method, const char **path,
 		uint8_t num_paths, const char **key, const char **value,
-		uint8_t num_kv_pairs, uint32_t *content_len, int tout_frames)
+		uint8_t num_kv_pairs, uint32_t *content_len,
+		int16_t tout_frames)
 {
 	enum mw_err err;
 	uint16_t pos;
@@ -1537,4 +1412,3 @@ enum mw_err mw_fw_upgrade(const char *name)
 
 	return MW_ERR_NONE;
 }
-

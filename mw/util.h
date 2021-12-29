@@ -258,14 +258,14 @@ int version_to_str(const uint8_t version[3], char *str);
  * \brief Compares two version number arrays (major, minor, micro).
  *
  * \param[in] old Old version numbers
- * \param[in] new New version numbers against to compare
+ * \param[in] cur New version numbers against to compare
  *
  * \return
- * * > 0 if new > old
- * * < 0 if new < old
- * *   0 if new == old
+ * * > 0 if cur > old
+ * * < 0 if cur < old
+ * *   0 if cur == old
  ****************************************************************************/
-int version_cmp(const uint8_t old[3], const uint8_t new[3]);
+int version_cmp(const uint8_t old[3], const uint8_t cur[3]);
 
 /************************************************************************//**
  * \brief Concatenates an array of strings into an output string, separated

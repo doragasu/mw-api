@@ -283,19 +283,19 @@ int version_to_str(const uint8_t version[3], char *str)
 	return pos;
 }
 
-int version_cmp(const uint8_t old[3], const uint8_t new[3])
+int version_cmp(const uint8_t old[3], const uint8_t cur[3])
 {
 	int result;
 	int i;
 
 	for (i = 0; i < 2; i++) {
-		result = new[i] - old[i];
+		result = cur[i] - old[i];
 		if (result) {
 			return result;
 		}
 	}
 
-	return new[i] - old[i];
+	return cur[i] - old[i];
 }
 
 uint16_t concat_strings(const char **str, uint8_t num_strs, char *output,
