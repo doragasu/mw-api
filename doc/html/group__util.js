@@ -25,14 +25,14 @@ var group__util =
     [ "ip_str_to_uint32", "group__util.html#gadeb908ba34661b2397003fe6bf969111", null ],
     [ "ip_validate", "group__util.html#ga851ec0ef4a4c9ca0cf855fe0925946b5", null ],
     [ "long_to_str", "group__util.html#ga312e2d6c6ba4c6b237f316453b833ca2", null ],
-    [ "str_is_uint8", "group__util.html#gaefdeee0521aeffc3705d9e36bd9047a0", null ],
-    [ "str_to_uint8", "group__util.html#ga1592ef63a7bfa19eed825eb2a90e80d0", null ],
+    [ "str_is_uint8", "group__util.html#ga351cc215232bf1e801b5d9a17f6d1ad0", null ],
+    [ "str_to_uint8", "group__util.html#ga51fb0c830f036bbecbf0091eaedcc64f", null ],
     [ "to_upper", "group__util.html#gac0417a833ac454efa44c61ee8bccd55d", null ],
     [ "uint16_to_str", "group__util.html#ga0746948d7f71ae3228218f5e88259256", null ],
     [ "uint32_to_hex_str", "group__util.html#gadc2fe63f7c4fde6fd40fdcbd34019d8b", null ],
     [ "uint32_to_ip_str", "group__util.html#gaa604833843bd10f3fedd956bc324a341", null ],
     [ "uint8_to_hex_str", "group__util.html#gafb94df8994a87fe786b0f62db37f8a15", null ],
     [ "uint8_to_str", "group__util.html#gad01ca814a706054fae664b09831a426d", null ],
-    [ "version_cmp", "group__util.html#gafcd38b059201c5b5386476abe742c3e7", null ],
+    [ "version_cmp", "group__util.html#ga978fcd09284b809e49a86d89cff2cb5c", null ],
     [ "version_to_str", "group__util.html#ga823c6af3d494d2dfaf5bcccf8f9f15e9", null ]
 ];

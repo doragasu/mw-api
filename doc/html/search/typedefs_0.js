@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['loop_5ffunc_5fcb_800',['loop_func_cb',['../group__loop.html#gad0a167733d7515e7a910917bd62a0528',1,'loop.h']]],
-  ['loop_5ftimer_5fcb_801',['loop_timer_cb',['../group__loop.html#gab12de3fc7408181eb2546c7a0b7809b7',1,'loop.h']]]
+  ['mw_5fcmd_0',['mw_cmd',['../group__mw-msg.html#ga4a8ec7133ac6ff328fe648526292e439',1,'mw-msg.h']]]
 ];
