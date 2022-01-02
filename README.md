@@ -10,15 +10,12 @@ The full API documentation [can be found here](https://doragasu.github.io/mw-api
 
 ## Building
 
-You will need a complete Genesis/Megadrive toolchain. The sources use some C standard library calls, such as `memcpy()`, `setjmp()`, `longjmp()`, etc. Thus your toolchain must include a C standard library implementation such as *newlib*.
-
-If you are an SGDK user, I wrote [detailed instructions about the build process here](https://github.com/doragasu/mw-sgdk-example). Otherwise, to build the files, you can use the provided Makefile, suiting it to your needs, or just add the source files to your project to build them.
+You will need a complete Genesis/Megadrive toolchain. The sources use some C standard library calls, such as `memcpy()`, `strchr()`, etc. Thus your toolchain must include a C standard library implementation such as *newlib*. Alternatively you can use the version integrated into the awesome [SGDK](https://github.com/Stephane-D/SGDK/).
 
 ## Overview
 
 The MegaWiFi API consists of the following modules:
-* loop: Loop handling for single threaded Megadrive programs.
-* mpool: Simple memory pool implementation.
+* tsk: Simple multitasking implementation (one supervisor task and one user task).
 * megawifi: Communications with the WiFi module and the Internet, including sockets and HTTP/HTTPS.
 * mw-msg: MegaWiFi command message definitions.
 * util: General purpose utility functions and macros.
@@ -26,15 +23,18 @@ The MegaWiFi API consists of the following modules:
 
 The `mw-msg` module contains the message definitions for the different MegaWiFi commands and command replies. Fear not because usually you do not need to use this module, unless you are doing something pretty advanced not covered by the `megawifi` module API.
 
-The `util` module contains general purpose functions and macros not fitting in the other modules, such as `ip_validate()` to check if a string is a valid IP address, `str_to_uint8()` to convert a string to an 8-bit number, etc.
+The `util` module contains general purpose functions and macros not fitting in the other modules, such as `ip_validate()` to check if a string is a valid IP address, `str_to_uint8()` to convert a string to an 8-bit number, etc. There is also a `json` module wich includes `jsmn` library along with some helper functions to parse JSON formatted strings. Please read `jsmn` documentation to learn how its tokenizer works.
 
-The other modules (`loop`, `mpool`, `megawifi`) are covered in depth below.
+Previous MegaWiFi releases also included two more modules: `mpool` (a quite limited dynamic memory allocator) and `loop` (a loop functions and timers implementation). I found most devs considered these modules confusing, so I removed them. If you use `newlib` and require dynamic memory allocation, you can implemente `_sbrk()` syscall and use the standard `malloc()` and `free()` functions. You can also use SGDK that already includes a dynamic memory allocator. As for the `loop` module, it has somehow been replaced by the `tsk` module.
 
-There is also a `json` module wich includes `jsmn` library along with some helper functions to parse JSON formatted strings. Please read `jsmn` documentation to learn how its tokenizer works.
+### tsk module
 
-### Loop module
+This module implements basic multitasking capabilities. It allows setting up a task that runs in user mode, in addition to the supervisor task. For the user task to run, the supervisor task must give it some CPU time. This can be done in two ways:
 
-This module implements the main loop of the program. It allows easily adding and removing functions to be run on the main loop, as well as timers based on the frame counter. It also provides a hacky interface to perform pseudo synchronous calls (through the `loop_pend()` and `loop_post()` semantics) without disturbing the loop execution.
+* By calling the lock function `tsk_super_pend()`: this causes the user task to resume execution. User task will keep running until it calls `tsk_super_post()`, or the timeout specified in the `tsk_supper_pend()` occurs. Then supervisor task will resume execution.
+* By calling `tsk_user_yield()`: this causes the user task to resume execution. User task will keep running until the next VBLANK interrupt, or until `tsk_super_post()` is called with the `force_ctx_sw` param set to `true`.
+
+User task will not run unless the supervisor task calls either `tsk_super_pend()` or `tsk_user_yield()`. So you must make sure to call one of them in your main loop or the user task will starve. If you are using SGDK, the `tsk_user_yield()` call is done transparently inside `VDP_waitVSync()`, `VDP_waitVActive()` and `SYS_doVBlankProcess()`. So just make sure you are calling one of these in your loop and you should be ready to go!
 
 A typical Megadrive game contains a main loop with a structure similar to this:
 
@@ -47,131 +47,23 @@ void main()
 	// Infinite loop with game logic
 	while(1) {
 		wait_vblank();
+		read_input();
 		draw_screen();
 		play_sound();
-		read_input();
 		game_logic();
 	}
 }
 ```
 
 The game performs the initialization using `init()` function, and then enters an infinite loop that:
-1. Waits for the vertical blanking period to begin.
+
+1. Waits for the vertical blanking period to begin. Inside this function `tsk_user_yield()` must be called, either directly or indirectly (if you are using SGDK, as explained above).
+4. Reads controller inputs.
 2. Updates the frame (scroll, sprites, tiles, etc).
 3. Keeps the music and SFX playing.
-4. Reads controller inputs.
 5. Computes game logic, such as collision detection, player/enemy movements, etc. When this step finishes, we have all the data to draw the next frame.
 
 The order of these elements might be slightly different, but these are the usual suspects in loop game design.
-
-On the contrary, the recommended way to write a MegaWiFi program requires using the `loop` module to implement the main loop. When using MegaWiFi API, the code above should be written like this (my recommendation with these examples is that you read the code from the bottom function to the top ones):
-
-```C
-#include "mw/util.h"
-#include "mw/loop.h"
-
-#define MW_MAX_LOOP_FUNCS 2
-#define MW_MAX_LOOP_TIMERS 4
-
-// Run once per frame
-static void frame_cb(struct loop_timer *t)
-{
-	// Avoid compiler warning because unused t parameter
-	UNUSED_PARAM(t);
-
-	draw_screen();
-	play_sound();
-	read_input();
-	game_logic();
-}
-
-static void main_loop_init(void)
-{
-	static struct loop_timer frame_timer = {
-		.timer_cb = frame_cb,
-		.frames = 1,
-		.auto_reload = TRUE
-	};
-
-	loop_init(MW_MAX_LOOP_FUNCS, MW_MAX_LOOP_TIMERS);
-	loop_timer_add(&frame_timer);
-}
-
-static void init(void)
-{
-	// Initialize game stuff
-	// ...
-
-	// Initialize game loop
-	main_loop_init();
-}
-
-void main()
-{
-	// Initialization
-	init();
-
-	loop();
-	// Function above should never return
-}
-```
-
-The `init()` function now calls `main_loop_init()` to:
-1. Initialize the loop module by calling `loop_init()`.
-2. Add a *loop_timer* that runs `frame_cb()` callback once per frame, ideally at the beginning of the vertical blanking period.
-
-As `frame_cb()` is run once per frame, we can (and we **must**) remove the `wait_vblank()` function call, and add all the remaining code previously inside the `while(1)` to the `frame_cb()`.
-
-Using this module, now if you for example want to add another *loop_timer* running each 5 frames to update the background animation, you just have to create the callback and the *loop_timer* structure, to finally add it to the loop by calling `loop_timer_add()`.
-
-In addition to timers, the module also allows adding functions that are run the spare frame time. We will see this in greater detail when talking about the `megawifi` module.
-
-The `loop` module also implements another functionality: pseudo-synchronous event waiting. This eases avoiding the typical callback hell that occurs when coding asynchronous programs. The pseudo-synchronous waits work like this:
-1. The function that wants to wait for an event, calls `loop_pend()` function. The execution of the function is then suspended.
-2. The suspended function is resumed by doing a `loop_post()` call from other point of the code.
-
-The important thing to take into account, is that while a function is suspended on a `loop_pend()` call, the other loop functions and loop timers continue running undisturbed. Isn't this neat?
-
-Nevertheless, you have to be careful when using `loop_pend()`/`loop_post()`: If you nest several `loop_pend()` calls, the following `loop_post()` calls will resume suspended functions in the reverse order of the `loop_pend()` calls. This is not probably what you want, and thus nesting `loop_pend()` calls is discouraged unless you know what you are doing.
-
-Also when using the `loop` module, you have to be careful not to block a loop function or loop timer. These functions must do their task quickly and exit as fast as possible. Otherwise, if you block by polling (e.g waiting for vblank, or waiting for the player to press a button), other loop functions or loop timers will not be able to get any CPU time. The only allowed way to block a loop function or loop timer, is by calling `loop_pend()` function (or any other function that uses it, such as `mw_sleep()`.
-
-As using the `loop` module seems to make the code more complex, maybe you are wondering why bothering with it. We will come to that later.
-
-### Mpool module
-
-This module implements a very fast and simple memory pool for dynamic memory allocation. Allocated memory is obtained from the unused region between the end of the `.bss` section and the stack top. The implementation is pretty simple: an internal pointer grows when memory is requested using `mp_alloc()`, and is reset to the specified position to free memory using `mp_free_to()`. This restricts the usage of the module to scenarios that free memory in exactly the reverse order in which they requested it (it does not allow generic allocate/free such as `malloc()` does).
-
-One thing interesting about this module is that you can free the memory allocated by several `mp_alloc()` calls with a single `mp_free_to()` call. This behavior can be nasty if you are accustomed to the usual *one `free()` per `malloc()`* scheme, but it is sometimes handy. For example, it helps avoiding memory fragmentation and memory leaks when changing from one game level to another. Imagine that you have two game levels and they allocate memory for several structures:
-
-```C
-void level1_init(void)
-{
-	struct level1_data *l1d = mp_alloc(sizeof(struct level1_data));
-	struct enemy *enem = mp_alloc(L1_NUM_ENEMIES * sizeof(struct enemy));
-}
-
-void level2_init(void)
-{
-	struct level2_data *l2d = mp_alloc(sizeof(struct level2_data));
-	struct enemy *enem = mp_alloc(L2_NUM_ENEMIES * sizeof(struct enemy));
-}
-```
-
-Imagine also that the game allocates more memory during level play for other purposes (bullets, explosions, etc). Now you finish the level and want to make sure all the memory is freed to load the new level. With `malloc()`/`free()` you would need to track each allocation and do the corresponding `free()`. But with the `mpool` module it is way easier:
-
-```C
-void level1_deinit(void)
-{
-	mp_free_to(l1d);
-}
-void level2_deinit(void)
-{
-	mp_free_to(l2d);
-}
-```
-
-And that's all, the call to `mp_free_to(l1d)` will deallocate all the memory obtained since the call to the first `mp_alloc()` in `level1_init()`, and you make sure no memory fragmentation and no memory leaks are caused by all the allocations in the level.
 
 ### Megawifi module
 
@@ -184,33 +76,30 @@ And we finally arrive to the `megawifi` module API. This API allows of course se
 * Keeping the time and day, accurately synchronized to NTP servers.
 * Generating large amounts of random numbers blazingly fast.
 
-You can use this API the hard way (directly sending commands defined in `mw-msg`), or the easy way (through the API calls in `megawifi`). Of course the latter is recommended.
+You can use this API the hard way (directly sending commands defined in `mw-msg`), or the easy way (through the API calls in `megawifi`). Of course the later is recommended.
 
-Most API functions require sending and receiving data to/from the WiFi module. But the data send/reception is decoupled from the command functions: the API functions prepare the module to send/receive data, but the data is not sent/received until the `mw_process()` function is called. As the `mw_process()` function polls the WiFi module for data, it is advisable to run it as frequently as possible. The easiest way to do this, is using a *loop_func*. Just set up a *loop_func* running `mw_process()` to ensure this function will be continuously executed, and you're done:
+Most API functions require sending and receiving data to/from the WiFi module. But the data send/reception is decoupled from the command functions: the API functions prepare the module to send/receive data, but the data is not sent/received until the `mw_process()` function is called. As the `mw_process()` function polls the WiFi module for data, it is advisable to run it as frequently as possible. The easiest way to do this, is creating a user task that continuously runs `mw_process()`:
 
 ```C
 #include "mw/util.h"
-#include "mw/loop.h"
+#include "mw/tsk.h"
 #include "mw/megawifi.h"
 
-static void megawifi_loop_cb(struct loop_func *f)
+static void user_tsk(void)
 {
-	UNUSED_PARAM(f);
-	mw_process();
+	while (1) {
+		mw_process();
+	}
 }
 
-static void main_loop_init(void)
+static void task_init(void)
 {
-	// Loop initialization code
-	// [...]
-	static struct loop_func megawifi_loop = {
-		.func_cb = megawifi_loop_cb
-	};
-	loop_func_add(&megawifi_loop);
+	// Configure the user task
+	tsk_user_set(user_tsk);
 }
 ```
 
-Using a *loop_func* like this makes sending and receiving data during game idle time way easier. Just make sure you set up your loops properly, and leave a bit of time for the loop function running `mw_process()`. Otherwise this function will starve and no data will be sent/received!
+Using a task like this makes sending and receiving data during game idle time way easier. Just make sure you have some spare CPU time for the user task to run and call `mw_process()`. Otherwise this task will starve and no data will be sent/received!
 
 About the API calls, basically all of them are synchronous or pseudo-synchronous, excepting the following ones, that are asynchronous and use callbacks to signal task completion:
 
@@ -238,12 +127,11 @@ The good news is that you do not need to code the connection configuration, you 
 
 ### Program initialization
 
-Basically you have to initialize megawifi and the game loop as explained before. You also have to create a *loop_func* to run `mw_process()` and a *loop_timer* with a 1 frame period to handle the game loop. The code below shows how to do this, and also how to detect if the WiFi module is installed, along with its firmware version.
+Basically you have to initialize megawifi and the game loop as explained before. You also have to create a user task to run `mw_process()`. The code below shows how to do this, and also how to detect if the WiFi module is installed, along with its firmware version.
 
 ```C
 #include "mw/util.h"
-#include "mw/mpool.h"
-#include "mw/loop.h"
+#include "mw/tsk.h"
 #include "mw/megawifi.h"
 
 // Length of the wflash buffer
@@ -252,31 +140,23 @@ Basically you have to initialize megawifi and the game loop as explained before.
 // TCP port to use (set to Megadrive release year ;-)
 #define MW_CH_PORT 	1985
 
-// Maximum number of loop functions
-#define MW_MAX_LOOP_FUNCS	2
-
-// Maximun number of loop timers
-#define MW_MAX_LOOP_TIMERS	4
-
 // Command buffer
 static char cmd_buf[MW_BUFLEN];
 
 // Runs mw_process() during idle time
-static void idle_cb(struct loop_func *f)
+static void user_tsk(void)
 {
-	UNUSED_PARAM(f);
-	mw_process();
+	while (1) {
+		mw_process();
+	}
 }
 
 // MegaWiFi initialization
-static void megawifi_init_cb(struct loop_func  *f)
+static void megawifi_init(void)
 {
 	uint8_t ver_major = 0, ver_minor = 0;
 	char *variant = NULL;
 	enum mw_err err;
-
-	// megawifi_init_cb is run only once. Use idle_cb from now on
-	f->func_cb = idle_cb;
 
 	// Initialize MegaWiFi
 	mw_init(cmd_buf, MW_BUFLEN);
@@ -294,32 +174,14 @@ static void megawifi_init_cb(struct loop_func  *f)
 }
 
 // Run the game loop once per frame
-static void frame_cb(struct loop_timer *t)
+static void game_loop(void)
 {
-	UNUSED_PARAM(t);
-
-	// One iteration of game loop
+	// Make sure this yields spare CPU time to user task
+	wait_vblank();
+	read_input();
 	draw_screen();
 	play_sound();
-	read_input();
 	game_logic();
-}
-
-// Loop initialization
-static void main_loop_init(void)
-{
-	static struct loop_timer frame_timer = {
-		.timer_cb = frame_cb,
-		.frames = 1,
-		.auto_reload = TRUE
-	};
-	static struct loop_func megawifi_loop = {
-		.func_cb = megawifi_init_cb
-	};
-
-	loop_init(MW_MAX_LOOP_FUNCS, MW_MAX_LOOP_TIMERS);
-	loop_timer_add(&frame_timer);
-	loop_func_add(&megawifi_loop);
 }
 
 // Global initialization
@@ -327,10 +189,10 @@ static void init(void)
 {
 	// Initialize hardware and game
 	// [...]
-	// Initialize memory pool
-	mp_init(0);
-	// Initialize game loop
-	main_loop_init();
+	// Configure user task
+	tsk_user_set(user_tsk);
+	// Initialize MegaWiFi
+	megawifi_init();
 }
 
 /// Entry point
@@ -339,8 +201,9 @@ void main()
 	// Initialization
 	init();
 
-	loop();
-	// loop() should never return
+	while (1) {
+		game_loop();
+	}
 }
 ```
 
@@ -489,18 +352,18 @@ void recv_example(void)
 
 ### Performing an HTTP/HTTPS request
 
-`megawifi` module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that setting an when using HTTPS, you can set an SSL certificate for the server identity to be verified. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.
+`megawifi` module allows performing HTTP and HTTPS requests in a simple way. HTTP and HTTPS use the same API, the only difference is that when using HTTPS, you can set an SSL certificate for the server identity to be verified. You can skip this step when using plain HTTP. Performing an HTTPS request requires the following steps. Some of them are optional and depend on the use case.
 
 1. (**Optional**) Set the SSL certificate. You can skip this step when using HTTP, or if you do not need to verify the server identity. You can retrieve the x509 hash of the currently stored certificate by calling `mw_http_cert_query()`. To set a different certificate, call `mw_http_cert_set()`. Once set, the certificate is stored on the non volatile memory, and will remain until replaced with a new one. Only one certificate can be stored at a time. Note you should not use this function unless required, because as it writes to Flash memory, it can wear the storage if used too often.
 2. Set the URL (e.g. https://www.example.com). Use `mw_http_url_set()` for this purpose.
 3. Set the HTTP method. Most commonly used ones are `MW_HTTP_METHOD_GET` and `MW_HTTP_METHOD_POST`. Use `mw_http_method_set()` to set it.
-4. (**Optional**) add HTTP headers to the request. Many aspects of the requests can be controlled via headers. E.g. you can define the formatting of the data you are posting by adding the header "Content-type" with the mime type "text/html", "application/json", etc.
+4. (**Optional**) add HTTP headers to the request. Many aspects of the requests can be controlled via headers. E.g. you can define the formatting of the data you are posting by adding the header "Content-type" with the mime type "text/html", "application/json", etc., or you can add access credentials using HTTP basic authentication, bearer authentication, etc.
 5. Open the connection. In this step, the HTTP or HTTPS connection is opened, and the request (including any headers added) is sent to the server. If the request contains a data payload, in this step the payload length is specified. The function `mw_http_open()` does this.
 6. (**Optional**) send the request data payload (if any). This must be performed only if a payload length (greater than 0) was specified in the previous step. This is done the same way as sending data through sockets, with the `mw_send()` or `mw_send_sync()` functions, using the HTTP reserved channel (`MW_CH_HTTP`).
 7. Finish the transaction. Call `mw_http_finish()` for the HTTP client to obtain the response to the request, along with its associated headers. If a response includes a data payload, its length is obtained in this step.
 8. (**Optional**) if the previous step returned a reply payload length greater than 0, it must be received in this step by calling `mw_recv()` or `mw_recv_sync()` using the HTTP reserved channel (`MW_CH_HTTP`).
 
-By looking to this list of steps, it might look complicated to perform an HTTP request, but the steps are relatively simple, and can be easily added to some functions. E.g., this code allows performing arbritrary GET (without payload) and POST (with JSON payload) requests:
+By looking to this list of steps, it might seem complicated to perform an HTTP request, but the steps are relatively simple, and can be easily added to some higher level functions. E.g., this code allows performing arbritrary `GET` (without payload) and `POST` (with `JSON` payload) requests:
 
 ```C
 // Performs initial steps of an HTTP request
@@ -733,7 +596,7 @@ The module has two network interfaces, each one with its unique BSSID (MAC addre
 In addition to the standard 32 megabits of Flash ROM memory connected to the Megadrive 68k bus, MegaWiFi cartridges have 16 megabits of additional flash storage, directly usable by the game. This memory is organized in 4 KiB sectors, and supports the following operations:
 
 * Identify: call `mw_flash_id_get()` to obtain the flash memory identifiers. Usually not needed.
-* Erase: call `mw_flash_sector_erase()` to erase an entire 4 KiB sector. Erased sectors will be read as 0xFF.
+* Erase: call `mw_flash_sector_erase()` to erase an entire 4 KiB sector. Erased sectors will be read as `0xFF`.
 * Program: call `mw_flash_write()` to write the specified data buffer to the indicated address. Prior to programming, **make sure the programmed address range is previously erased**, otherwise operation will fail.
 * Read: call `mw_flash_read()` to read the specified amount of data from the indicated address.
 
@@ -743,7 +606,7 @@ Also keep in mind that flash memory suffers from wearing, so do not perform more
 
 ### GameJolt Game API
 
-GameJolt API is implemented on top of the HTTP APIs, so the HTTP reserved channel is used to receive data when using the GameJolt API module. The current version 1.2 is fully supported, excepting the batch function, that maybe will not be very useful on the Megadrive, because of the tight memory restrictions. It is recommended you complement this documentation with the [official documentation of the API](https://gamejolt.com/game-api/doc). You will find additional details there.
+GameJolt API is implemented on top of the HTTP APIs, so the HTTP reserved channel is used to receive data when using the GameJolt API module. The current version 1.2 is fully supported, excepting the batch function, that maybe will not be very useful on the Megadrive, because of the tight memory constraints. It is recommended you complement this documentation with the [official documentation of the API](https://gamejolt.com/game-api/doc). You will find additional details there.
 
 The first thing you need to know is that the GameJolt API implementation for MegaWiFi has the following restrictions:
 
@@ -772,7 +635,7 @@ Make sure you store the credentials in a safe place, specially the game private 
 
 #### Achieving a trophy
 
-Trophies are added using in the GameJolt Web UI. Once added, to make the player achieve a trophy, just call `gj_trophy_add_achieved()` with the trophy id:
+Trophies are added using the GameJolt Web UI. Once added, to make the player achieve a trophy, just call `gj_trophy_add_achieved()` with the trophy id:
 
 ```C
 	if (gj_trophy_add_achieved("121457")) {
@@ -875,7 +738,7 @@ You can list friends, and get detailed data of each user. To list friends, reque
 	}
 ```
 
-And you can get user data from username or user\_id as follows:
+And you can get user data from *username* or *user\_id* as follows:
 
 ```C
 	struct gj_user user;
@@ -933,6 +796,44 @@ Most API functions return an error either via a bool value (error if true), or a
 ### Test program
 
 The main.c file contains a test program that detects the WiFi module, associates to the AP on slot 0, connects to `https://www.example.com` using both a TCP socket and an HTTPS request, displays the synchronized date/time, sends and receives using a client UDP socket, and echoes UDP data on port 8007.
+
+### Some more tips
+
+As previously discussed, most MegaWiFi API calls are synchronous: this means that when you call the function, the system task will be blocked until a response arrives (or a timeout occurs). This can be inconvenient, because typically you will still want to do things while waiting for the data (move backgrounds, update sprites, etc.). There are several ways to workaround this problem, some of them discussed below.
+
+#### Use asynchronous functions to send/receive data
+
+Usually you can separate the communications related work in two parts: *initialization stage* and *game stage*. During the *initialization stage* you will have to do tasks such as associating to the WiFi access point, connecting to the server, updating scoreboards, etc. During the *game stage* you will usually only need to send player actions to the server and get server status updates. Usually during the *initialization stage* it can be tolerable blocking and not updating the screen for short time-defined periods. But during *game stage*, usually yow want to continuously move things, so you cannot afford blocking the supervisor task. Taking this into account, a good compromise solution could be using all the MegaWiFi blocking functions during the *initialization stage*, and using the non-blocking asynchronous `mw_send()` and `mw_recv()` functions during the *game stage*.
+
+#### Use the VBLANK interrupt to update the game status
+
+You can use the VBLANK interrupt as an additional task to the supervisor and user task. The idea here is that the VBLANK interrupt performs all the game logic and commands the system task (via shared memory) when to send/receive data. When the data is sent/received, the code in the VBLANK interrupt will also get the notification/data via shared memory variables. The tricky part here is separating the game logic from the communications logic, and properly synchronizing the shared memory variables. Also you should make sure not touching the VDP outside the VBLANK interrupt, or you risk the code touching the VDP to be interrupted, leading to difficult to debug bugs.
+
+#### Use the lower level MegaWiFi API
+
+Instead of using the "higher level" MegaWiFi API, that implements the locking mechanism and requires the user task to be properly configured, you can do your alternative implementation using only the asynchronous API calls:`mw_send()`, `mw_recv()`, `mw_cmd_send()` and `mw_cmd_recv()`. This requires manually building the command frames using the formatting defined in `mw-msg.h`, and manually polling the `mw_process()` function after any of the previous functions to get the data sent/received. Note this can be very time consuming if you are using many commands that you will have to implement, and especially for the more higher level ones, like the GameJolt Game API.
+
+#### Use the loop module
+
+As I wrote above, previous versions of MegaWiFi came with a `loop` module. This module is a bit more complex and requires a bit more work to set up than the tasking approach, but it can be a lot more flexible: it allows setting up as many "loop functions" and "loop timers" as you need. So you can have a loop timer blocked on sending/receiving data from the module, while other is running free and updating the game without a problem.
+
+Although the loop module is not included in current MegaWiFi releases, you can grab it from older releases (latest one including it is version 1.4). If you do, make sure you also read the documentation from that release detailing how the loop module works.
+
+#### Do status changes in the user task
+
+As you have seen, you are in charge of setting up the user task to call `mw_process()`. But in addition to call `mw_process()`, you can do more work in the user task if you want. Your user task could be something like:
+
+```C
+static void user_tsk(void)
+{
+	while (1) {
+		update_game_logic();
+		mw_process();
+	}
+}
+```
+
+Inside `update_game_logic()` you could monitor when the frame changes, and do updates to the game logic accordingly. Note this might look like an easy approach, but actually it might be the hardest one to do properly. The reason is that if you touch the VDP inside `update_game_logic()`, if the function is interrupted in the middle of changing the VDP state, weird and hard to debug bugs will occur. I would advice against this approach, unless you do a thorough timing analysis to ensure this problem cannot occur. Also in case you were thinking on disabling interrupts at the CPU level while touching the VDP to avoid this problem, I'm afraid you can not. Changing interrupts is a privileged operation, and the user task just can't do it.
 
 ## Author
 

@@ -1,7 +1,15 @@
 /************************************************************************//**
- * Tasking routines related functions.
+ * \file
+ * \brief Tasking routines related functions.
  *
- * These functions are implemented in boot/sega.s
+ * \defgroup tsk tsk
+ * \{
+ * \brief Tasking routines related functions.
+ *
+ * \author Jesus Alonso (doragasu)
+ * \date 2021
+ *
+ * \note These functions are implemented in boot/sega.s
  ****************************************************************************/
 
 #ifndef __TSK_H__
@@ -16,6 +24,7 @@
 /// Converts milliseconds to frames, rounding to the nearest.
 #define MS_TO_FRAMES(ms)	(((ms)*FPS/500 + 1)/2)
 
+/// Timeout value to use for infinite waits
 #define TSK_PEND_FOREVER -1
 
 /************************************************************************//**
@@ -69,3 +78,5 @@ bool tsk_super_pend(int16_t wait_tout);
 void tsk_super_post(bool force_ctx_sw);
 
 #endif /*__TSK_H__*/
+
+/** \} */

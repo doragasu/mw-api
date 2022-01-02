@@ -13,7 +13,7 @@ PROVIDE (_ram_start = 0x00FF0000);
 
 MEMORY
 {
-    rom : ORIGIN = _rom_start, LENGTH = 0x00400000
+    rom (rx) : ORIGIN = _rom_start, LENGTH = 0x00400000
     ram : ORIGIN = _ram_start, LENGTH = 0x00010000
 }
 

@@ -1,4 +1,3 @@
-/// FIXME Documentation for infinite timeouts!
 /************************************************************************//**
  * \file
  *
@@ -37,7 +36,7 @@
 #define MW_API_VERSION_MAJOR	1
 
 /// API version implemented, minor number
-#define MW_API_VERSION_MINOR	4
+#define MW_API_VERSION_MINOR	5
 
 /// Timeout for standard commands in milliseconds
 #define MW_COMMAND_TOUT_MS	1000
@@ -350,7 +349,7 @@ enum mw_err mw_ap_assoc(uint8_t slot);
  * AP or timeout occurs.
  *
  * \param[in] tout_frames Maximun number of frames to wait for association.
- *            Set to 0 for an infinite wait.
+ *            Set to TSK_PEND_FOREVER for an infinite wait.
  *
  * \return MW_ERR_NONE if device is associated to AP. MW_ERR_NOT_READY if
  * the timeout has expired.
@@ -537,8 +536,8 @@ static inline enum lsd_status mw_send(uint8_t ch, const char *data, int16_t len,
  * \param[out] buf        Reception buffer.
  * \param[inout] buf_len  On input, length of the buffer.
  *                        On output, received data length in bytes.
- * \param[in] tout_frames Reception timeout in frames. Set to 0 for infinite
- *                        wait (dangerous!).
+ * \param[in] tout_frames Reception timeout in frames. Set to TSK_PEND_FOREVER
+ *                        for infinite wait (dangerous!).
  *
  * \return Status of the receive procedure.
  * \warning Do not use more than one syncrhonous call at once. You must wait

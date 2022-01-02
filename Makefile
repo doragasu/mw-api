@@ -22,7 +22,7 @@ EMU    ?= blastem
 OBJDIR  = tmp
 
 # List of directories with sources, excluding the boot stuff
-DIRS=. mw menu_imp menu_mw menu_example
+DIRS=. mw
 OBJDIRS = $(foreach DIR, $(DIRS), $(OBJDIR)/$(DIR))
 CSRCS = $(foreach DIR, $(DIRS), $(wildcard $(DIR)/*.c))
 
