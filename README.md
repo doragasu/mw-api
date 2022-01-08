@@ -1,3 +1,7 @@
+# WARNING: THIS PROJECT HAS MOVED
+
+You can find the most recent version at the [mw-api GitLab project page](https://gitlab.com/doragasu/mw-api). This repository will be kept as is, and will not be updated anymore.
+
 # MegaWiFi API
 
 ## Introduction
